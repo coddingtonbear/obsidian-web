@@ -56,11 +56,7 @@ const Popup = () => {
         });
         selectedText = selectedTextInjected[0].result;
       } catch (e) {
-        postNotification({
-          title: "Error",
-          message: "Could not get selection!",
-        });
-        return;
+        selectedText = "";
       }
 
       const preset = items.presets[selectedPreset];
@@ -91,17 +87,20 @@ const Popup = () => {
       return;
     }
 
-    const finalHeaders = {
-      ...headers,
-      Authorization: `Bearer ${apiKey}`,
-    };
-
-    const result = await fetch(`https://127.0.0.1:27124${compiledUrl}`, {
+    const request: RequestInit = {
       method: method,
       body: compiledContent,
-      headers: finalHeaders,
+      headers: {
+        ...headers,
+        Authorization: `Bearer ${apiKey}`,
+      },
       mode: "cors",
-    });
+    };
+
+    const result = await fetch(
+      `https://127.0.0.1:27124${compiledUrl}`,
+      request
+    );
 
     if (result.status < 300) {
       postNotification({
@@ -109,9 +108,10 @@ const Popup = () => {
         message: "Your content was sent to Obsidian successfully.",
       });
     } else {
+      const body = await result.json();
       postNotification({
         title: "Error",
-        message: `Could not send content to Obsidian: ${result.body}`,
+        message: `Could not send content to Obsidian: (Code ${body.errorCode}) ${body.message}`,
       });
     }
   };

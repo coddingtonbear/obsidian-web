@@ -8,19 +8,13 @@ interface Props {
 const HeaderControl: React.FC<Props> = ({ headers }) => {
   return (
     <>
-      {headers && (
+      {Object.entries(headers).length > 0 && (
         <>
           <table>
-            <thead>
-              <tr>
-                <th>Header</th>
-                <th>Value</th>
-              </tr>
-            </thead>
             <tbody>
               {Object.keys(headers).map((key) => (
                 <tr key={key}>
-                  <td>{key}</td>
+                  <th>{key}</th>
                   <td>{headers[key]}</td>
                 </tr>
               ))}

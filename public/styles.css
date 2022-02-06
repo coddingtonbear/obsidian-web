@@ -30,6 +30,9 @@ div.option div.option-value textarea {
 div.option div.option-value input {
   width: 100%;
 }
+div.option div.option-value select {
+  width: 100%;
+}
 
 div.option-panel div.submit {
   display: flex;
