@@ -1,70 +1,17 @@
-# Chrome Extension TypeScript Starter
+# Obsidian Web: Connect your browser with your Obsidian notes
 
-![build](https://github.com/chibat/chrome-extension-typescript-starter/workflows/build/badge.svg)
-
-Chrome Extension, TypeScript and Visual Studio Code
+*Note: This is a work-in-progress!*  This does currently work, but it's not polished enough for me to release to the Chrome Extension Store yet.  See "Development" below for how you might use this extension before release.
 
 ## Prerequisites
 
-* [node + npm](https://nodejs.org/) (Current Version)
+* [Obsidian Local REST API](https://github.com/coddingtonbear/obsidian-local-rest-api)
+  * Note: Supports use only with the default port (27124).
 
-## Option
-
-* [Visual Studio Code](https://code.visualstudio.com/)
-
-## Includes the following
-
-* TypeScript
-* Webpack
-* React
-* Jest
-* Example Code
-    * Chrome Storage
-    * Options Version 2
-    * content script
-    * count up badge number
-    * background
-
-## Project Structure
-
-* src/typescript: TypeScript source files
-* src/assets: static files
-* dist: Chrome Extension directory
-* dist/js: Generated JavaScript files
-
-## Setup
+## Development
 
 ```
-npm install
+npm i
+npm run dev
 ```
 
-## Import as Visual Studio Code project
-
-...
-
-## Build
-
-```
-npm run build
-```
-
-## Build in watch mode
-
-### terminal
-
-```
-npm run watch
-```
-
-### Visual Studio Code
-
-Run watch mode.
-
-type `Ctrl + Shift + B`
-
-## Load extension to chrome
-
-Load `dist` directory
-
-## Test
-`npx jest` or `npm run test`
+Then: load your "unpacked extension" from [Chrome Extensions](chrome://extensions/) by pointing Chrome at the `dist` folder.
