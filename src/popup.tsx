@@ -4,6 +4,12 @@ import ReactDOM from "react-dom";
 import HeaderControl from "./components/HeaderControl";
 import { ExtensionSettings, OutputPreset } from "./types";
 import { getSettings, postNotification } from "./utils";
+import Button from "@mui/material/Button";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
+import { ThemeProvider } from "@mui/system";
+import { PurpleTheme } from "./theme";
 
 const Popup = () => {
   const [apiKey, setApiKey] = useState<string>("");
@@ -117,84 +123,95 @@ const Popup = () => {
   };
 
   return (
-    <div className="obsidian-web-popup-container">
-      <div className="option-panel">
-        <div className="option">
-          <div className="option-name">
-            <label htmlFor="preset">Preset</label>
+    <ThemeProvider theme={PurpleTheme}>
+      <div className="obsidian-web-popup-container">
+        <div className="option-panel">
+          <div className="option">
+            <div className="option-name">
+              <label htmlFor="preset">Preset</label>
+            </div>
+            <div className="option-value">
+              <Select
+                id="preset"
+                value={selectedPreset}
+                onChange={(event) =>
+                  setSelectedPreset(
+                    typeof event.target.value === "number"
+                      ? event.target.value
+                      : parseInt(event.target.value, 10)
+                  )
+                }
+              >
+                {presets.map((preset, idx) => (
+                  <MenuItem key={preset.name} value={idx}>
+                    {preset.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </div>
           </div>
-          <div className="option-value">
-            <select
-              id="preset"
-              value={selectedPreset}
-              onChange={(event) =>
-                setSelectedPreset(parseInt(event.target.value))
-              }
-            >
-              {presets.map((preset, idx) => (
-                <option key={preset.name} value={idx}>
-                  {preset.name}
-                </option>
-              ))}
-            </select>
+          <div className="option">
+            <div className="option-name">
+              <label htmlFor="header-template">Header</label>
+            </div>
+            <div className="option-value">
+              <HeaderControl headers={headers} onChange={setHeaders} />
+            </div>
           </div>
-        </div>
-        <div className="option">
-          <div className="option-name">
-            <label htmlFor="header-template">Header</label>
+          <div className="option">
+            <div className="option-name">
+              <label htmlFor="content-template">Content</label>
+            </div>
+            <div className="option-value">
+              <TextField
+                multiline={true}
+                id="content-template"
+                value={compiledContent}
+                helperText="Available template properties include {{ page.url }}, {{ page.title }}, and {{ page.selectedText }}."
+                onChange={(event) => setCompiledContent(event.target.value)}
+              />
+            </div>
           </div>
-          <div className="option-value">
-            <HeaderControl headers={headers} onChange={setHeaders} />
+          <div className="option">
+            <div className="option-name">
+              <label htmlFor="method">Method</label>
+            </div>
+            <div className="option-value">
+              <Select
+                id="method"
+                value={method}
+                onChange={(event) =>
+                  setMethod(event.target.value as OutputPreset["method"])
+                }
+              >
+                <MenuItem value="post">POST</MenuItem>
+                <MenuItem value="put">PUT</MenuItem>
+                <MenuItem value="patch">PATCH</MenuItem>
+              </Select>
+            </div>
           </div>
-        </div>
-        <div className="option">
-          <div className="option-name">
-            <label htmlFor="content-template">Content</label>
+          <div className="option">
+            <div className="option-name">
+              <label htmlFor="url-template">URL Template</label>
+            </div>
+            <div className="option-value">
+              <TextField
+                fullWidth={true}
+                id="url-template"
+                type="text"
+                value={compiledUrl}
+                onChange={(event) => setCompiledUrl(event.target.value)}
+              />
+            </div>
           </div>
-          <div className="option-value">
-            <textarea
-              id="content-template"
-              value={compiledContent}
-              onChange={(event) => setCompiledContent(event.target.value)}
-            />
+          <div className="submit">
+            <Button variant="contained" onClick={sendToObsidian}>
+              Send to Obsidian
+            </Button>
           </div>
-        </div>
-        <div className="option">
-          <div className="option-name">
-            <label htmlFor="method">Method</label>
-          </div>
-          <div className="option-value">
-            <select
-              id="method"
-              value={method}
-              onChange={(event) =>
-                setMethod(event.target.value as OutputPreset["method"])
-              }
-            >
-              <option value="post">POST</option>
-              <option value="put">PUT</option>
-              <option value="patch">PATCH</option>
-            </select>
-          </div>
-        </div>
-        <div className="option">
-          <div className="option-name">
-            <label htmlFor="url-template">URL Template</label>
-          </div>
-          <div className="option-value">
-            <input
-              id="url-template"
-              type="text"
-              value={compiledUrl}
-              onChange={(event) => setCompiledUrl(event.target.value)}
-            />
-          </div>
-        </div>
-        <div className="submit">
-          <button onClick={sendToObsidian}>Send to Obsidian</button>
         </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 };
 

@@ -10,6 +10,8 @@ import {
   DefaultMethod,
   DefaultUrlTemplate,
 } from "./constants";
+import { ThemeProvider } from "@mui/system";
+import { PurpleTheme } from "./theme";
 
 const Options = () => {
   const [apiKey, setApiKey] = useState<string>("");
@@ -125,129 +127,131 @@ const Options = () => {
   };
 
   return (
-    <div className="option-panel">
-      {editingPreset === undefined && (
-        <>
-          <div className="option">
-            <div className="option-name">
-              <label htmlFor="api-key">Api Key</label>
+    <ThemeProvider theme={PurpleTheme}>
+      <div className="option-panel">
+        {editingPreset === undefined && (
+          <>
+            <div className="option">
+              <div className="option-name">
+                <label htmlFor="api-key">Api Key</label>
+              </div>
+              <div className="option-value">
+                <input
+                  id="api-key"
+                  type="text"
+                  value={apiKey}
+                  onChange={(event) => setApiKey(event.target.value)}
+                />
+              </div>
             </div>
-            <div className="option-value">
-              <input
-                id="api-key"
-                type="text"
-                value={apiKey}
-                onChange={(event) => setApiKey(event.target.value)}
-              />
-            </div>
-          </div>
-          <div className="option">
-            <div className="option-name">
-              <label htmlFor="api-key">Presets</label>
-            </div>
-            <div className="option-value">
-              {presets.map((preset, idx) => (
-                <div key={preset.name}>
-                  {preset.name}{" "}
-                  <button
-                    onClick={() => {
-                      setEditingPreset(idx);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  {presets.length > 1 && (
+            <div className="option">
+              <div className="option-name">
+                <label htmlFor="api-key">Presets</label>
+              </div>
+              <div className="option-value">
+                {presets.map((preset, idx) => (
+                  <div key={preset.name}>
+                    {preset.name}{" "}
                     <button
                       onClick={() => {
-                        deletePreset(idx);
+                        setEditingPreset(idx);
                       }}
                     >
-                      Delete
+                      Edit
                     </button>
-                  )}
-                </div>
-              ))}
-              <button onClick={() => setEditingPreset(-1)}>Create new</button>
+                    {presets.length > 1 && (
+                      <button
+                        onClick={() => {
+                          deletePreset(idx);
+                        }}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button onClick={() => setEditingPreset(-1)}>Create new</button>
+              </div>
             </div>
-          </div>
-          <div className="submit">
-            <button onClick={saveOptions}>Save</button>
-            <div className="status">{status}</div>
-          </div>
-        </>
-      )}
-      {editingPreset !== undefined && (
-        <>
-          <div className="option">
-            <div className="option-name">
-              <label htmlFor="preset-name">Name</label>
+            <div className="submit">
+              <button onClick={saveOptions}>Save</button>
+              <div className="status">{status}</div>
             </div>
-            <div className="option-value">
-              <input
-                id="preset-name"
-                type="text"
-                value={presetName}
-                onChange={(event) => setPresetName(event.target.value)}
-              />
+          </>
+        )}
+        {editingPreset !== undefined && (
+          <>
+            <div className="option">
+              <div className="option-name">
+                <label htmlFor="preset-name">Name</label>
+              </div>
+              <div className="option-value">
+                <input
+                  id="preset-name"
+                  type="text"
+                  value={presetName}
+                  onChange={(event) => setPresetName(event.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          <div className="option">
-            <div className="option-name">
-              <label htmlFor="header-template">Headers</label>
+            <div className="option">
+              <div className="option-name">
+                <label htmlFor="header-template">Headers</label>
+              </div>
+              <div className="option-value">
+                <HeaderControl headers={headers} onChange={setHeaders} />
+              </div>
             </div>
-            <div className="option-value">
-              <HeaderControl headers={headers} onChange={setHeaders} />
+            <div className="option">
+              <div className="option-name">
+                <label htmlFor="content-template">Content Template</label>
+              </div>
+              <div className="option-value">
+                <textarea
+                  id="content-template"
+                  value={contentTemplate}
+                  onChange={(event) => setContentTemplate(event.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          <div className="option">
-            <div className="option-name">
-              <label htmlFor="content-template">Content Template</label>
+            <div className="option">
+              <div className="option-name">
+                <label htmlFor="method">Method</label>
+              </div>
+              <div className="option-value">
+                <select
+                  id="method"
+                  value={method}
+                  onChange={(event) =>
+                    setMethod(event.target.value as OutputPreset["method"])
+                  }
+                >
+                  <option value="post">POST</option>
+                  <option value="put">PUT</option>
+                  <option value="patch">PATCH</option>
+                </select>
+              </div>
             </div>
-            <div className="option-value">
-              <textarea
-                id="content-template"
-                value={contentTemplate}
-                onChange={(event) => setContentTemplate(event.target.value)}
-              />
+            <div className="option">
+              <div className="option-name">
+                <label htmlFor="url-template">URL Template</label>
+              </div>
+              <div className="option-value">
+                <input
+                  id="url-template"
+                  type="text"
+                  value={urlTemplate}
+                  onChange={(event) => setUrlTemplate(event.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          <div className="option">
-            <div className="option-name">
-              <label htmlFor="method">Method</label>
+            <div className="submit">
+              <button onClick={savePreset}>Save Preset</button>
             </div>
-            <div className="option-value">
-              <select
-                id="method"
-                value={method}
-                onChange={(event) =>
-                  setMethod(event.target.value as OutputPreset["method"])
-                }
-              >
-                <option value="post">POST</option>
-                <option value="put">PUT</option>
-                <option value="patch">PATCH</option>
-              </select>
-            </div>
-          </div>
-          <div className="option">
-            <div className="option-name">
-              <label htmlFor="url-template">URL Template</label>
-            </div>
-            <div className="option-value">
-              <input
-                id="url-template"
-                type="text"
-                value={urlTemplate}
-                onChange={(event) => setUrlTemplate(event.target.value)}
-              />
-            </div>
-          </div>
-          <div className="submit">
-            <button onClick={savePreset}>Save Preset</button>
-          </div>
-        </>
-      )}
-    </div>
+          </>
+        )}
+      </div>
+    </ThemeProvider>
   );
 };
 

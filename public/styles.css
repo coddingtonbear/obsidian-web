@@ -1,5 +1,21 @@
+@font-face {
+  font-family: "Roboto";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(chrome-extension://__MSG_@@extension_id__/Roboto-Regular.ttf);
+}
+
+@font-face {
+  font-family: "Material Icons";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(chrome-extension://__MSG_@@extension_id__/MaterialIcons-Regular.ttf);
+}
+
 body {
-  font-family: sans-serif;
+  font-family: "Roboto";
 }
 
 body.options #root {
@@ -7,9 +23,7 @@ body.options #root {
 }
 
 body.popup {
-  background-color: black;
-  color: white;
-  width: 400px;
+  width: 600px;
 }
 
 div.option-panel div.option {
