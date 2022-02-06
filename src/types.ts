@@ -1,19 +1,13 @@
-export interface SendToObsidianMessage {
-  type: 'send-to-obsidian',
-  url: string
-  title: string
-}
-
-export type Message = SendToObsidianMessage
-
-export interface ResultMessage {
-  ok: boolean
+export interface OutputPreset {
+  name: string;
+  urlTemplate: string;
+  contentTemplate: string;
+  headers: Record<string, string>;
+  method: "post" | "put" | "patch";
 }
 
 export interface ExtensionSettings {
-  apiKey: string
-  contentTemplate: string
-  urlTemplate: string
-  headerTemplate: string
-  method: 'post' | 'put' | 'patch'
+  apiKey: string;
+  version: string;
+  presets: OutputPreset[];
 }

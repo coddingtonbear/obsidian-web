@@ -1,37 +1,31 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { ExtensionSettings } from "./types";
+import { ExtensionSettings, OutputPreset } from "./types";
 import { compile } from "micromustache";
+import { getSettings } from "./utils";
+import HeaderControl from "./components/HeaderControl";
 
 const Options = () => {
   const [apiKey, setApiKey] = useState<string>("");
+
   const [contentTemplate, setContentTemplate] = useState<string>("");
   const [urlTemplate, setUrlTemplate] = useState<string>("");
-  const [headerTemplate, setHeaderTemplate] = useState<string>("");
-  const [method, setMethod] = useState<ExtensionSettings["method"]>("post");
+  const [headers, setHeaders] = useState<Record<string, string>>({});
+  const [method, setMethod] = useState<OutputPreset["method"]>("post");
 
-  const [status, setStatus] = useState<string>("");
+  const [presets, setPresets] = useState<OutputPreset[]>([]);
 
   useEffect(() => {
     // Restores select box and checkbox state using the preferences
     // stored in chrome.storage.
-    chrome.storage.sync.get(
-      {
-        apiKey: "",
-        contentTemplate:
-          "## {{ page.title }}\nURL: {{ page.url }}\n\n> {{ page.selectedText }}\n\n",
-        urlTemplate: "/periodic/daily/",
-        method: "post",
-        headerTemplate: "",
-      } as ExtensionSettings,
-      (items) => {
-        setApiKey(items.apiKey);
-        setContentTemplate(items.contentTemplate);
-        setUrlTemplate(items.urlTemplate);
-        setMethod(items.method);
-        setHeaderTemplate(items.headerTemplate);
-      }
-    );
+    async function handle() {
+      const settings = await getSettings(chrome.storage.sync);
+
+      setApiKey(settings.apiKey);
+      setPresets(settings.presets);
+    }
+
+    handle();
   }, []);
 
   const saveOptions = () => {
@@ -50,32 +44,23 @@ const Options = () => {
         errorMessage = "Could not compile url template.";
       }
     }
-    if (!errorMessage) {
-      try {
-        compile(headerTemplate);
-      } catch (e) {
-        errorMessage = "Could not compile header template.";
-      }
-    }
 
     if (errorMessage) {
-      setStatus(`Error: ${errorMessage}`);
+      chrome.notifications.create({
+        title: "Error",
+        message: `Could not save settings: ${errorMessage}`,
+      });
     } else {
       chrome.storage.sync.set(
         {
           apiKey,
-          contentTemplate,
-          urlTemplate,
-          method,
-          headerTemplate,
+          presets,
         } as ExtensionSettings,
         () => {
-          // Update status to let user know options were saved.
-          setStatus("Options saved.");
-          const id = setTimeout(() => {
-            setStatus("");
-          }, 1000);
-          return () => clearTimeout(id);
+          chrome.notifications.create({
+            title: "Success",
+            message: "Options saved",
+          });
         }
       );
     }
@@ -101,11 +86,7 @@ const Options = () => {
           <label htmlFor="header-template">Header Template</label>
         </div>
         <div className="option-value">
-          <textarea
-            id="header-template"
-            value={headerTemplate}
-            onChange={(event) => setHeaderTemplate(event.target.value)}
-          />
+          <HeaderControl headers={headers} onChange={setHeaders} />
         </div>
       </div>
       <div className="option">
@@ -129,7 +110,7 @@ const Options = () => {
             id="method"
             value={method}
             onChange={(event) =>
-              setMethod(event.target.value as ExtensionSettings["method"])
+              setMethod(event.target.value as OutputPreset["method"])
             }
           >
             <option value="post">POST</option>

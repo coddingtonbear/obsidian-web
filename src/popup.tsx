@@ -1,37 +1,19 @@
 import { compile } from "micromustache";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import {
-  SendToObsidianMessage,
-  ResultMessage,
-  ExtensionSettings,
-} from "./types";
+import HeaderControl from "./components/HeaderControl";
+import { ExtensionSettings, OutputPreset } from "./types";
+import { getSettings, postNotification } from "./utils";
 
 const Popup = () => {
-  const [compiledHeader, setCompiledHeader] = useState<string>("");
-  const [compiledContent, setCompiledContent] = useState<string>("");
-  const [compiledUrl, setCompiledUrl] = useState<string>("");
   const [apiKey, setApiKey] = useState<string>("");
-  const [method, setMethod] = useState<ExtensionSettings["method"]>("post");
+  const [method, setMethod] = useState<OutputPreset["method"]>("post");
+  const [compiledUrl, setCompiledUrl] = useState<string>("");
+  const [headers, setHeaders] = useState<Record<string, string>>({});
+  const [compiledContent, setCompiledContent] = useState<string>("");
 
-  const [status, setStatus] = useState<string>("");
-
-  const extractHeaders = (headerString: string): Record<string, string> => {
-    const headers: Record<string, string> = {};
-
-    for (const headerLine of headerString.split("\n")) {
-      const delimiter = headerLine.indexOf(":");
-      if (delimiter > -1) {
-        headers[headerLine.slice(0, delimiter).trim()] = headerLine
-          .slice(delimiter + 1)
-          .trim();
-      }
-    }
-
-    console.log(headers);
-
-    return headers;
-  };
+  const [presets, setPresets] = useState<OutputPreset[]>([]);
+  const [selectedPreset, setSelectedPreset] = useState<number>(0);
 
   useEffect(() => {
     async function handle() {
@@ -43,26 +25,26 @@ const Popup = () => {
         });
         tab = tabs[0];
       } catch (e) {
-        setStatus("Could not get tab");
+        postNotification({
+          title: "Error",
+          message: "Could not get current tab!",
+        });
         return;
       }
 
       if (!tab.id) {
         return;
       }
-      let items: Record<string, string>;
+      let items: ExtensionSettings;
 
       try {
-        items = await chrome.storage.sync.get({
-          apiKey: "",
-          contentTemplate:
-            "## {{ page.title }}\nURL: {{ page.url }}\n\n> {{ page.selectedText }}\n\n",
-          urlTemplate: "/periodic/daily/",
-          method: "post",
-          headerTemplate: "",
-        } as ExtensionSettings);
+        items = await getSettings(chrome.storage.sync);
+        setPresets(items.presets);
       } catch (e) {
-        setStatus("Could not get settings");
+        postNotification({
+          title: "Error",
+          message: "Could not get settings!",
+        });
         return;
       }
 
@@ -74,9 +56,14 @@ const Popup = () => {
         });
         selectedText = selectedTextInjected[0].result;
       } catch (e) {
-        setStatus("Could not get selection");
-        selectedText = "";
+        postNotification({
+          title: "Error",
+          message: "Could not get selection!",
+        });
+        return;
       }
+
+      const preset = items.presets[selectedPreset];
 
       const context = {
         page: {
@@ -86,15 +73,15 @@ const Popup = () => {
         },
       };
 
-      setMethod(items.method as ExtensionSettings["method"]);
       setApiKey(items.apiKey);
-      setCompiledContent(compile(items.contentTemplate).render(context));
-      setCompiledHeader(compile(items.headerTemplate).render(context));
-      setCompiledUrl(compile(items.urlTemplate).render(context));
+      setMethod(preset.method as OutputPreset["method"]);
+      setCompiledUrl(compile(preset.urlTemplate).render(context));
+      setHeaders(preset.headers);
+      setCompiledContent(compile(preset.contentTemplate).render(context));
     }
 
     handle();
-  }, []);
+  }, [selectedPreset]);
 
   const sendToObsidian = async () => {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -104,19 +91,29 @@ const Popup = () => {
       return;
     }
 
-    const headers = extractHeaders(compiledHeader);
-    headers["Authorization"] = `Bearer ${apiKey}`;
+    const finalHeaders = {
+      ...headers,
+      Authorization: `Bearer ${apiKey}`,
+    };
 
     const result = await fetch(`https://127.0.0.1:27124${compiledUrl}`, {
       method: method,
       body: compiledContent,
-      headers: headers,
+      headers: finalHeaders,
       mode: "cors",
     });
 
-    setStatus(`${result.status}: ${result.body}`);
-
-    console.log(result);
+    if (result.status < 300) {
+      postNotification({
+        title: "All done!",
+        message: "Your content was sent to Obsidian successfully.",
+      });
+    } else {
+      postNotification({
+        title: "Error",
+        message: `Could not send content to Obsidian: ${result.body}`,
+      });
+    }
   };
 
   return (
@@ -124,14 +121,30 @@ const Popup = () => {
       <div className="option-panel">
         <div className="option">
           <div className="option-name">
+            <label htmlFor="preset">Preset</label>
+          </div>
+          <div className="option-value">
+            <select
+              id="preset"
+              value={selectedPreset}
+              onChange={(event) =>
+                setSelectedPreset(parseInt(event.target.value))
+              }
+            >
+              {presets.map((preset, idx) => (
+                <option key={preset.name} value={idx}>
+                  {preset.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="option">
+          <div className="option-name">
             <label htmlFor="header-template">Header</label>
           </div>
           <div className="option-value">
-            <textarea
-              id="header-template"
-              value={compiledHeader}
-              onChange={(event) => setCompiledHeader(event.target.value)}
-            />
+            <HeaderControl headers={headers} onChange={setHeaders} />
           </div>
         </div>
         <div className="option">
@@ -155,7 +168,7 @@ const Popup = () => {
               id="method"
               value={method}
               onChange={(event) =>
-                setMethod(event.target.value as ExtensionSettings["method"])
+                setMethod(event.target.value as OutputPreset["method"])
               }
             >
               <option value="post">POST</option>
@@ -179,7 +192,6 @@ const Popup = () => {
         </div>
         <div className="submit">
           <button onClick={sendToObsidian}>Send to Obsidian</button>
-          <div className="status">{status}</div>
         </div>
       </div>
     </div>
