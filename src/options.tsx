@@ -10,7 +10,7 @@ import {
   DefaultMethod,
   DefaultUrlTemplate,
 } from "./constants";
-import { ThemeProvider } from "@mui/system";
+import ThemeProvider from "@mui/system/ThemeProvider";
 import { PurpleTheme } from "./theme";
 
 const Options = () => {

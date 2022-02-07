@@ -3,15 +3,15 @@ import { createTheme } from "@mui/material/styles";
 export const PurpleTheme = createTheme({
   palette: {
     primary: {
-      light: "#b757ff",
-      main: "#7e1dfb",
-      dark: "#3f00c7",
+      light: "#7a61cb",
+      main: "#483699",
+      dark: "#0c0e6a",
       contrastText: "#ffffff",
     },
     secondary: {
-      light: "#819ca9",
-      main: "#546e7a",
-      dark: "#29434e",
+      light: "#525252",
+      main: "#2a2a2a",
+      dark: "#000000",
       contrastText: "#ffffff",
     },
   },

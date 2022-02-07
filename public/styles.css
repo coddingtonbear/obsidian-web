@@ -26,32 +26,8 @@ body.popup {
   width: 600px;
 }
 
-div.option-panel div.option {
+div.option-value {
   display: flex;
   flex-direction: row;
-}
-div.option div.option-name {
-  width: 30%;
-}
-div.option div.option-value {
-  flex-grow: 1;
-}
-
-div.option div.option-value textarea {
-  width: 100%;
-  min-height: 150px;
-}
-div.option div.option-value input {
-  width: 100%;
-}
-div.option div.option-value select {
-  width: 100%;
-}
-
-div.option-panel div.submit {
-  display: flex;
-}
-
-div.option-panel div.submit div.status {
-  margin-left: 10%;
+  margin-bottom: 10px;
 }

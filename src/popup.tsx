@@ -8,8 +8,13 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import { ThemeProvider } from "@mui/system";
+import ThemeProvider from "@mui/system/ThemeProvider";
 import { PurpleTheme } from "./theme";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import Typography from "@mui/material/Typography";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const Popup = () => {
   const [apiKey, setApiKey] = useState<string>("");
@@ -124,60 +129,55 @@ const Popup = () => {
 
   return (
     <ThemeProvider theme={PurpleTheme}>
-      <div className="obsidian-web-popup-container">
-        <div className="option-panel">
+      <div className="option">
+        <div className="option-value">
+          <Select
+            label="Preset"
+            id="preset"
+            value={selectedPreset}
+            onChange={(event) =>
+              setSelectedPreset(
+                typeof event.target.value === "number"
+                  ? event.target.value
+                  : parseInt(event.target.value, 10)
+              )
+            }
+          >
+            {presets.map((preset, idx) => (
+              <MenuItem key={preset.name} value={idx}>
+                {preset.name}
+              </MenuItem>
+            ))}
+          </Select>
+          <Button variant="contained" onClick={sendToObsidian}>
+            Send to Obsidian
+          </Button>
+        </div>
+      </div>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography>Content Details</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
           <div className="option">
-            <div className="option-name">
-              <label htmlFor="preset">Preset</label>
-            </div>
-            <div className="option-value">
-              <Select
-                id="preset"
-                value={selectedPreset}
-                onChange={(event) =>
-                  setSelectedPreset(
-                    typeof event.target.value === "number"
-                      ? event.target.value
-                      : parseInt(event.target.value, 10)
-                  )
-                }
-              >
-                {presets.map((preset, idx) => (
-                  <MenuItem key={preset.name} value={idx}>
-                    {preset.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </div>
-          </div>
-          <div className="option">
-            <div className="option-name">
-              <label htmlFor="header-template">Header</label>
-            </div>
             <div className="option-value">
               <HeaderControl headers={headers} onChange={setHeaders} />
             </div>
           </div>
           <div className="option">
-            <div className="option-name">
-              <label htmlFor="content-template">Content</label>
-            </div>
             <div className="option-value">
               <TextField
+                label="Content"
+                fullWidth={true}
                 multiline={true}
                 id="content-template"
                 value={compiledContent}
-                helperText="Available template properties include {{ page.url }}, {{ page.title }}, and {{ page.selectedText }}."
                 onChange={(event) => setCompiledContent(event.target.value)}
               />
             </div>
-          </div>
-          <div className="option">
-            <div className="option-name">
-              <label htmlFor="method">Method</label>
-            </div>
             <div className="option-value">
               <Select
+                label="HTTP Method"
                 id="method"
                 value={method}
                 onChange={(event) =>
@@ -188,14 +188,8 @@ const Popup = () => {
                 <MenuItem value="put">PUT</MenuItem>
                 <MenuItem value="patch">PATCH</MenuItem>
               </Select>
-            </div>
-          </div>
-          <div className="option">
-            <div className="option-name">
-              <label htmlFor="url-template">URL Template</label>
-            </div>
-            <div className="option-value">
               <TextField
+                label="API URL"
                 fullWidth={true}
                 id="url-template"
                 type="text"
@@ -204,13 +198,8 @@ const Popup = () => {
               />
             </div>
           </div>
-          <div className="submit">
-            <Button variant="contained" onClick={sendToObsidian}>
-              Send to Obsidian
-            </Button>
-          </div>
-        </div>
-      </div>
+        </AccordionDetails>
+      </Accordion>
     </ThemeProvider>
   );
 };
