@@ -26,8 +26,10 @@ export async function obsidianRequest(
     ...options,
     headers: {
       ...options.headers,
+      "Content-Type": "text/markdown",
       Authorization: `Bearer ${apiKey}`,
     },
+    method: options.method?.toUpperCase(),
     mode: "cors",
   };
 
