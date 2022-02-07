@@ -24,6 +24,8 @@ import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
 
+import StarFilled from "@mui/icons-material/Star";
+import StarEmpty from "@mui/icons-material/StarRate";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CreateIcon from "@mui/icons-material/AddCircle";
@@ -128,6 +130,17 @@ const Options = () => {
 
   const deletePreset = (idx: number) => {
     const newPresets = [...presets.slice(0, idx), ...presets.slice(idx + 1)];
+    setPresets(newPresets);
+  };
+
+  const setAsDefault = (idx: number) => {
+    const thisItem = presets[idx];
+
+    const newPresets = [
+      thisItem,
+      ...presets.slice(0, idx),
+      ...presets.slice(idx + 1),
+    ];
     setPresets(newPresets);
   };
 
@@ -266,6 +279,16 @@ const Options = () => {
                               {preset.name}
                             </TableCell>
                             <TableCell align="right">
+                              {idx !== 0 && (
+                                <IconButton
+                                  aria-label="make default"
+                                  onClick={() => {
+                                    setAsDefault(idx);
+                                  }}
+                                >
+                                  <StarEmpty />
+                                </IconButton>
+                              )}
                               <IconButton
                                 aria-label="edit"
                                 onClick={() => {
