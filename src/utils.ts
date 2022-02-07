@@ -8,15 +8,6 @@ export async function getSettings(
   return settings as ExtensionSettings;
 }
 
-export function postNotification(
-  options: chrome.notifications.NotificationOptions
-): void {
-  options.type = "basic";
-  options.iconUrl = "icon256.png";
-
-  chrome.notifications.create(options);
-}
-
 export async function obsidianRequest(
   apiKey: string,
   path: string,
