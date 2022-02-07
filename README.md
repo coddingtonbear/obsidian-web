@@ -12,8 +12,7 @@ Do you find yourself on a webpage somewhere and want to add it to your notes so 
 
 1. Install this Chrome Extension from the Chrome App Store.
 2. Install and enable [Obsidian Local REST API](https://github.com/coddingtonbear/obsidian-local-rest-api) from the Obsidian Community Plugins settings in Obsidian.
-3. Register the self-signed certificate Obsidian Local REST API generates as an accepted Certificate Authority from your [Chrome Certificate Settings](chrome://settings/certificates).
-4. Right click on the "Obsidian Web" icon in your toolbar and select "Options".  Enter the API key you can find in the "Obsidian Local REST API" settings in Obsidian into the field marked "API Key", then press "Save".
+3. Right click on the "Obsidian Web" icon in your toolbar and select "Options".  Enter the API key you can find in the "Obsidian Local REST API" settings in Obsidian into the field marked "API Key", then press "Save".
 
 Now you should be able to click on the icon in your toolbar to submit the page you're on to Obsidian:
 
