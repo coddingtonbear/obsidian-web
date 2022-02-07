@@ -1,19 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { compile } from "micromustache";
 import ReactDOM from "react-dom";
-import {
-  DefaultContentTemplate,
-  DefaultHeaders,
-  DefaultMethod,
-  DefaultUrlTemplate,
-} from "./constants";
+
 import ThemeProvider from "@mui/system/ThemeProvider";
-import {
-  Button,
-  TextField,
-  Typography,
-  Alert as MaterialAlert,
-} from "@mui/material";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import MaterialAlert from "@mui/material/Alert";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -24,12 +17,17 @@ import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
 
-import StarFilled from "@mui/icons-material/Star";
 import StarEmpty from "@mui/icons-material/StarRate";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CreateIcon from "@mui/icons-material/AddCircle";
 
+import {
+  DefaultContentTemplate,
+  DefaultHeaders,
+  DefaultMethod,
+  DefaultUrlTemplate,
+} from "./constants";
 import { ExtensionSettings, OutputPreset, AlertStatus } from "./types";
 import { getSettings, obsidianRequest } from "./utils";
 import Alert from "./components/Alert";
