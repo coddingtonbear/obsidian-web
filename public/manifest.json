@@ -5,9 +5,7 @@
   "description": "Connect your browser with your notes in Obsidian",
   "version": "1.0",
 
-  "options_ui": {
-    "page": "options.html"
-  },
+  "options_page": "options.html",
 
   "icons": {
     "16": "icon16.png",

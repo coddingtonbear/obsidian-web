@@ -18,6 +18,10 @@ body {
   font-family: "Roboto";
 }
 
+body.options {
+  min-width: 800px;
+}
+
 body.options #root {
   margin: 20px;
 }
@@ -30,4 +34,28 @@ div.option-value {
   display: flex;
   flex-direction: row;
   margin-bottom: 10px;
+  justify-content: space-between;
+}
+
+div.submit {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+}
+
+div.modal {
+  margin: 50px 100px;
+  padding: 25px;
+}
+
+div.options-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+
+div.options-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 10px 50px;
 }

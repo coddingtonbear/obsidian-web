@@ -9,7 +9,7 @@ export const DefaultSettings = {
   apiKey: "",
   presets: [
     {
-      name: "Append to daily note",
+      name: "Append to current daily note",
       urlTemplate: "/periodic/daily/",
       contentTemplate:
         "## {{ page.title }}\nURL: {{ page.url }}\n\n> {{ page.selectedText }}\n\n",

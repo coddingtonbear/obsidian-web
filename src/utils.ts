@@ -16,3 +16,20 @@ export function postNotification(
 
   chrome.notifications.create(options);
 }
+
+export async function obsidianRequest(
+  apiKey: string,
+  path: string,
+  options: RequestInit
+): Promise<ReturnType<typeof fetch>> {
+  const requestOptions: RequestInit = {
+    ...options,
+    headers: {
+      ...options.headers,
+      Authorization: `Bearer ${apiKey}`,
+    },
+    mode: "cors",
+  };
+
+  return fetch(`https://127.0.0.1:27124${path}`, requestOptions);
+}
