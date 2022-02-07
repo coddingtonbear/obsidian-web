@@ -133,7 +133,6 @@ const Popup = () => {
         <div className="option-value">
           <Select
             label="Preset"
-            id="preset"
             value={selectedPreset}
             onChange={(event) =>
               setSelectedPreset(
@@ -156,29 +155,13 @@ const Popup = () => {
       </div>
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>Content Details</Typography>
+          <Typography>Entry Details</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <div className="option">
             <div className="option-value">
-              <HeaderControl headers={headers} onChange={setHeaders} />
-            </div>
-          </div>
-          <div className="option">
-            <div className="option-value">
-              <TextField
-                label="Content"
-                fullWidth={true}
-                multiline={true}
-                id="content-template"
-                value={compiledContent}
-                onChange={(event) => setCompiledContent(event.target.value)}
-              />
-            </div>
-            <div className="option-value">
               <Select
                 label="HTTP Method"
-                id="method"
                 value={method}
                 onChange={(event) =>
                   setMethod(event.target.value as OutputPreset["method"])
@@ -191,10 +174,24 @@ const Popup = () => {
               <TextField
                 label="API URL"
                 fullWidth={true}
-                id="url-template"
-                type="text"
                 value={compiledUrl}
                 onChange={(event) => setCompiledUrl(event.target.value)}
+              />
+            </div>
+          </div>
+          <div className="option">
+            <div className="option-value">
+              <HeaderControl headers={headers} onChange={setHeaders} />
+            </div>
+          </div>
+          <div className="option">
+            <div className="option-value">
+              <TextField
+                label="Content"
+                fullWidth={true}
+                multiline={true}
+                value={compiledContent}
+                onChange={(event) => setCompiledContent(event.target.value)}
               />
             </div>
           </div>
