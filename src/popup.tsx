@@ -112,6 +112,7 @@ const Popup = () => {
       headers,
     };
     const result = await obsidianRequest(apiKey, compiledUrl, request);
+    const text = await result.text();
 
     if (result.status < 300) {
       setStatus({
@@ -121,12 +122,20 @@ const Popup = () => {
       });
       setTimeout(() => window.close(), 2000);
     } else {
-      const body = await result.json();
-      setStatus({
-        severity: "error",
-        title: "Error",
-        message: `Could not send content to Obsidian: (Code ${body.errorCode}) ${body.message}`,
-      });
+      try {
+        const body = JSON.parse(text);
+        setStatus({
+          severity: "error",
+          title: "Error",
+          message: `Could not send content to Obsidian: (Error Code ${body.errorCode}) ${body.message}`,
+        });
+      } catch (e) {
+        setStatus({
+          severity: "error",
+          title: "Error",
+          message: `Could not send content to Obsidian!: (Status Code ${result.status}) ${text}`,
+        });
+      }
     }
   };
 

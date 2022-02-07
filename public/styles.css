@@ -37,6 +37,14 @@ div.option-value {
   justify-content: space-between;
 }
 
+div.option-value.api-key {
+  justify-content: left;
+}
+
+div.api-key-valid-icon svg {
+  margin-top: 30%;
+}
+
 div.submit {
   display: flex;
   flex-direction: row;
@@ -46,6 +54,8 @@ div.submit {
 div.modal {
   margin: 50px 100px;
   padding: 25px;
+  max-height: 500px;
+  overflow-y: scroll;
 }
 
 div.options-header {

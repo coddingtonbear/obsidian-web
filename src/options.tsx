@@ -17,7 +17,11 @@ import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
 
-import StarEmpty from "@mui/icons-material/StarRate";
+import Check from "@mui/icons-material/CheckCircleOutline";
+import Error from "@mui/icons-material/Error";
+import Copy from "@mui/icons-material/ContentCopy";
+import Promote from "@mui/icons-material/ArrowCircleUp";
+import Star from "@mui/icons-material/StarRate";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CreateIcon from "@mui/icons-material/AddCircle";
@@ -36,6 +40,7 @@ import { PurpleTheme } from "./theme";
 
 const Options = () => {
   const [status, setStatus] = useState<AlertStatus>();
+  const [modalStatus, setModalStatus] = useState<AlertStatus>();
 
   const [apiKey, setApiKey] = useState<string>("");
   const [apiKeyOk, setApiKeyOk] = useState<boolean>(false);
@@ -61,16 +66,16 @@ const Options = () => {
 
       try {
         const result = await obsidianRequest(apiKey, "/", { method: "get" });
+        const body = await result.text();
 
         if (result.status !== 200) {
-          const body = await result.text();
           setApiKeyError(
             `Unable to connect to Obsidian: (Status Code ${result.status}) ${body}.`
           );
           return;
         }
 
-        const jsonBody = await result.json();
+        const jsonBody = JSON.parse(body);
         if (!jsonBody.authenticated) {
           setApiKeyError(`Your API key was not accepted.`);
           return;
@@ -105,26 +110,35 @@ const Options = () => {
     handle();
   }, []);
 
-  useEffect(() => {
-    if (editingPreset === undefined) {
-      return;
-    }
-    if (editingPreset === -1) {
+  const closeEditingModal = () => {
+    setEditingPreset(undefined);
+  };
+
+  const openEditingModal = (
+    idx: number | null,
+    template?: number | undefined
+  ) => {
+    prepareForm(template ?? idx ?? null, template !== undefined);
+    setEditingPreset(idx ?? -1);
+  };
+
+  const prepareForm = (idx: number | null, fromTemplate?: boolean) => {
+    if (idx !== null) {
+      const preset = presets[idx];
+
+      setPresetName(fromTemplate ? `Copy of ${preset.name}` : preset.name);
+      setContentTemplate(preset.contentTemplate);
+      setUrlTemplate(preset.urlTemplate);
+      setMethod(preset.method);
+      setHeaders(preset.headers);
+    } else {
       setPresetName("Untitled Preset");
       setContentTemplate(DefaultContentTemplate);
       setUrlTemplate(DefaultUrlTemplate);
       setMethod(DefaultMethod);
       setHeaders(DefaultHeaders);
-    } else {
-      const preset = presets[editingPreset];
-
-      setPresetName(preset.name);
-      setContentTemplate(preset.contentTemplate);
-      setUrlTemplate(preset.urlTemplate);
-      setMethod(preset.method);
-      setHeaders(preset.headers);
     }
-  }, [editingPreset]);
+  };
 
   const deletePreset = (idx: number) => {
     const newPresets = [...presets.slice(0, idx), ...presets.slice(idx + 1)];
@@ -164,12 +178,13 @@ const Options = () => {
     }
 
     if (errorMessage) {
-      setStatus({
+      setModalStatus({
         severity: "error",
         title: "Error",
         message: `Could not save preset: ${errorMessage}`,
       });
     } else {
+      setModalStatus(undefined);
       const preset = {
         name: presetName,
         urlTemplate: urlTemplate,
@@ -184,7 +199,7 @@ const Options = () => {
         newPresets[editingPreset] = preset;
         setPresets(newPresets);
       }
-      setEditingPreset(undefined);
+      closeEditingModal();
     }
   };
 
@@ -230,25 +245,22 @@ const Options = () => {
                 and enable that plugin from within Obsidian.
               </Typography>
               <div className="option">
-                <div className="option-value">
+                <div className="option-value api-key">
                   <TextField
                     label="API Key"
                     value={apiKey}
                     helperText="You can find your API key from the 'Local REST API' section of your settings in Obsidian."
                     onChange={(event) => setApiKey(event.target.value)}
                   />
+                  <div className="api-key-valid-icon">
+                    {apiKeyOk && <Check color="success" fontSize="large" />}
+                    {apiKeyError && <Error color="error" fontSize="large" />}
+                  </div>
                 </div>
                 {apiKeyError && (
                   <div className="option-value">
                     <MaterialAlert severity="error">
                       {apiKeyError}
-                    </MaterialAlert>
-                  </div>
-                )}
-                {apiKeyOk && (
-                  <div className="option-value">
-                    <MaterialAlert severity="success">
-                      This API Key was accepted.
                     </MaterialAlert>
                   </div>
                 )}
@@ -266,6 +278,7 @@ const Options = () => {
                     <Table>
                       <TableHead>
                         <TableRow>
+                          <TableCell></TableCell>
                           <TableCell>Name</TableCell>
                           <TableCell align="right">Options</TableCell>
                         </TableRow>
@@ -273,30 +286,47 @@ const Options = () => {
                       <TableBody>
                         {presets.map((preset, idx) => (
                           <TableRow key={preset.name}>
+                            <TableCell>
+                              {idx === 0 && (
+                                <Star fontSize="small" titleAccess="Default" />
+                              )}
+                            </TableCell>
                             <TableCell component="th" scope="row">
                               {preset.name}
                             </TableCell>
                             <TableCell align="right">
                               {idx !== 0 && (
                                 <IconButton
+                                  title="Make Default"
                                   aria-label="make default"
                                   onClick={() => {
                                     setAsDefault(idx);
                                   }}
                                 >
-                                  <StarEmpty />
+                                  <Promote />
                                 </IconButton>
                               )}
                               <IconButton
+                                title="Edit"
                                 aria-label="edit"
                                 onClick={() => {
-                                  setEditingPreset(idx);
+                                  openEditingModal(idx);
                                 }}
                               >
                                 <EditIcon />
                               </IconButton>
+                              <IconButton
+                                title="Duplicate"
+                                aria-label="duplicate"
+                                onClick={() => {
+                                  openEditingModal(null, idx);
+                                }}
+                              >
+                                <Copy />
+                              </IconButton>
                               {presets.length > 1 && (
                                 <IconButton
+                                  title="Delete"
                                   aria-label="delete"
                                   onClick={() => {
                                     deletePreset(idx);
@@ -309,9 +339,10 @@ const Options = () => {
                           </TableRow>
                         ))}
                         <TableRow key="new">
+                          <TableCell></TableCell>
                           <TableCell component="th" scope="row"></TableCell>
                           <TableCell align="right">
-                            <IconButton onClick={() => setEditingPreset(-1)}>
+                            <IconButton onClick={() => openEditingModal(null)}>
                               <CreateIcon />
                             </IconButton>
                           </TableCell>
@@ -321,7 +352,6 @@ const Options = () => {
                   </TableContainer>
                 </div>
               </div>
-              {status && <Alert value={status} />}
               <div className="submit">
                 <Button variant="outlined" onClick={() => window.close()}>
                   Close
@@ -330,13 +360,14 @@ const Options = () => {
                   Save Settings
                 </Button>
               </div>
+              {status && <Alert value={status} />}
             </>
           )}
         </div>
       </Paper>
       <Modal
         open={editingPreset !== undefined}
-        onClose={() => setEditingPreset(undefined)}
+        onClose={() => closeEditingModal()}
       >
         <Paper elevation={3} className="modal">
           <div className="option">
@@ -362,7 +393,7 @@ const Options = () => {
               are on.
             </li>
             <li>
-              &#123;&#123; page.selectedContent &#125;&#125;: The text (if any)
+              &#123;&#123; page.selectedText &#125;&#125;: The text (if any)
               that is currently selected on the page you are on.
             </li>
           </ul>
@@ -388,16 +419,14 @@ const Options = () => {
             onChangeContent={setContentTemplate}
           />
           <div className="submit">
-            <Button
-              variant="outlined"
-              onClick={() => setEditingPreset(undefined)}
-            >
+            <Button variant="outlined" onClick={() => closeEditingModal()}>
               Cancel
             </Button>
             <Button variant="contained" onClick={savePreset}>
               Save Changes
             </Button>
           </div>
+          {modalStatus && <Alert value={modalStatus} />}
         </Paper>
       </Modal>
     </ThemeProvider>
