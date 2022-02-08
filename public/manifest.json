@@ -24,7 +24,7 @@
     "default_popup": "popup.html"
   },
 
-  "permissions": ["storage", "tabs", "activeTab", "scripting"],
+  "permissions": ["storage", "activeTab", "scripting"],
 
   "host_permissions": ["https://127.0.0.1:27124/*"]
 }
