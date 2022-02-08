@@ -4,7 +4,7 @@ This is an unofficial Chrome extension for Obsidian that lets you send content f
 
 Do you find yourself on a webpage somewhere and want to add it to your notes so you can remember it later?  You can use Obsidian Web for sending any web content from Chrome to your Obsidian Notes easily by just clicking on a button in your toolbar.
 
-*Note*: This was submitted for review on the Chrome Web store on 6 February 2022, but is still in review.
+*Note*: This was submitted for review on the Chrome Web store on 8 February 2022, but is still in review.
 
 ## Prerequisites
 
