@@ -1,6 +1,6 @@
 # Obsidian Web: Connect your browser with your Obsidian notes
 
-This is an unofficial plugin for Obsidian that lets you send content from the web to your notes in Obsidian.
+This is an unofficial Chrome extension for Obsidian that lets you send content from the web to your notes in Obsidian.
 
 Do you find yourself on a webpage somewhere and want to add it to your notes so you can remember it later?  You can use Obsidian Web for sending any web content from Chrome to your Obsidian Notes easily by just clicking on a button in your toolbar.
 
