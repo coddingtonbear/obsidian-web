@@ -1,7 +1,7 @@
 {
-  "name": "chrome-extension-typescript-starter",
-  "version": "1.0.1",
-  "description": "chrome-extension-typescript-starter",
+  "name": "obsidian-web",
+  "version": "1.1.0",
+  "description": "Connect your browser with your notes in Obsidian",
   "main": "index.js",
   "scripts": {
     "dev": "webpack --config webpack/webpack.dev.js --watch",
@@ -15,7 +15,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chibat/chrome-extension-typescript-starter.git"
+    "url": "https://github.com/coddingtonbear/obsidian-web.git"
   },
   "dependencies": {
     "@emotion/react": "^11.7.1",
