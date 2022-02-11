@@ -17,7 +17,8 @@ import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
 
-import Check from "@mui/icons-material/CheckCircleOutline";
+import SecureConnection from "@mui/icons-material/GppGood";
+import InsecureConnection from "@mui/icons-material/GppMaybe";
 import Error from "@mui/icons-material/Error";
 import Copy from "@mui/icons-material/ContentCopy";
 import Promote from "@mui/icons-material/ArrowCircleUp";
@@ -47,6 +48,7 @@ const Options = () => {
   const [apiKeyError, setApiKeyError] = useState<string>();
 
   const [presetName, setPresetName] = useState<string>("");
+  const [insecureMode, setInsecureMode] = useState<boolean>(false);
   const [contentTemplate, setContentTemplate] = useState<string>("");
   const [urlTemplate, setUrlTemplate] = useState<string>("");
   const [headers, setHeaders] = useState<Record<string, string>>({});
@@ -64,31 +66,40 @@ const Options = () => {
         return;
       }
 
+      let usedInsecureMode = false;
+      let result: Response;
       try {
-        const result = await obsidianRequest(apiKey, "/", { method: "get" });
-        const body = await result.text();
-
-        if (result.status !== 200) {
+        result = await obsidianRequest(apiKey, "/", { method: "get" }, false);
+        result.type;
+      } catch (e) {
+        try {
+          result = await obsidianRequest(apiKey, "/", { method: "get" }, true);
+          usedInsecureMode = true;
+        } catch (e) {
           setApiKeyError(
-            `Unable to connect to Obsidian: (Status Code ${result.status}) ${body}.`
+            `Unable to connect to Obsidian: ${
+              (e as Error).message
+            }. Obsidian Local REST API is probably running in secure-only mode, and your browser probably does not trust its certificate.  Either enable insecure mode from Obsidian Local REST API's settings panel, or see the settings panel for instructions regarding where to acquire the certificate you need to configure your browser to trust.`
           );
           return;
         }
+      }
 
-        const jsonBody = JSON.parse(body);
-        if (!jsonBody.authenticated) {
-          setApiKeyError(`Your API key was not accepted.`);
-          return;
-        }
-      } catch (e) {
+      const body = await result.text();
+      if (result.status !== 200) {
         setApiKeyError(
-          `Unable to connect to Obsidian: ${
-            (e as Error).message
-          }.  Your browser probably doesn't trust the Obsidian Local REST API's certificate.  See the settings panel for Obsidian Local REST API in Obsidian for instructions.`
+          `Unable to connect to Obsidian: (Status Code ${result.status}) ${body}.`
         );
         return;
       }
 
+      const jsonBody = JSON.parse(body);
+      if (!jsonBody.authenticated) {
+        setApiKeyError(`Your API key was not accepted.`);
+        return;
+      }
+
+      setInsecureMode(usedInsecureMode);
       setApiKeyError(undefined);
       setApiKeyOk(true);
     }
@@ -208,6 +219,7 @@ const Options = () => {
       {
         apiKey,
         presets,
+        insecureMode,
       } as ExtensionSettings,
       () => {
         setStatus({
@@ -253,8 +265,31 @@ const Options = () => {
                     onChange={(event) => setApiKey(event.target.value)}
                   />
                   <div className="api-key-valid-icon">
-                    {apiKeyOk && <Check color="success" fontSize="large" />}
-                    {apiKeyError && <Error color="error" fontSize="large" />}
+                    {apiKeyOk && (
+                      <>
+                        {insecureMode && (
+                          <InsecureConnection
+                            color="warning"
+                            fontSize="large"
+                            titleAccess="Connected insecurely to the API via HTTP."
+                          />
+                        )}
+                        {!insecureMode && (
+                          <SecureConnection
+                            color="success"
+                            fontSize="large"
+                            titleAccess="Connected securely to the API via HTTPS."
+                          />
+                        )}
+                      </>
+                    )}
+                    {apiKeyError && (
+                      <Error
+                        color="error"
+                        fontSize="large"
+                        titleAccess="Could not connect to the API."
+                      />
+                    )}
                   </div>
                 </div>
                 {apiKeyError && (

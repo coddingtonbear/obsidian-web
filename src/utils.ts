@@ -11,8 +11,9 @@ export async function getSettings(
 export async function obsidianRequest(
   apiKey: string,
   path: string,
-  options: RequestInit
-): Promise<ReturnType<typeof fetch>> {
+  options: RequestInit,
+  insecureMode: boolean
+): ReturnType<typeof fetch> {
   const requestOptions: RequestInit = {
     ...options,
     headers: {
@@ -24,5 +25,10 @@ export async function obsidianRequest(
     mode: "cors",
   };
 
-  return fetch(`https://127.0.0.1:27124${path}`, requestOptions);
+  return fetch(
+    `http${insecureMode ? "" : "s"}://127.0.0.1:${
+      insecureMode ? "27123" : "27124"
+    }${path}`,
+    requestOptions
+  );
 }

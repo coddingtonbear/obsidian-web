@@ -23,6 +23,7 @@ const Popup = () => {
 
   const [ready, setReady] = useState<boolean>(false);
   const [apiKey, setApiKey] = useState<string>("");
+  const [insecureMode, setInsecureMode] = useState<boolean>(false);
   const [method, setMethod] = useState<OutputPreset["method"]>("post");
   const [compiledUrl, setCompiledUrl] = useState<string>("");
   const [headers, setHeaders] = useState<Record<string, string>>({});
@@ -88,6 +89,7 @@ const Popup = () => {
       };
 
       setApiKey(items.apiKey);
+      setInsecureMode(items.insecureMode ?? false);
       setMethod(preset.method as OutputPreset["method"]);
       setCompiledUrl(compile(preset.urlTemplate).render(context));
       setHeaders(preset.headers);
@@ -111,7 +113,12 @@ const Popup = () => {
       body: compiledContent,
       headers,
     };
-    const result = await obsidianRequest(apiKey, compiledUrl, request);
+    const result = await obsidianRequest(
+      apiKey,
+      compiledUrl,
+      request,
+      insecureMode
+    );
     const text = await result.text();
 
     if (result.status < 300) {

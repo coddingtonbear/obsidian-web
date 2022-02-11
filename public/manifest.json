@@ -3,7 +3,7 @@
 
   "name": "Obsidian Web",
   "description": "Connect your browser with your notes in Obsidian",
-  "version": "1.0.1",
+  "version": "1.1.0",
 
   "options_page": "options.html",
 
@@ -26,5 +26,5 @@
 
   "permissions": ["storage", "activeTab", "scripting"],
 
-  "host_permissions": ["https://127.0.0.1:27124/*"]
+  "host_permissions": ["https://127.0.0.1:27124/*", "http://127.0.0.1:27123/*"]
 }

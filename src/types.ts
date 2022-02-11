@@ -10,6 +10,7 @@ export interface OutputPreset {
 
 export interface ExtensionSettings {
   apiKey: string;
+  insecureMode?: boolean;
   version: string;
   presets: OutputPreset[];
 }
