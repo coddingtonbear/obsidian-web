@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { compile } from "micromustache";
 import ReactDOM from "react-dom";
 
 import ThemeProvider from "@mui/system/ThemeProvider";
@@ -34,7 +33,7 @@ import {
   DefaultUrlTemplate,
 } from "./constants";
 import { ExtensionSettings, OutputPreset, AlertStatus } from "./types";
-import { getSettings, obsidianRequest } from "./utils";
+import { getSettings, obsidianRequest, compile } from "./utils";
 import Alert from "./components/Alert";
 import RequestParameters from "./components/RequestParameters";
 import { PurpleTheme } from "./theme";
@@ -112,7 +111,6 @@ const Options = () => {
     // stored in chrome.storage.
     async function handle() {
       const settings = await getSettings(chrome.storage.sync);
-      console.log(settings);
 
       setApiKey(settings.apiKey);
       setPresets(settings.presets);
@@ -167,7 +165,7 @@ const Options = () => {
     setPresets(newPresets);
   };
 
-  const savePreset = () => {
+  const savePreset = async () => {
     if (editingPreset === undefined) {
       return;
     }
@@ -175,14 +173,14 @@ const Options = () => {
     let errorMessage: string | undefined = undefined;
 
     try {
-      compile(contentTemplate);
+      await compile(contentTemplate, {});
     } catch (e) {
       errorMessage = "Could not compile content template.";
     }
 
     if (!errorMessage) {
       try {
-        compile(urlTemplate);
+        await compile(urlTemplate, {});
       } catch (e) {
         errorMessage = "Could not compile url template.";
       }

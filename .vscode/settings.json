@@ -9,5 +9,8 @@
   ],
   "editor.formatOnSave": true,
   "html.autoClosingTags": false,
-  "typescript.autoClosingTags": false
+  "typescript.autoClosingTags": false,
+  "files.exclude": {
+    "dist/**": true
+  }
 }

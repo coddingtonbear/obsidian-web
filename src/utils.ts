@@ -1,4 +1,9 @@
-import { ExtensionSettings } from "./types";
+import {
+  ExtensionSettings,
+  SandboxRenderRequest,
+  SandboxRenderResponse,
+  SandboxExceptionResponse,
+} from "./types";
 import { DefaultSettings } from "./constants";
 
 export async function getSettings(
@@ -31,4 +36,42 @@ export async function obsidianRequest(
     }${path}`,
     requestOptions
   );
+}
+
+export function compile(
+  template: string,
+  context: Record<string, any>
+): Promise<string> {
+  const result = new Promise<string>((resolve, reject) => {
+    const sandbox = document.getElementById(
+      "handlebars-sandbox"
+    ) as HTMLIFrameElement;
+
+    const message: SandboxRenderRequest = {
+      command: "render",
+      template,
+      context,
+    };
+
+    if (!sandbox.contentWindow) {
+      throw new Error("No content window found for handlebars sandbox!");
+    }
+
+    const handler = (
+      event: MessageEvent<SandboxRenderResponse | SandboxExceptionResponse>
+    ) => {
+      console.log("SCRIPT RESPONSE", event);
+      if (event.data.success) {
+        resolve(event.data.rendered);
+      } else {
+        reject(event.data.message);
+      }
+    };
+
+    window.addEventListener("message", handler, { once: true });
+
+    sandbox.contentWindow.postMessage(message, "*");
+  });
+
+  return result;
 }

@@ -22,7 +22,7 @@
     "@emotion/styled": "^11.6.0",
     "@mui/icons-material": "^5.3.1",
     "@mui/material": "^5.4.0",
-    "micromustache": "^8.0.3",
+    "handlebars": "^4.7.7",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },

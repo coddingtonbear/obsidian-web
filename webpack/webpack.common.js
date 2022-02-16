@@ -7,6 +7,7 @@ module.exports = {
   entry: {
     popup: path.join(srcDir, "popup.tsx"),
     options: path.join(srcDir, "options.tsx"),
+    handlebars: path.join(srcDir, "handlebars.ts"),
   },
   output: {
     path: path.join(__dirname, "../dist/js"),
@@ -31,6 +32,9 @@ module.exports = {
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
+    alias: {
+      handlebars: "handlebars/dist/handlebars.min.js",
+    },
   },
   plugins: [
     new CopyPlugin({

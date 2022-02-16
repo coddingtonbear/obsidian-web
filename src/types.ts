@@ -20,3 +20,32 @@ export interface AlertStatus {
   title: string;
   message: string;
 }
+
+export interface SandboxRenderRequest {
+  command: "render";
+  template: string;
+  context: Record<string, any>;
+}
+
+export type SandboxRequest = SandboxRenderRequest;
+
+export interface SandboxResponseBase {
+  request: SandboxRequest;
+  success: boolean;
+}
+
+export interface SandboxExceptionResponse extends SandboxResponseBase {
+  success: false;
+  message: string;
+}
+
+export interface SandboxSuccessResponse extends SandboxResponseBase {
+  success: true;
+}
+
+export interface SandboxRenderResponse extends SandboxSuccessResponse {
+  request: SandboxRenderRequest;
+  rendered: string;
+}
+
+export type SandboxResponse = SandboxRenderResponse | SandboxExceptionResponse;

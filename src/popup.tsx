@@ -1,4 +1,3 @@
-import { compile } from "micromustache";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import Button from "@mui/material/Button";
@@ -15,7 +14,7 @@ import MaterialAlert from "@mui/material/Alert";
 
 import Alert from "./components/Alert";
 import { AlertStatus, ExtensionSettings, OutputPreset } from "./types";
-import { getSettings, obsidianRequest } from "./utils";
+import { getSettings, obsidianRequest, compile } from "./utils";
 import RequestParameters from "./components/RequestParameters";
 
 const Popup = () => {
@@ -88,12 +87,15 @@ const Popup = () => {
         },
       };
 
+      const compiledUrl = await compile(preset.urlTemplate, context);
+      const compiledContent = await compile(preset.contentTemplate, context);
+
       setApiKey(items.apiKey);
       setInsecureMode(items.insecureMode ?? false);
       setMethod(preset.method as OutputPreset["method"]);
-      setCompiledUrl(compile(preset.urlTemplate).render(context));
+      setCompiledUrl(compiledUrl);
       setHeaders(preset.headers);
-      setCompiledContent(compile(preset.contentTemplate).render(context));
+      setCompiledContent(compiledContent);
       setReady(true);
     }
 
