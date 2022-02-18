@@ -19,6 +19,10 @@ Handlebars.registerHelper("date", (format: string) => {
   return formatDate(now, format);
 });
 
+Handlebars.registerHelper("filename", (unsafe: string) => {
+  return unsafe.replace(/[^a-zA-Z -]+/g, "");
+});
+
 const render = (request: SandboxRenderRequest): SandboxRenderResponse => {
   const compiled = Handlebars.compile(request.template, { noEscape: true });
 
