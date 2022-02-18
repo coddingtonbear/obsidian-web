@@ -25,15 +25,17 @@ import Star from "@mui/icons-material/StarRate";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CreateIcon from "@mui/icons-material/AddCircle";
+import RestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 
 import {
   DefaultContentTemplate,
   DefaultHeaders,
   DefaultMethod,
+  DefaultSettings,
   DefaultUrlTemplate,
 } from "./constants";
 import { ExtensionSettings, OutputPreset, AlertStatus } from "./types";
-import { getSettings, obsidianRequest, compile } from "./utils";
+import { getSettings, obsidianRequest, compileTemplate } from "./utils";
 import Alert from "./components/Alert";
 import RequestParameters from "./components/RequestParameters";
 import { PurpleTheme } from "./theme";
@@ -173,14 +175,14 @@ const Options = () => {
     let errorMessage: string | undefined = undefined;
 
     try {
-      await compile(contentTemplate, {});
+      await compileTemplate(contentTemplate, {});
     } catch (e) {
       errorMessage = "Could not compile content template.";
     }
 
     if (!errorMessage) {
       try {
-        await compile(urlTemplate, {});
+        await compileTemplate(urlTemplate, {});
       } catch (e) {
         errorMessage = "Could not compile url template.";
       }

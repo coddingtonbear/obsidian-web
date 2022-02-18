@@ -14,7 +14,7 @@ import MaterialAlert from "@mui/material/Alert";
 
 import Alert from "./components/Alert";
 import { AlertStatus, ExtensionSettings, OutputPreset } from "./types";
-import { getSettings, obsidianRequest, compile } from "./utils";
+import { getSettings, obsidianRequest, compileTemplate } from "./utils";
 import RequestParameters from "./components/RequestParameters";
 
 const Popup = () => {
@@ -92,8 +92,11 @@ const Popup = () => {
         },
       };
 
-      const compiledUrl = await compile(preset.urlTemplate, context);
-      const compiledContent = await compile(preset.contentTemplate, context);
+      const compiledUrl = await compileTemplate(preset.urlTemplate, context);
+      const compiledContent = await compileTemplate(
+        preset.contentTemplate,
+        context
+      );
 
       setApiKey(items.apiKey);
       setInsecureMode(items.insecureMode ?? false);

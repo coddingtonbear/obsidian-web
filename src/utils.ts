@@ -38,7 +38,7 @@ export async function obsidianRequest(
   );
 }
 
-export function compile(
+export function compileTemplate(
   template: string,
   context: Record<string, any>
 ): Promise<string> {
