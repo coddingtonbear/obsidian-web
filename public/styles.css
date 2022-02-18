@@ -54,7 +54,6 @@ div.submit {
 div.modal {
   margin: 50px 100px;
   padding: 25px;
-  max-height: 500px;
   overflow-y: scroll;
 }
 
