@@ -60,7 +60,6 @@ export function compile(
     const handler = (
       event: MessageEvent<SandboxRenderResponse | SandboxExceptionResponse>
     ) => {
-      console.log("SCRIPT RESPONSE", event);
       if (event.data.success) {
         resolve(event.data.rendered);
       } else {

@@ -16,16 +16,7 @@ const render = (request: SandboxRenderRequest): SandboxRenderResponse => {
 };
 
 function handleEvent(evt: MessageEvent<SandboxRequest>): void {
-  if (evt.origin === "null") {
-    console.log("Received event from self :-(", evt);
-    return;
-  }
-  console.log("Parent: ", window.parent);
-  console.log("Received event: ", evt);
-
   const command = evt.data.command;
-  const postMessage = (evt.source as WindowProxy).postMessage;
-  console.log("Received event (Src): ", evt.source);
 
   const debug = document.getElementById("debug");
   if (debug) {
@@ -35,21 +26,19 @@ function handleEvent(evt: MessageEvent<SandboxRequest>): void {
   try {
     switch (command) {
       case "render":
-        postMessage(render(evt.data), "*");
+        (evt.source as WindowProxy).postMessage(render(evt.data), evt.origin);
         break;
       default:
-        return;
         throw new Error(`Unexpected command: ${command}`);
     }
   } catch (e) {
-    console.error(e);
-    postMessage(
+    (evt.source as WindowProxy).postMessage(
       {
         success: false,
         request: evt.data,
         message: (e as Error).message,
       },
-      "*"
+      evt.origin
     );
   }
 }
