@@ -451,6 +451,19 @@ const Options = () => {
               line in <code>FIELD</code> with <code>&gt; </code> so as to cause
               it to be displayed as a quote in your notes.
             </li>
+            <li>
+              &#123;&#123;date <code>"FORMAT"</code>&#125;&#125;: Will format
+              the current date using the format described in <code>FORMAT</code>
+              . See{" "}
+              <a
+                href="https://date-fns.org/v2.28.0/docs/format"
+                target="_blank"
+              >
+                here
+              </a>{" "}
+              for a full list of formatting codes. Example:{" "}
+              <code>&#123;&#123;date "yyyy-MM-dd HH:mm:ss"&#125;&#125;</code>.
+            </li>
           </ul>
 
           <Typography paragraph={true}>

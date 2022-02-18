@@ -1,4 +1,5 @@
 import Handlebars from "handlebars";
+import { format as formatDate } from "date-fns";
 import {
   SandboxRequest,
   SandboxRenderResponse,
@@ -11,6 +12,11 @@ Handlebars.registerHelper("quote", (value: string) => {
     lines.push(`> ${rawLine}`);
   }
   return lines.join("\n");
+});
+
+Handlebars.registerHelper("date", (format: string) => {
+  const now = new Date();
+  return formatDate(now, format);
 });
 
 const render = (request: SandboxRenderRequest): SandboxRenderResponse => {
