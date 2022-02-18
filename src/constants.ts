@@ -1,4 +1,4 @@
-import { ExtensionSettings } from "./types";
+import { ExtensionLocalSettings, ExtensionSyncSettings } from "./types";
 
 export const DefaultContentTemplate =
   "---\npage-title: {{page.title}}\nurl: {{page.url}}\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}";
@@ -6,9 +6,13 @@ export const DefaultUrlTemplate = "/vault/{{filename page.title}}.md";
 export const DefaultHeaders = {};
 export const DefaultMethod = "put";
 
-export const DefaultSettings: ExtensionSettings = {
+export const DefaultLocalSettings: ExtensionLocalSettings = {
   version: "0.1",
   apiKey: "",
+};
+
+export const DefaultSyncSettings: ExtensionSyncSettings = {
+  version: "0.1",
   presets: [
     {
       name: "Append to current daily note",

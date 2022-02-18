@@ -13,8 +13,18 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MaterialAlert from "@mui/material/Alert";
 
 import Alert from "./components/Alert";
-import { AlertStatus, ExtensionSettings, OutputPreset } from "./types";
-import { getSettings, obsidianRequest, compileTemplate } from "./utils";
+import {
+  AlertStatus,
+  ExtensionLocalSettings,
+  ExtensionSyncSettings,
+  OutputPreset,
+} from "./types";
+import {
+  getLocalSettings,
+  getSyncSettings,
+  obsidianRequest,
+  compileTemplate,
+} from "./utils";
 import RequestParameters from "./components/RequestParameters";
 
 const Popup = () => {
@@ -57,11 +67,23 @@ const Popup = () => {
       if (!tab.id) {
         return;
       }
-      let items: ExtensionSettings;
+      let syncSettings: ExtensionSyncSettings;
+      let localSettings: ExtensionLocalSettings;
 
       try {
-        items = await getSettings(chrome.storage.sync);
-        setPresets(items.presets);
+        localSettings = await getLocalSettings(chrome.storage.local);
+      } catch (e) {
+        setStatus({
+          severity: "error",
+          title: "Error",
+          message: "Could not get local settings!",
+        });
+        return;
+      }
+
+      try {
+        syncSettings = await getSyncSettings(chrome.storage.sync);
+        setPresets(syncSettings.presets);
       } catch (e) {
         setStatus({
           severity: "error",
@@ -82,7 +104,7 @@ const Popup = () => {
         selectedText = "";
       }
 
-      const preset = items.presets[selectedPreset];
+      const preset = syncSettings.presets[selectedPreset];
 
       const context = {
         page: {
@@ -98,8 +120,8 @@ const Popup = () => {
         context
       );
 
-      setApiKey(items.apiKey);
-      setInsecureMode(items.insecureMode ?? false);
+      setApiKey(localSettings.apiKey);
+      setInsecureMode(localSettings.insecureMode ?? false);
       setMethod(preset.method as OutputPreset["method"]);
       setCompiledUrl(compiledUrl);
       setHeaders(preset.headers);

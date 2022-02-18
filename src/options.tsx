@@ -31,11 +31,21 @@ import {
   DefaultContentTemplate,
   DefaultHeaders,
   DefaultMethod,
-  DefaultSettings,
+  DefaultSyncSettings,
   DefaultUrlTemplate,
 } from "./constants";
-import { ExtensionSettings, OutputPreset, AlertStatus } from "./types";
-import { getSettings, obsidianRequest, compileTemplate } from "./utils";
+import {
+  ExtensionSyncSettings,
+  OutputPreset,
+  AlertStatus,
+  ExtensionLocalSettings,
+} from "./types";
+import {
+  getLocalSettings,
+  getSyncSettings,
+  obsidianRequest,
+  compileTemplate,
+} from "./utils";
 import Alert from "./components/Alert";
 import RequestParameters from "./components/RequestParameters";
 import { PurpleTheme } from "./theme";
@@ -112,10 +122,11 @@ const Options = () => {
     // Restores select box and checkbox state using the preferences
     // stored in chrome.storage.
     async function handle() {
-      const settings = await getSettings(chrome.storage.sync);
+      const syncSettings = await getSyncSettings(chrome.storage.sync);
+      const localSettings = await getLocalSettings(chrome.storage.local);
 
-      setApiKey(settings.apiKey);
-      setPresets(settings.presets);
+      setApiKey(localSettings.apiKey);
+      setPresets(syncSettings.presets);
     }
 
     handle();
@@ -168,7 +179,7 @@ const Options = () => {
   };
 
   const restoreDefaultTemplates = () => {
-    setPresets([...presets, ...DefaultSettings.presets]);
+    setPresets([...presets, ...DefaultSyncSettings.presets]);
   };
 
   const savePreset = async () => {
@@ -218,21 +229,21 @@ const Options = () => {
     }
   };
 
-  const saveOptions = () => {
-    chrome.storage.sync.set(
-      {
-        apiKey,
-        presets,
-        insecureMode,
-      } as ExtensionSettings,
-      () => {
-        setStatus({
-          severity: "success",
-          title: "Success",
-          message: "Options saved",
-        });
-      }
-    );
+  const saveOptions = async () => {
+    await chrome.storage.local.set({
+      apiKey,
+      insecureMode,
+    } as ExtensionLocalSettings);
+
+    await chrome.storage.sync.set({
+      presets,
+    } as ExtensionSyncSettings);
+
+    setStatus({
+      severity: "success",
+      title: "Success",
+      message: "Options saved",
+    });
   };
 
   return (

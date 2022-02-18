@@ -8,9 +8,13 @@ export interface OutputPreset {
   method: "post" | "put" | "patch";
 }
 
-export interface ExtensionSettings {
+export interface ExtensionLocalSettings {
+  version: string;
   apiKey: string;
   insecureMode?: boolean;
+}
+
+export interface ExtensionSyncSettings {
   version: string;
   presets: OutputPreset[];
 }

@@ -1,16 +1,24 @@
 import {
-  ExtensionSettings,
+  ExtensionSyncSettings,
+  ExtensionLocalSettings,
   SandboxRenderRequest,
   SandboxRenderResponse,
   SandboxExceptionResponse,
 } from "./types";
-import { DefaultSettings } from "./constants";
+import { DefaultSyncSettings, DefaultLocalSettings } from "./constants";
 
-export async function getSettings(
+export async function getSyncSettings(
   sync: chrome.storage.SyncStorageArea
-): Promise<ExtensionSettings> {
-  const settings = await sync.get(DefaultSettings);
-  return settings as ExtensionSettings;
+): Promise<ExtensionSyncSettings> {
+  const settings = await sync.get(DefaultSyncSettings);
+  return settings as ExtensionSyncSettings;
+}
+
+export async function getLocalSettings(
+  local: chrome.storage.LocalStorageArea
+): Promise<ExtensionLocalSettings> {
+  const settings = await local.get(DefaultLocalSettings);
+  return settings as ExtensionLocalSettings;
 }
 
 export async function obsidianRequest(
