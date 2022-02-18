@@ -5,6 +5,14 @@ import {
   SandboxRenderRequest,
 } from "./types";
 
+Handlebars.registerHelper("quote", (value: string) => {
+  const lines: string[] = [];
+  for (const rawLine of value.split("\n")) {
+    lines.push(`> ${rawLine}`);
+  }
+  return lines.join("\n");
+});
+
 const render = (request: SandboxRenderRequest): SandboxRenderResponse => {
   const compiled = Handlebars.compile(request.template, { noEscape: true });
 

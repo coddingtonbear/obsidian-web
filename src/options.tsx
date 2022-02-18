@@ -429,18 +429,30 @@ const Options = () => {
           </Typography>
           <ul>
             <li>
-              &#123;&#123; page.url &#125;&#125;: The URL of your the page you
-              are on.
+              &#123;&#123;page.url&#125;&#125;: The URL of your the page you are
+              on.
             </li>
             <li>
-              &#123;&#123; page.title &#125;&#125;: The title of the page you
-              are on.
+              &#123;&#123;page.title&#125;&#125;: The title of the page you are
+              on.
             </li>
             <li>
-              &#123;&#123; page.selectedText &#125;&#125;: The text (if any)
-              that is currently selected on the page you are on.
+              &#123;&#123;page.selectedText&#125;&#125;: The text (if any) that
+              is currently selected on the page you are on.
             </li>
           </ul>
+          <Typography paragraph={true}>
+            Additionally, you have access to the following helpers for
+            formatting your notes:
+          </Typography>
+          <ul>
+            <li>
+              &#123;&#123;quote <code>FIELD</code>&#125;&#125;: Will prefix each
+              line in <code>FIELD</code> with <code>&gt; </code> so as to cause
+              it to be displayed as a quote in your notes.
+            </li>
+          </ul>
+
           <Typography paragraph={true}>
             These templates use the{" "}
             <a href="https://handlebarsjs.com/guide/" target="_blank">
