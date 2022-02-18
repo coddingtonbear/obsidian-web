@@ -20,6 +20,7 @@ import RequestParameters from "./components/RequestParameters";
 const Popup = () => {
   const [status, setStatus] = useState<AlertStatus>();
 
+  const [sandboxReady, setSandboxReady] = useState<boolean>(false);
   const [ready, setReady] = useState<boolean>(false);
   const [apiKey, setApiKey] = useState<string>("");
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
@@ -32,6 +33,10 @@ const Popup = () => {
   const [selectedPreset, setSelectedPreset] = useState<number>(0);
 
   useEffect(() => {
+    if (!sandboxReady) {
+      return;
+    }
+
     async function handle() {
       let tab: chrome.tabs.Tab;
       try {
@@ -100,7 +105,11 @@ const Popup = () => {
     }
 
     handle();
-  }, [selectedPreset]);
+  }, [sandboxReady, selectedPreset]);
+
+  window.addEventListener("message", () => setSandboxReady(true), {
+    once: true,
+  });
 
   const sendToObsidian = async () => {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });

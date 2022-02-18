@@ -44,3 +44,4 @@ function handleEvent(evt: MessageEvent<SandboxRequest>): void {
 }
 
 window.addEventListener("message", handleEvent);
+window.parent.postMessage({ loaded: true }, "*");

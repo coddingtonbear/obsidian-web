@@ -413,8 +413,8 @@ const Options = () => {
             </div>
           </div>
           <Typography paragraph={true}>
-            Enter your template information below. Note that you may use the
-            following template properties in the "Content" and "API URL" fields:
+            Enter your template information below. You may use the following
+            template properties in the "Content" and "API URL" fields:
           </Typography>
           <ul>
             <li>
@@ -430,6 +430,13 @@ const Options = () => {
               that is currently selected on the page you are on.
             </li>
           </ul>
+          <Typography paragraph={true}>
+            These templates use the{" "}
+            <a href="https://handlebarsjs.com/guide/" target="_blank">
+              Handlebars template language
+            </a>
+            ; so you also have access to any features provided by it.
+          </Typography>
           <Typography paragraph={true}>
             See{" "}
             <a
