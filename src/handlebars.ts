@@ -6,7 +6,7 @@ import {
 } from "./types";
 
 const render = (request: SandboxRenderRequest): SandboxRenderResponse => {
-  const compiled = Handlebars.compile(request.template);
+  const compiled = Handlebars.compile(request.template, { noEscape: true });
 
   return {
     success: true,
