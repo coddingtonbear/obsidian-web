@@ -167,6 +167,10 @@ const Options = () => {
     setPresets(newPresets);
   };
 
+  const restoreDefaultTemplates = () => {
+    setPresets([...presets, ...DefaultSettings.presets]);
+  };
+
   const savePreset = async () => {
     if (editingPreset === undefined) {
       return;
@@ -377,8 +381,13 @@ const Options = () => {
                           <TableCell></TableCell>
                           <TableCell component="th" scope="row"></TableCell>
                           <TableCell align="right">
+                            <IconButton
+                              onClick={() => restoreDefaultTemplates()}
+                            >
+                              <RestoreIcon titleAccess="Restore default templates" />
+                            </IconButton>
                             <IconButton onClick={() => openEditingModal(null)}>
-                              <CreateIcon />
+                              <CreateIcon titleAccess="Create new template" />
                             </IconButton>
                           </TableCell>
                         </TableRow>

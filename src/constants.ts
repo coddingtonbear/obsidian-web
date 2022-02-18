@@ -1,7 +1,7 @@
 import { ExtensionSettings } from "./types";
 
 export const DefaultContentTemplate =
-  "---\npage-title: {{ page.title }}\nurl: {{ page.url }}\n---\n\n> {{ page.selectedText }}\n\n";
+  "---\npage-title: {{ page.title }}\nurl: {{ page.url }}\n---\n{{#if page.selectedText}}\n\n> {{ page.selectedText }}\n{{/if}}";
 export const DefaultUrlTemplate = "/vault/{{ page.title }}.md";
 export const DefaultHeaders = {};
 export const DefaultMethod = "put";
@@ -14,7 +14,7 @@ export const DefaultSettings: ExtensionSettings = {
       name: "Append to current daily note",
       urlTemplate: "/periodic/daily/",
       contentTemplate:
-        "## {{ page.title }}\nURL: {{ page.url }}\n\n> {{ page.selectedText }}\n\n",
+        "## {{ page.title }}\nURL: {{ page.url }}\n{{#if page.selectedText}}\n\n> {{ page.selectedText }}{{/if}}\n",
       headers: {},
       method: "post",
     },
