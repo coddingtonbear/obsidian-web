@@ -447,13 +447,11 @@ const Options = () => {
           </Typography>
           <ul>
             <li>
-              &#123;&#123;quote <code>FIELD</code>&#125;&#125;: Prefixes each
-              line in <code>FIELD</code> with <code>&gt; </code> so as to cause
-              it to be displayed as a quote in your notes.
-            </li>
-            <li>
-              &#123;&#123;date <code>"FORMAT"</code>&#125;&#125;: Formats the
-              current date using the format described in <code>FORMAT</code>.
+              &#123;&#123;date&#125;&#125;: Displays a timestamp. By default,
+              uses the format "yyyy-MM-dd HH:mm:ss", but you can configure what
+              format the timestamp is displayed in by providing a second
+              parameter; for example:
+              <code>&#123;&#123;date "yyyy-MM-dd HH:mm:ss"&#125;&#125;</code>.
               See{" "}
               <a
                 href="https://date-fns.org/v2.28.0/docs/format"
@@ -461,13 +459,17 @@ const Options = () => {
               >
                 here
               </a>{" "}
-              for a full list of formatting codes. Example:{" "}
-              <code>&#123;&#123;date "yyyy-MM-dd HH:mm:ss"&#125;&#125;</code>.
+              for a full list of formatting codes.
             </li>
             <li>
               &#123;&#123;filename <code>FIELD</code>&#125;&#125;: Strips any
               characters from <code>FIELD</code> that are not safe in a
               filename.
+            </li>
+            <li>
+              &#123;&#123;quote <code>FIELD</code>&#125;&#125;: Prefixes each
+              line in <code>FIELD</code> with <code>&gt; </code> so as to cause
+              it to be displayed as a quote in your notes.
             </li>
           </ul>
 

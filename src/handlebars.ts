@@ -6,7 +6,7 @@ import {
   SandboxRenderRequest,
 } from "./types";
 
-Handlebars.registerHelper("quote", (value: string) => {
+Handlebars.registerHelper("quote", (value: string): string => {
   const lines: string[] = [];
   for (const rawLine of value.split("\n")) {
     lines.push(`> ${rawLine}`);
@@ -14,13 +14,23 @@ Handlebars.registerHelper("quote", (value: string) => {
   return lines.join("\n");
 });
 
-Handlebars.registerHelper("date", (format: string) => {
-  const now = new Date();
-  return formatDate(now, format);
-});
+Handlebars.registerHelper(
+  "date",
+  (format: string | { [key: string]: string }): string => {
+    const now = new Date();
+    let formatStr: string = "yyyy-MM-dd HH:mm:ss";
+    if (typeof format === "string") {
+      formatStr = format;
+    }
+    return formatDate(now, formatStr);
+  }
+);
 
-Handlebars.registerHelper("filename", (unsafe: string) => {
-  return unsafe.replace(/[^a-zA-Z -]+/g, "");
+Handlebars.registerHelper("filename", (unsafe: string | undefined): string => {
+  if (typeof unsafe === "string") {
+    return unsafe.replace(/[^a-zA-Z -]+/g, "");
+  }
+  return "";
 });
 
 const render = (request: SandboxRenderRequest): SandboxRenderResponse => {
