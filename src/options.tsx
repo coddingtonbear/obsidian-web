@@ -51,6 +51,7 @@ import RequestParameters from "./components/RequestParameters";
 import { PurpleTheme } from "./theme";
 
 const Options = () => {
+  const [loaded, setLoaded] = useState<boolean>(false);
   const [status, setStatus] = useState<AlertStatus>();
   const [modalStatus, setModalStatus] = useState<AlertStatus>();
 
@@ -70,6 +71,9 @@ const Options = () => {
   const [presets, setPresets] = useState<OutputPreset[]>([]);
 
   useEffect(() => {
+    if (!loaded) {
+      return;
+    }
     async function handle() {
       setApiKeyOk(false);
       if (apiKey === "") {
@@ -113,10 +117,30 @@ const Options = () => {
       setInsecureMode(usedInsecureMode);
       setApiKeyError(undefined);
       setApiKeyOk(true);
+
+      await chrome.storage.local.set({
+        apiKey,
+        insecureMode,
+      } as ExtensionLocalSettings);
+      showSaveNotice();
     }
 
     handle();
   }, [apiKey]);
+
+  useEffect(() => {
+    if (!loaded) {
+      return;
+    }
+    async function handle() {
+      await chrome.storage.sync.set({
+        presets,
+      } as ExtensionSyncSettings);
+      showSaveNotice();
+    }
+
+    handle();
+  }, [presets]);
 
   useEffect(() => {
     // Restores select box and checkbox state using the preferences
@@ -127,6 +151,7 @@ const Options = () => {
 
       setApiKey(localSettings.apiKey);
       setPresets(syncSettings.presets);
+      setLoaded(true);
     }
 
     handle();
@@ -229,21 +254,13 @@ const Options = () => {
     }
   };
 
-  const saveOptions = async () => {
-    await chrome.storage.local.set({
-      apiKey,
-      insecureMode,
-    } as ExtensionLocalSettings);
-
-    await chrome.storage.sync.set({
-      presets,
-    } as ExtensionSyncSettings);
-
+  const showSaveNotice = () => {
     setStatus({
       severity: "success",
       title: "Success",
       message: "Options saved",
     });
+    setTimeout(() => setStatus(undefined), 3000);
   };
 
   return (
@@ -406,14 +423,6 @@ const Options = () => {
                     </Table>
                   </TableContainer>
                 </div>
-              </div>
-              <div className="submit">
-                <Button variant="outlined" onClick={() => window.close()}>
-                  Close
-                </Button>
-                <Button variant="contained" onClick={saveOptions}>
-                  Save Settings
-                </Button>
               </div>
               {status && <Alert value={status} />}
             </>
