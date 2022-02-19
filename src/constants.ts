@@ -1,3 +1,5 @@
+import TurndownService from "turndown";
+
 import { ExtensionLocalSettings, ExtensionSyncSettings } from "./types";
 
 export const DefaultContentTemplate =
@@ -29,5 +31,21 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
       headers: DefaultHeaders,
       method: DefaultMethod,
     },
+    {
+      name: "Capture page snapshot",
+      urlTemplate: DefaultUrlTemplate,
+      contentTemplate:
+        '---\npage-title: {{json page.title}}\nurl: {{json page.url}}\ndate: "{{date}}"\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n\n---\n\n{{/if}}{{page.content}}',
+      headers: DefaultHeaders,
+      method: DefaultMethod,
+    },
   ],
+};
+
+export const TurndownConfiguration: TurndownService.Options = {
+  headingStyle: "atx",
+  hr: "---",
+  bulletListMarker: "-",
+  codeBlockStyle: "fenced",
+  emDelimiter: "*",
 };

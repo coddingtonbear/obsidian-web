@@ -460,6 +460,10 @@ const Options = () => {
               page you are on.
             </li>
             <li>
+              <code>&#123;&#123;page.content&#125;&#125;</code>: The page
+              content of the page you are currently on as Markdown text.
+            </li>
+            <li>
               <code>&#123;&#123;page.selectedText&#125;&#125;</code>: The text
               (if any) that is currently selected on the page you are on.
             </li>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import Turndown from "turndown";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
@@ -26,6 +27,7 @@ import {
   compileTemplate,
 } from "./utils";
 import RequestParameters from "./components/RequestParameters";
+import { TurndownConfiguration } from "./constants";
 
 const Popup = () => {
   const [status, setStatus] = useState<AlertStatus>();
@@ -41,6 +43,8 @@ const Popup = () => {
 
   const [presets, setPresets] = useState<OutputPreset[]>([]);
   const [selectedPreset, setSelectedPreset] = useState<number>(0);
+
+  const turndown = new Turndown(TurndownConfiguration);
 
   useEffect(() => {
     if (!sandboxReady) {
@@ -104,6 +108,17 @@ const Popup = () => {
         selectedText = "";
       }
 
+      let pageContent: string;
+      try {
+        const pageContentInjected = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => window.document.body.innerHTML,
+        });
+        pageContent = turndown.turndown(pageContentInjected[0].result);
+      } catch (e) {
+        pageContent = "";
+      }
+
       const preset = syncSettings.presets[selectedPreset];
 
       const context = {
@@ -111,6 +126,7 @@ const Popup = () => {
           url: tab.url,
           title: tab.title,
           selectedText: selectedText,
+          content: pageContent,
         },
       };
 
