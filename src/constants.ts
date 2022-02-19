@@ -1,7 +1,7 @@
 import { ExtensionLocalSettings, ExtensionSyncSettings } from "./types";
 
 export const DefaultContentTemplate =
-  "---\npage-title: {{page.title}}\nurl: {{page.url}}\ndate: {{date}}\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}";
+  '---\npage-title: {{json page.title}}\nurl: {{json page.url}}\ndate: "{{date}}"\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}';
 export const DefaultUrlTemplate = "/vault/{{filename page.title}}.md";
 export const DefaultHeaders = {};
 export const DefaultMethod = "put";

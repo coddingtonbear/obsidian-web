@@ -489,6 +489,10 @@ const Options = () => {
               filename.
             </li>
             <li>
+              &#123;&#123;json <code>FIELD</code>&#125;&#125;: Encodes value in{" "}
+              <code>FIELD</code> as a JSON string.
+            </li>
+            <li>
               &#123;&#123;quote <code>FIELD</code>&#125;&#125;: Prefixes each
               line in <code>FIELD</code> with <code>&gt; </code> so as to cause
               it to be displayed as a quote in your notes.

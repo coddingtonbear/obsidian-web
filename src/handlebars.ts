@@ -33,6 +33,13 @@ Handlebars.registerHelper("filename", (unsafe: string | undefined): string => {
   return "";
 });
 
+Handlebars.registerHelper("json", (unsafe: string | undefined): string => {
+  if (typeof unsafe === "string") {
+    return JSON.stringify(unsafe);
+  }
+  return "";
+});
+
 const render = (request: SandboxRenderRequest): SandboxRenderResponse => {
   const compiled = Handlebars.compile(request.template, { noEscape: true });
 
