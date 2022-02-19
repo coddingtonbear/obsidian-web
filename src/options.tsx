@@ -295,7 +295,7 @@ const Options = () => {
                   <TextField
                     label="API Key"
                     value={apiKey}
-                    helperText="You can find your API key from the 'Local REST API' section of your settings in Obsidian."
+                    helperText="You can find your API key in the 'Local REST API' section of your settings in Obsidian."
                     onChange={(event) => setApiKey(event.target.value)}
                   />
                   <div className="api-key-valid-icon">
