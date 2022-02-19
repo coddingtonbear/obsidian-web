@@ -440,6 +440,7 @@ const Options = () => {
             <div className="option-value">
               <TextField
                 label="Template Name"
+                fullWidth={true}
                 value={presetName}
                 onChange={(event) => setPresetName(event.target.value)}
               />

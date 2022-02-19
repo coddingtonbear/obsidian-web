@@ -206,6 +206,7 @@ const Popup = () => {
                   <Select
                     label="Preset"
                     value={selectedPreset}
+                    fullWidth={true}
                     onChange={(event) =>
                       setSelectedPreset(
                         typeof event.target.value === "number"
