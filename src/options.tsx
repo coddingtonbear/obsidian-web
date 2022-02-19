@@ -452,16 +452,16 @@ const Options = () => {
           </Typography>
           <ul>
             <li>
-              &#123;&#123;page.url&#125;&#125;: The URL of your the page you are
-              on.
+              <code>&#123;&#123;page.url&#125;&#125;</code>: The URL of your the
+              page you are on.
             </li>
             <li>
-              &#123;&#123;page.title&#125;&#125;: The title of the page you are
-              on.
+              <code>&#123;&#123;page.title&#125;&#125;</code>: The title of the
+              page you are on.
             </li>
             <li>
-              &#123;&#123;page.selectedText&#125;&#125;: The text (if any) that
-              is currently selected on the page you are on.
+              <code>&#123;&#123;page.selectedText&#125;&#125;</code>: The text
+              (if any) that is currently selected on the page you are on.
             </li>
           </ul>
           <Typography paragraph={true}>
@@ -470,12 +470,12 @@ const Options = () => {
           </Typography>
           <ul>
             <li>
-              &#123;&#123;date&#125;&#125;: Displays a timestamp. By default,
-              uses the format "yyyy-MM-dd HH:mm:ss", but you can configure what
-              format the timestamp is displayed in by providing a second
-              parameter; for example:
-              <code>&#123;&#123;date "yyyy-MM-dd HH:mm:ss"&#125;&#125;</code>.
-              See{" "}
+              <code>&#123;&#123;date&#125;&#125;</code>: Displays a timestamp.
+              By default this uses the format "yyyy-MM-dd HH:mm:ss", but you can
+              configure the format used by providing a second parameter; for
+              example:
+              <code>&#123;&#123;date "EEEE, MMMM do"&#125;&#125;</code> would
+              display a timestamp like "Friday, February 18th". See{" "}
               <a
                 href="https://date-fns.org/v2.28.0/docs/format"
                 target="_blank"
@@ -485,16 +485,16 @@ const Options = () => {
               for a full list of formatting codes.
             </li>
             <li>
-              &#123;&#123;filename <code>FIELD</code>&#125;&#125;: Strips any
+              <code>&#123;&#123;filename FIELD&#125;&#125;</code>: Strips any
               characters from <code>FIELD</code> that are not safe in a
               filename.
             </li>
             <li>
-              &#123;&#123;json <code>FIELD</code>&#125;&#125;: Encodes value in{" "}
+              <code>&#123;&#123;json FIELD&#125;&#125;</code>: Encodes value in{" "}
               <code>FIELD</code> as a JSON string.
             </li>
             <li>
-              &#123;&#123;quote <code>FIELD</code>&#125;&#125;: Prefixes each
+              <code>&#123;&#123;quote FIELD&#125;&#125;</code>: Prefixes each
               line in <code>FIELD</code> with <code>&gt; </code> so as to cause
               it to be displayed as a quote in your notes.
             </li>
