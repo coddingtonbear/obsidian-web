@@ -12,6 +12,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MaterialAlert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import Alert from "./components/Alert";
 import {
@@ -262,6 +263,15 @@ const Popup = () => {
             </>
           )}
         </>
+      )}
+      {!ready && (
+        <div className="loading">
+          {" "}
+          <Typography paragraph={true}>
+            Gathering page information...
+          </Typography>
+          <CircularProgress />
+        </div>
       )}
       {status && <Alert value={status} />}
     </ThemeProvider>

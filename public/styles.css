@@ -68,3 +68,16 @@ div.options-container {
   margin: 0 auto;
   padding: 10px 50px;
 }
+
+div.loading {
+  display: flex;
+  flex-direction: column;
+}
+
+div.loading > p {
+  text-align: center;
+}
+
+div.loading > span {
+  margin: 0 auto;
+}
