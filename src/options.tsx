@@ -71,9 +71,6 @@ const Options = () => {
   const [presets, setPresets] = useState<OutputPreset[]>([]);
 
   useEffect(() => {
-    if (!loaded) {
-      return;
-    }
     async function handle() {
       setApiKeyOk(false);
       if (apiKey === "") {
@@ -118,11 +115,16 @@ const Options = () => {
       setApiKeyError(undefined);
       setApiKeyOk(true);
 
-      await chrome.storage.local.set({
-        apiKey,
-        insecureMode,
-      } as ExtensionLocalSettings);
-      showSaveNotice();
+      if (loaded) {
+        // If we are *not* loaded, it means we're just in the process
+        // of populating the form from stored settings.  If we are,
+        // it means you've changed something.
+        await chrome.storage.local.set({
+          apiKey,
+          insecureMode,
+        } as ExtensionLocalSettings);
+        showSaveNotice();
+      }
     }
 
     handle();
@@ -352,7 +354,7 @@ const Options = () => {
                       </TableHead>
                       <TableBody>
                         {presets.map((preset, idx) => (
-                          <TableRow key={preset.name}>
+                          <TableRow key={preset.name + idx}>
                             <TableCell>
                               {idx === 0 && (
                                 <Star fontSize="small" titleAccess="Default" />

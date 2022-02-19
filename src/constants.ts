@@ -18,7 +18,7 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
       name: "Append to current daily note",
       urlTemplate: "/periodic/daily/",
       contentTemplate:
-        "## {{page.title}}\nURL: {{page.url}}\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}{{/if}}\n",
+        "## {{page.title}}\nURL: {{page.url}}\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}",
       headers: {},
       method: "post",
     },
