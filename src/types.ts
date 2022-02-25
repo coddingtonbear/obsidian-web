@@ -17,6 +17,9 @@ export interface ExtensionLocalSettings {
 export interface ExtensionSyncSettings {
   version: string;
   presets: OutputPreset[];
+  searchEnabled: boolean;
+  searchMatchMentionTemplate: string;
+  searchMatchDirectTemplate: string;
 }
 
 export interface AlertStatus {

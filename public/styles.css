@@ -81,3 +81,8 @@ div.loading > p {
 div.loading > span {
   margin: 0 auto;
 }
+
+.paper-option-panel {
+  padding: 5px 20px 20px 20px;
+  margin-top: 10px;
+}

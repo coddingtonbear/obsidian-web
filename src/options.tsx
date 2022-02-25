@@ -15,6 +15,11 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 
 import SecureConnection from "@mui/icons-material/GppGood";
 import InsecureConnection from "@mui/icons-material/GppMaybe";
@@ -58,6 +63,12 @@ const Options = () => {
   const [apiKey, setApiKey] = useState<string>("");
   const [apiKeyOk, setApiKeyOk] = useState<boolean>(false);
   const [apiKeyError, setApiKeyError] = useState<string>();
+
+  const [searchEnabled, setSearchEnabled] = useState<boolean>(false);
+  const [searchMatchMentionTemplate, setSearchMatchMentionTemplate] =
+    useState<string>("");
+  const [searchMatchDirectTemplate, setSearchMatchDirectTemplate] =
+    useState<string>("");
 
   const [presetName, setPresetName] = useState<string>("");
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
@@ -137,12 +148,20 @@ const Options = () => {
     async function handle() {
       await chrome.storage.sync.set({
         presets,
+        searchEnabled,
+        searchMatchDirectTemplate,
+        searchMatchMentionTemplate,
       } as ExtensionSyncSettings);
       showSaveNotice();
     }
 
     handle();
-  }, [presets]);
+  }, [
+    presets,
+    searchEnabled,
+    searchMatchDirectTemplate,
+    searchMatchMentionTemplate,
+  ]);
 
   useEffect(() => {
     // Restores select box and checkbox state using the preferences
@@ -153,6 +172,9 @@ const Options = () => {
 
       setApiKey(localSettings.apiKey);
       setPresets(syncSettings.presets);
+      setSearchEnabled(syncSettings.searchEnabled);
+      setSearchMatchDirectTemplate(syncSettings.searchMatchDirectTemplate);
+      setSearchMatchMentionTemplate(syncSettings.searchMatchMentionTemplate);
       setLoaded(true);
     }
 
@@ -332,6 +354,76 @@ const Options = () => {
                       {apiKeyError}
                     </MaterialAlert>
                   </div>
+                )}
+              </div>
+              <div className="option">
+                <h2>Page History</h2>
+                <Typography paragraph={true}>
+                  Have you been to this page before? Maybe you already have
+                  notes about it. If you turn this feature on, Obsidian can
+                  search your notes to see if it can find any mentions of the
+                  URL you are visiting in your notes.
+                </Typography>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(evt) => setSearchEnabled(evt.target.checked)}
+                        checked={searchEnabled}
+                      />
+                    }
+                    label="Search for previous notes about this page?"
+                  />
+                </FormGroup>
+                {searchEnabled && (
+                  <Paper className="paper-option-panel">
+                    <h3>URL Frontmatter</h3>
+                    <Typography paragraph={true}>
+                      When the URL of the page you are visiting has been found
+                      in the <code>url</code> field in the frontmatter of of a
+                      page in your vault, suggest this template:
+                    </Typography>
+                    <Select
+                      label="When in frontmatter"
+                      value={searchMatchDirectTemplate}
+                      fullWidth={true}
+                      onChange={(event) =>
+                        setSearchMatchDirectTemplate(event.target.value)
+                      }
+                    >
+                      <MenuItem value="">
+                        None (Do not suggested template)
+                      </MenuItem>
+                      {presets.map((preset) => (
+                        <MenuItem key={preset.name} value={preset.name}>
+                          {preset.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    <h3>URL Mentions</h3>
+                    <Typography paragraph={true}>
+                      When the URL of the page you are visiting has been found
+                      outside the frontmatter of a page in your vault, suggest
+                      this template:
+                    </Typography>
+                    <Select
+                      label="When mentioned"
+                      value={searchMatchMentionTemplate}
+                      fullWidth={true}
+                      onChange={(event) =>
+                        setSearchMatchMentionTemplate(event.target.value)
+                      }
+                    >
+                      <MenuItem value="">
+                        None (Do not suggested template)
+                      </MenuItem>
+                      {presets.map((preset) => (
+                        <MenuItem key={preset.name} value={preset.name}>
+                          {preset.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Paper>
                 )}
               </div>
               <div className="option">

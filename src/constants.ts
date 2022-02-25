@@ -40,6 +40,9 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
       method: DefaultMethod,
     },
   ],
+  searchEnabled: false,
+  searchMatchMentionTemplate: "",
+  searchMatchDirectTemplate: "",
 };
 
 export const TurndownConfiguration: TurndownService.Options = {
