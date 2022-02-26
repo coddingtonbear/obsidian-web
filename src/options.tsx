@@ -454,8 +454,8 @@ const Options = () => {
                     }
                     label={
                       <>
-                        Search for previous notes about this page when you
-                        activate the plugin?
+                        Search for previous notes about this page when you open
+                        the extension menu?
                       </>
                     }
                   />
