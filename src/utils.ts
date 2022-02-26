@@ -1,3 +1,5 @@
+import escapeStringRegexp from "escape-string-regexp";
+
 import {
   ExtensionSyncSettings,
   ExtensionLocalSettings,
@@ -45,7 +47,7 @@ export async function getUrlMentions(
 }> {
   async function handleMentions() {
     return await obsidianSearchRequest(apiKey, insecureMode, {
-      in: [url, { var: "content" }],
+      regexp: [`${escapeStringRegexp(url)}(?=\\s|\\)|$)`, { var: "content" }],
     });
   }
 
