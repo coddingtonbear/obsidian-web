@@ -495,12 +495,13 @@ const Options = () => {
                       label="When in frontmatter"
                       value={searchMatchDirectTemplate}
                       fullWidth={true}
+                      displayEmpty={true}
                       onChange={(event) =>
                         setSearchMatchDirectTemplate(event.target.value)
                       }
                     >
                       <MenuItem value="">
-                        None (Do not suggested template)
+                        None (Do not suggest updating the existing note)
                       </MenuItem>
                       {presets.map((preset) => (
                         <MenuItem key={preset.name} value={preset.name}>
@@ -518,12 +519,13 @@ const Options = () => {
                       label="When mentioned"
                       value={searchMatchMentionTemplate}
                       fullWidth={true}
+                      displayEmpty={true}
                       onChange={(event) =>
                         setSearchMatchMentionTemplate(event.target.value)
                       }
                     >
                       <MenuItem value="">
-                        None (Do not suggested template)
+                        None (Do not suggest updating the existing note)
                       </MenuItem>
                       {presets.map((preset) => (
                         <MenuItem key={preset.name} value={preset.name}>
