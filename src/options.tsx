@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
+import compareVersions from "compare-versions";
+
 import ThemeProvider from "@mui/system/ThemeProvider";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -38,12 +40,14 @@ import {
   DefaultMethod,
   DefaultSyncSettings,
   DefaultUrlTemplate,
+  MinVersion,
 } from "./constants";
 import {
   ExtensionSyncSettings,
   OutputPreset,
   AlertStatus,
   ExtensionLocalSettings,
+  StatusResponse,
 } from "./types";
 import {
   getLocalSettings,
@@ -56,8 +60,11 @@ import RequestParameters from "./components/RequestParameters";
 import { PurpleTheme } from "./theme";
 
 const Options = () => {
+  const minVersion = MinVersion;
+
   const [loaded, setLoaded] = useState<boolean>(false);
   const [status, setStatus] = useState<AlertStatus>();
+  const [pluginVersion, setPluginVersion] = useState<string>();
   const [modalStatus, setModalStatus] = useState<AlertStatus>();
 
   const [apiKey, setApiKey] = useState<string>("");
@@ -108,16 +115,19 @@ const Options = () => {
         }
       }
 
-      const body = await result.text();
+      const body: StatusResponse = await result.json();
       if (result.status !== 200) {
         setApiKeyError(
-          `Unable to connect to Obsidian: (Status Code ${result.status}) ${body}.`
+          `Unable to connect to Obsidian: (Status Code ${
+            result.status
+          }) ${JSON.stringify(body)}.`
         );
         return;
       }
 
-      const jsonBody = JSON.parse(body);
-      if (!jsonBody.authenticated) {
+      setPluginVersion(body.versions.self);
+
+      if (!body.authenticated) {
         setApiKeyError(`Your API key was not accepted.`);
         return;
       }
@@ -355,6 +365,23 @@ const Options = () => {
                     </MaterialAlert>
                   </div>
                 )}
+                {pluginVersion &&
+                  compareVersions(pluginVersion, minVersion) < 0 && (
+                    <>
+                      <div className="option-value">
+                        <MaterialAlert severity="warning">
+                          <strong>
+                            Your install of Obsidian Local REST API is
+                            out-of-date and missing some important capabilities.
+                          </strong>{" "}
+                          Some features may not work correctly as a result.
+                          Please go to the "Community Plugins" section of your
+                          settings in Obsidian to update the "Obsidian Local
+                          REST API" plugin to the latest version.
+                        </MaterialAlert>
+                      </div>
+                    </>
+                  )}
               </div>
               <div className="option">
                 <h2>Page History</h2>

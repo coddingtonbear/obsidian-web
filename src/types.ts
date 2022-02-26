@@ -61,3 +61,13 @@ export interface SearchJsonResponseItem {
   filename: string;
   result: unknown;
 }
+
+export interface StatusResponse {
+  status: string;
+  versions: {
+    obsidian: string;
+    self: string;
+  };
+  service: string;
+  authenticated: boolean;
+}
