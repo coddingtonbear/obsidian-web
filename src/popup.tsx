@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
+
 import ReactDOM from "react-dom";
 import Turndown from "turndown";
+import { Readability } from "@mozilla/readability";
+
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
@@ -28,7 +31,6 @@ import {
   getSyncSettings,
   obsidianRequest,
   compileTemplate,
-  obsidianSearchRequest,
   getUrlMentions,
 } from "./utils";
 import RequestParameters from "./components/RequestParameters";
@@ -72,6 +74,16 @@ const Popup = () => {
   const [selectedPreset, setSelectedPreset] = useState<number>(0);
 
   const turndown = new Turndown(TurndownConfiguration);
+
+  window.addEventListener(
+    "message",
+    () => {
+      setSandboxReady(true);
+    },
+    {
+      once: true,
+    }
+  );
 
   useEffect(() => {
     if (!apiKey) {
@@ -171,15 +183,21 @@ const Popup = () => {
         selectedText = "";
       }
 
-      let pageContent: string;
+      let pageContent: string = "";
       try {
         const pageContentInjected = await chrome.scripting.executeScript({
           target: { tabId: tab.id },
           func: () => window.document.body.innerHTML,
         });
-        pageContent = turndown.turndown(pageContentInjected[0].result);
+        const tempDoc = document.implementation.createHTMLDocument();
+        tempDoc.body.innerHTML = pageContentInjected[0].result;
+        const reader = new Readability(tempDoc);
+        const parsed = reader.parse();
+        if (parsed) {
+          pageContent = turndown.turndown(parsed.content);
+        }
       } catch (e) {
-        pageContent = "";
+        // Nothing -- we'll just have no pageContent
       }
 
       setUrl(tab.url ?? "");
@@ -250,10 +268,6 @@ const Popup = () => {
     selection,
     pageContent,
   ]);
-
-  window.addEventListener("message", () => setSandboxReady(true), {
-    once: true,
-  });
 
   const sendToObsidian = async () => {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
