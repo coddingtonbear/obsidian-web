@@ -9,6 +9,8 @@
     "build-icons-dev": "./scripts/build_icons.dev.sh",
     "build-icons": "./scripts/build_icons.sh",
     "dist-chrome": "./scripts/build_package.sh",
+    "dist-firefox": "./scripts/build_firefox.sh",
+    "web-ext": "./node_modules/web-ext/bin/web-ext",
     "clean": "rimraf dist",
     "test": "npx jest",
     "style": "prettier --write \"src/**/*.{ts,tsx}\""
@@ -46,6 +48,7 @@
     "ts-jest": "^27.0.5",
     "ts-loader": "^8.0.0",
     "typescript": "^4.4.3 ",
+    "web-ext": "^6.7.0",
     "webpack": "^5.0.0",
     "webpack-cli": "^4.0.0",
     "webpack-merge": "^5.0.0"
