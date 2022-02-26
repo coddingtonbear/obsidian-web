@@ -93,48 +93,52 @@ const Options = () => {
       setApiKeyOk(false);
       if (apiKey === "") {
         setApiKeyError(undefined);
-        return;
-      }
-
-      let usedInsecureMode = false;
-      let result: Response;
-      try {
-        result = await obsidianRequest(apiKey, "/", { method: "get" }, false);
-        result.type;
-      } catch (e) {
+      } else {
+        let usedInsecureMode = false;
+        let result: Response;
         try {
-          result = await obsidianRequest(apiKey, "/", { method: "get" }, true);
-          usedInsecureMode = true;
+          result = await obsidianRequest(apiKey, "/", { method: "get" }, false);
+          result.type;
         } catch (e) {
+          try {
+            result = await obsidianRequest(
+              apiKey,
+              "/",
+              { method: "get" },
+              true
+            );
+            usedInsecureMode = true;
+          } catch (e) {
+            setApiKeyError(
+              `Unable to connect to Obsidian: ${
+                (e as Error).message
+              }. Obsidian Local REST API is probably running in secure-only mode, and your browser probably does not trust its certificate.  Either enable insecure mode from Obsidian Local REST API's settings panel, or see the settings panel for instructions regarding where to acquire the certificate you need to configure your browser to trust.`
+            );
+            return;
+          }
+        }
+
+        const body: StatusResponse = await result.json();
+        if (result.status !== 200) {
           setApiKeyError(
-            `Unable to connect to Obsidian: ${
-              (e as Error).message
-            }. Obsidian Local REST API is probably running in secure-only mode, and your browser probably does not trust its certificate.  Either enable insecure mode from Obsidian Local REST API's settings panel, or see the settings panel for instructions regarding where to acquire the certificate you need to configure your browser to trust.`
+            `Unable to connect to Obsidian: (Status Code ${
+              result.status
+            }) ${JSON.stringify(body)}.`
           );
           return;
         }
+
+        setPluginVersion(body.versions.self);
+
+        if (!body.authenticated) {
+          setApiKeyError(`Your API key was not accepted.`);
+          return;
+        }
+
+        setInsecureMode(usedInsecureMode);
+        setApiKeyError(undefined);
+        setApiKeyOk(true);
       }
-
-      const body: StatusResponse = await result.json();
-      if (result.status !== 200) {
-        setApiKeyError(
-          `Unable to connect to Obsidian: (Status Code ${
-            result.status
-          }) ${JSON.stringify(body)}.`
-        );
-        return;
-      }
-
-      setPluginVersion(body.versions.self);
-
-      if (!body.authenticated) {
-        setApiKeyError(`Your API key was not accepted.`);
-        return;
-      }
-
-      setInsecureMode(usedInsecureMode);
-      setApiKeyError(undefined);
-      setApiKeyOk(true);
 
       if (loaded) {
         // If we are *not* loaded, it means we're just in the process

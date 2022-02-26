@@ -11,8 +11,8 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import MaterialAlert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import MaterialAlert from "@mui/material/Alert";
 
 import Alert from "./components/Alert";
 import {
@@ -21,6 +21,7 @@ import {
   ExtensionSyncSettings,
   OutputPreset,
   SearchJsonResponseItem,
+  StatusResponse,
 } from "./types";
 import {
   getLocalSettings,
@@ -37,6 +38,8 @@ const Popup = () => {
   const [status, setStatus] = useState<AlertStatus>();
 
   const [sandboxReady, setSandboxReady] = useState<boolean>(false);
+  const [obsidianUnavailable, setObsidianUnavailable] =
+    useState<boolean>(false);
   const [ready, setReady] = useState<boolean>(false);
   const [apiKey, setApiKey] = useState<string>("");
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
@@ -68,6 +71,35 @@ const Popup = () => {
   const [selectedPreset, setSelectedPreset] = useState<number>(0);
 
   const turndown = new Turndown(TurndownConfiguration);
+
+  useEffect(() => {
+    if (!apiKey) {
+      return;
+    }
+
+    async function handle() {
+      try {
+        const request = await obsidianRequest(
+          apiKey,
+          "/",
+          { method: "get" },
+          insecureMode
+        );
+        const result: StatusResponse = await request.json();
+        if (
+          result.status === "OK" &&
+          result.service.includes("Obsidian Local REST API")
+        ) {
+          setObsidianUnavailable(false);
+        } else {
+          setObsidianUnavailable(true);
+        }
+      } catch (e) {
+        setObsidianUnavailable(true);
+      }
+    }
+    handle();
+  }, []);
 
   useEffect(() => {
     async function handle() {
@@ -296,19 +328,18 @@ const Popup = () => {
 
   return (
     <ThemeProvider theme={PurpleTheme}>
-      {ready && (
+      {ready && !obsidianUnavailable && (
         <>
           {apiKey.length === 0 && (
             <>
-              <MaterialAlert severity="error">
-                No API Key is set in your settings.
+              <MaterialAlert severity="success">
+                Thanks for installing Obsidian Web! Obsidian Web needs some
+                information from you before it can connect to your Obsidian
+                instance.
+                <Button onClick={() => chrome.runtime.openOptionsPage()}>
+                  Go to settings
+                </Button>
               </MaterialAlert>
-              <Button
-                variant="contained"
-                onClick={() => chrome.runtime.openOptionsPage()}
-              >
-                Go to settings
-              </Button>
             </>
           )}
           {apiKey && (
@@ -402,7 +433,15 @@ const Popup = () => {
           )}
         </>
       )}
-      {!ready && (
+      {obsidianUnavailable && (
+        <>
+          <MaterialAlert severity="error">
+            Could not connect to Obsidian! Make sure Obsidian is running and
+            that the Obsidian Local REST API plugin is enabled.
+          </MaterialAlert>
+        </>
+      )}
+      {!ready && !obsidianUnavailable && (
         <div className="loading">
           {" "}
           <Typography paragraph={true}>
