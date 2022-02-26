@@ -1,13 +1,10 @@
 import { getUrlMentions, getLocalSettings } from "./utils";
 import { ExtensionLocalSettings } from "./types";
 
-let localSettings: ExtensionLocalSettings;
-
-getLocalSettings(chrome.storage.local).then((settings) => {
-  localSettings = settings;
-});
-
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  const localSettings: ExtensionLocalSettings = await getLocalSettings(
+    chrome.storage.local
+  );
   const url = tab.url;
 
   if (

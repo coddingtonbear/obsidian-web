@@ -436,9 +436,11 @@ const Options = () => {
                 <h2>Page History</h2>
                 <Typography paragraph={true}>
                   Have you been to this page before -- maybe you already have
-                  notes about it? If you turn this feature on, Obsidian will
-                  search your notes to see if it can find any mentions of the
-                  URL you are visiting on an existing one.
+                  notes about it? Enabling this feature will let us search your
+                  notes when you click on the extension icon and, if you enable
+                  background searches, show a badge on the extension icon while
+                  you are browsing the web to let you know that you have notes
+                  about the page you are currently visiting.
                 </Typography>
                 <FormGroup>
                   <FormControlLabel
@@ -470,10 +472,8 @@ const Options = () => {
                     label={
                       <>
                         Search for previous notes about this page in the
-                        background? If enabled, this will show a badge on the
-                        extension's icon in your browser toolbar to let you know
-                        that matches for your current page were found.
-                        <em>Requires extra permissions.</em>
+                        background?&nbsp;&nbsp;
+                        <strong>Requires extra permissions.</strong>
                       </>
                     }
                   />
