@@ -22,6 +22,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
+import Chip from "@mui/material/Chip";
 
 import SecureConnection from "@mui/icons-material/GppGood";
 import InsecureConnection from "@mui/icons-material/GppMaybe";
@@ -433,14 +434,14 @@ const Options = () => {
                   )}
               </div>
               <div className="option">
-                <h2>Page History</h2>
+                <h2>Note Recall</h2>
                 <Typography paragraph={true}>
                   Have you been to this page before -- maybe you already have
-                  notes about it? Enabling this feature will let us search your
-                  notes when you click on the extension icon and, if you enable
-                  background searches, show a badge on the extension icon while
-                  you are browsing the web to let you know that you have notes
-                  about the page you are currently visiting.
+                  notes about it? Enabling this feature will let this extension
+                  search your notes when you click on the extension icon and, if
+                  you enable background searches, show a badge on the extension
+                  icon while you are browsing the web to let you know that you
+                  have notes about the page you are currently visiting.
                 </Typography>
                 <FormGroup>
                   <FormControlLabel
@@ -473,7 +474,7 @@ const Options = () => {
                       <>
                         Search for previous notes about this page in the
                         background?&nbsp;&nbsp;
-                        <strong>Requires extra permissions.</strong>
+                        <Chip size="small" label="Requires extra permissions" />
                       </>
                     }
                   />
