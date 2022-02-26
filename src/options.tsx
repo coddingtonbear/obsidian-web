@@ -360,9 +360,9 @@ const Options = () => {
                 <h2>Page History</h2>
                 <Typography paragraph={true}>
                   Have you been to this page before? Maybe you already have
-                  notes about it. If you turn this feature on, Obsidian can
+                  notes about it. If you turn this feature on, Obsidian will
                   search your notes to see if it can find any mentions of the
-                  URL you are visiting in your notes.
+                  URL you are visiting on an existing note.
                 </Typography>
                 <FormGroup>
                   <FormControlLabel
@@ -380,8 +380,11 @@ const Options = () => {
                     <h3>URL Frontmatter</h3>
                     <Typography paragraph={true}>
                       When the URL of the page you are visiting has been found
-                      in the <code>url</code> field in the frontmatter of of a
-                      page in your vault, suggest this template:
+                      to match the <code>url</code> field in the frontmatter of
+                      an existing note in your vault, or if a note in your vault
+                      has a frontmatter field <code>url-glob</code> holding a
+                      glob (a.k.a wildcard) string that matches your URL,
+                      suggest this template for updating the existing note:
                     </Typography>
                     <Select
                       label="When in frontmatter"
@@ -404,7 +407,7 @@ const Options = () => {
                     <Typography paragraph={true}>
                       When the URL of the page you are visiting has been found
                       outside the frontmatter of a page in your vault, suggest
-                      this template:
+                      this template for updating the existing note:
                     </Typography>
                     <Select
                       label="When mentioned"
