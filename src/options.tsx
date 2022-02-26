@@ -436,12 +436,13 @@ const Options = () => {
               <div className="option">
                 <h2>Note Recall</h2>
                 <Typography paragraph={true}>
-                  Have you been to this page before -- maybe you already have
-                  notes about it? Enabling this feature will let this extension
-                  search your notes when you click on the extension icon and, if
-                  you enable background searches, show a badge on the extension
-                  icon while you are browsing the web to let you know that you
-                  have notes about the page you are currently visiting.
+                  Have you been to this page before &mdash; maybe you already
+                  have notes about it? Enabling this feature will let this
+                  extension search your notes when you click on the extension
+                  icon and, if you enable background searches, show a badge on
+                  the extension icon while you are browsing the web to let you
+                  know that you have notes about the page you are currently
+                  visiting.
                 </Typography>
                 <FormGroup>
                   <FormControlLabel
@@ -481,7 +482,7 @@ const Options = () => {
                 </FormGroup>
                 {searchEnabled && (
                   <Paper className="paper-option-panel">
-                    <h3>URL Frontmatter</h3>
+                    <h3>Page Notes</h3>
                     <Typography paragraph={true}>
                       When the URL of the page you are visiting has been found
                       to match the <code>url</code> field in the frontmatter of
@@ -507,7 +508,7 @@ const Options = () => {
                         </MenuItem>
                       ))}
                     </Select>
-                    <h3>URL Mentions</h3>
+                    <h3>Mentions</h3>
                     <Typography paragraph={true}>
                       When the URL of the page you are visiting has been found
                       outside the frontmatter of a page in your vault, suggest
