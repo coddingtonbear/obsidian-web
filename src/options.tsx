@@ -359,10 +359,10 @@ const Options = () => {
               <div className="option">
                 <h2>Page History</h2>
                 <Typography paragraph={true}>
-                  Have you been to this page before? Maybe you already have
-                  notes about it. If you turn this feature on, Obsidian will
+                  Have you been to this page before -- maybe you already have
+                  notes about it? If you turn this feature on, Obsidian will
                   search your notes to see if it can find any mentions of the
-                  URL you are visiting on an existing note.
+                  URL you are visiting on an existing one.
                 </Typography>
                 <FormGroup>
                   <FormControlLabel
