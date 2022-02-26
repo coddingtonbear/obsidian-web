@@ -511,8 +511,8 @@ const Options = () => {
                     <h3>Mentions</h3>
                     <Typography paragraph={true}>
                       When the URL of the page you are visiting has been found
-                      outside the frontmatter of a page in your vault, suggest
-                      this template for updating the existing note:
+                      in the content of a note in your vault, suggest this
+                      template for updating the existing note:
                     </Typography>
                     <Select
                       label="When mentioned"
