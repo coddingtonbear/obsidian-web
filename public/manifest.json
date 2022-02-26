@@ -7,6 +7,10 @@
 
   "options_page": "options.html",
 
+  "background": {
+    "service_worker": "js/background.js"
+  },
+
   "sandbox": {
     "pages": ["handlebars.html"]
   },
@@ -28,6 +32,7 @@
     "default_popup": "popup.html"
   },
 
+  "optional_permissions": ["tabs"],
   "permissions": ["storage", "activeTab", "scripting"],
 
   "host_permissions": ["https://127.0.0.1:27124/*", "http://127.0.0.1:27123/*"]

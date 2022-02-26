@@ -51,6 +51,7 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
     },
   ],
   searchEnabled: false,
+  searchBackgroundEnabled: false,
   searchMatchMentionTemplate: "",
   searchMatchDirectTemplate: "Append to existing note",
 };

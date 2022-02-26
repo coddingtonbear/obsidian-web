@@ -35,6 +35,37 @@ export async function openFileInObsidian(
   );
 }
 
+export async function getUrlMentions(
+  apiKey: string,
+  insecureMode: boolean,
+  url: string
+): Promise<{
+  mentions: SearchJsonResponseItem[];
+  direct: SearchJsonResponseItem[];
+}> {
+  async function handleMentions() {
+    return await obsidianSearchRequest(apiKey, insecureMode, {
+      in: [url, { var: "content" }],
+    });
+  }
+
+  async function handleDirect() {
+    return await obsidianSearchRequest(apiKey, insecureMode, {
+      or: [
+        { "==": [{ var: "frontmatter.url" }, url] },
+        {
+          glob: [{ var: "frontmatter.url-glob" }, url],
+        },
+      ],
+    });
+  }
+
+  return {
+    mentions: await handleMentions(),
+    direct: await handleDirect(),
+  };
+}
+
 export async function obsidianSearchRequest(
   apiKey: string,
   insecureMode: boolean,

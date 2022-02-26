@@ -72,6 +72,8 @@ const Options = () => {
   const [apiKeyError, setApiKeyError] = useState<string>();
 
   const [searchEnabled, setSearchEnabled] = useState<boolean>(false);
+  const [searchBackgroundEnabled, setSearchBackgroundEnabled] =
+    useState<boolean>(false);
   const [searchMatchMentionTemplate, setSearchMatchMentionTemplate] =
     useState<string>("");
   const [searchMatchDirectTemplate, setSearchMatchDirectTemplate] =
@@ -163,6 +165,7 @@ const Options = () => {
       await chrome.storage.sync.set({
         presets,
         searchEnabled,
+        searchBackgroundEnabled,
         searchMatchDirectTemplate,
         searchMatchMentionTemplate,
       } as ExtensionSyncSettings);
@@ -173,6 +176,7 @@ const Options = () => {
   }, [
     presets,
     searchEnabled,
+    searchBackgroundEnabled,
     searchMatchDirectTemplate,
     searchMatchMentionTemplate,
   ]);
@@ -187,9 +191,24 @@ const Options = () => {
       setApiKey(localSettings.apiKey);
       setPresets(syncSettings.presets);
       setSearchEnabled(syncSettings.searchEnabled);
+      setSearchBackgroundEnabled(syncSettings.searchBackgroundEnabled);
       setSearchMatchDirectTemplate(syncSettings.searchMatchDirectTemplate);
       setSearchMatchMentionTemplate(syncSettings.searchMatchMentionTemplate);
       setLoaded(true);
+
+      // If we do not have "tabs" permission; we can't really use
+      // background search; so let's un-toggle that so they can re-toggle
+      // it to re-probe for permissions
+      chrome.permissions.contains(
+        {
+          permissions: ["tabs"],
+        },
+        (result) => {
+          if (!result) {
+            setSearchBackgroundEnabled(false);
+          }
+        }
+      );
     }
 
     handle();
@@ -289,6 +308,32 @@ const Options = () => {
         setPresets(newPresets);
       }
       closeEditingModal();
+    }
+  };
+
+  const onToggleBackgroundSearch = (targetStateEnabled: boolean) => {
+    if (targetStateEnabled) {
+      chrome.permissions.request(
+        {
+          permissions: ["tabs"],
+        },
+        (granted) => {
+          if (granted) {
+            setSearchBackgroundEnabled(targetStateEnabled);
+          }
+        }
+      );
+    } else {
+      chrome.permissions.remove(
+        {
+          permissions: ["tabs"],
+        },
+        (removed) => {
+          if (removed) {
+            setSearchBackgroundEnabled(targetStateEnabled);
+          }
+        }
+      );
     }
   };
 
@@ -403,7 +448,34 @@ const Options = () => {
                         checked={searchEnabled}
                       />
                     }
-                    label="Search for previous notes about this page?"
+                    label={
+                      <>
+                        Search for previous notes about this page when you
+                        activate the plugin?
+                      </>
+                    }
+                  />
+                </FormGroup>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(evt) =>
+                          onToggleBackgroundSearch(evt.target.checked)
+                        }
+                        disabled={!searchEnabled}
+                        checked={searchEnabled && searchBackgroundEnabled}
+                      />
+                    }
+                    label={
+                      <>
+                        Search for previous notes about this page in the
+                        background? If enabled, this will show a badge on the
+                        extension's icon in your browser toolbar to let you know
+                        that matches for your current page were found.
+                        <em>Requires extra permissions.</em>
+                      </>
+                    }
                   />
                 </FormGroup>
                 {searchEnabled && (

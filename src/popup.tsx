@@ -29,6 +29,7 @@ import {
   obsidianRequest,
   compileTemplate,
   obsidianSearchRequest,
+  getUrlMentions,
 } from "./utils";
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
@@ -194,27 +195,14 @@ const Popup = () => {
       return;
     }
 
-    async function handleMentions() {
-      const mentions = await obsidianSearchRequest(apiKey, insecureMode, {
-        in: [url, { var: "content" }],
-      });
-      setMentions(mentions);
+    async function handle() {
+      const allMentions = await getUrlMentions(apiKey, insecureMode, url);
+
+      setMentions(allMentions.mentions);
+      setDirectReferences(allMentions.direct);
     }
 
-    async function handleDirect() {
-      const direct = await obsidianSearchRequest(apiKey, insecureMode, {
-        or: [
-          { "==": [{ var: "frontmatter.url" }, url] },
-          {
-            glob: [{ var: "frontmatter.url-glob" }, url],
-          },
-        ],
-      });
-      setDirectReferences(direct);
-    }
-
-    handleMentions();
-    handleDirect();
+    handle();
   }, [url]);
 
   useEffect(() => {

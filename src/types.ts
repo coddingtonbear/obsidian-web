@@ -18,6 +18,7 @@ export interface ExtensionSyncSettings {
   version: string;
   presets: OutputPreset[];
   searchEnabled: boolean;
+  searchBackgroundEnabled: boolean;
   searchMatchMentionTemplate: string;
   searchMatchDirectTemplate: string;
 }
