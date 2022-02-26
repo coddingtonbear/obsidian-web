@@ -56,3 +56,8 @@ export interface SandboxRenderResponse extends SandboxSuccessResponse {
 }
 
 export type SandboxResponse = SandboxRenderResponse | SandboxExceptionResponse;
+
+export interface SearchJsonResponseItem {
+  filename: string;
+  result: unknown;
+}

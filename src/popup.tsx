@@ -20,15 +20,18 @@ import {
   ExtensionLocalSettings,
   ExtensionSyncSettings,
   OutputPreset,
+  SearchJsonResponseItem,
 } from "./types";
 import {
   getLocalSettings,
   getSyncSettings,
   obsidianRequest,
   compileTemplate,
+  obsidianSearchRequest,
 } from "./utils";
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
+import MentionNotice from "./components/MentionNotice";
 
 const Popup = () => {
   const [status, setStatus] = useState<AlertStatus>();
@@ -37,7 +40,26 @@ const Popup = () => {
   const [ready, setReady] = useState<boolean>(false);
   const [apiKey, setApiKey] = useState<string>("");
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
+
+  const [url, setUrl] = useState<string>("");
+  const [title, setTitle] = useState<string>("");
+  const [selection, setSelection] = useState<string>("");
+  const [pageContent, setPageContent] = useState<string>("");
+
+  const [suggestionAccepted, setSuggestionAccepted] = useState<boolean>(false);
+  const [mentions, setMentions] = useState<SearchJsonResponseItem[]>([]);
+  const [directReferences, setDirectReferences] = useState<
+    SearchJsonResponseItem[]
+  >([]);
+
+  const [searchEnabled, setSearchEnabled] = useState<boolean>(false);
+  const [searchMatchMentionTemplate, setSearchMatchMentionTemplate] =
+    useState<string>("");
+  const [searchMatchDirectTemplate, setSearchMatchDirectTemplate] =
+    useState<string>("");
+
   const [method, setMethod] = useState<OutputPreset["method"]>("post");
+  const [overrideUrl, setOverrideUrl] = useState<string>();
   const [compiledUrl, setCompiledUrl] = useState<string>("");
   const [headers, setHeaders] = useState<Record<string, string>>({});
   const [compiledContent, setCompiledContent] = useState<string>("");
@@ -48,30 +70,7 @@ const Popup = () => {
   const turndown = new Turndown(TurndownConfiguration);
 
   useEffect(() => {
-    if (!sandboxReady) {
-      return;
-    }
-
     async function handle() {
-      let tab: chrome.tabs.Tab;
-      try {
-        const tabs = await chrome.tabs.query({
-          active: true,
-          currentWindow: true,
-        });
-        tab = tabs[0];
-      } catch (e) {
-        setStatus({
-          severity: "error",
-          title: "Error",
-          message: "Could not get current tab!",
-        });
-        return;
-      }
-
-      if (!tab.id) {
-        return;
-      }
       let syncSettings: ExtensionSyncSettings;
       let localSettings: ExtensionLocalSettings;
 
@@ -98,6 +97,36 @@ const Popup = () => {
         return;
       }
 
+      setApiKey(localSettings.apiKey);
+      setSearchEnabled(syncSettings.searchEnabled);
+      setSearchMatchMentionTemplate(syncSettings.searchMatchMentionTemplate);
+      setSearchMatchDirectTemplate(syncSettings.searchMatchDirectTemplate);
+      setInsecureMode(localSettings.insecureMode ?? false);
+    }
+    handle();
+  }, []);
+
+  useEffect(() => {
+    async function handle() {
+      let tab: chrome.tabs.Tab;
+      try {
+        const tabs = await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+        tab = tabs[0];
+      } catch (e) {
+        setStatus({
+          severity: "error",
+          title: "Error",
+          message: "Could not get current tab!",
+        });
+        return;
+      }
+      if (!tab.id) {
+        return;
+      }
+
       let selectedText: string;
       try {
         const selectedTextInjected = await chrome.scripting.executeScript({
@@ -120,34 +149,87 @@ const Popup = () => {
         pageContent = "";
       }
 
-      const preset = syncSettings.presets[selectedPreset];
+      setUrl(tab.url ?? "");
+      setTitle(tab.title ?? "");
+      setSelection(selectedText);
+      setPageContent(pageContent);
+    }
+    handle();
+  }, []);
+
+  useEffect(() => {
+    if (!searchEnabled) {
+      return;
+    }
+
+    async function handleMentions() {
+      const mentions = await obsidianSearchRequest(apiKey, insecureMode, {
+        in: [url, { var: "content" }],
+      });
+      setMentions(mentions);
+    }
+
+    async function handleDirect() {
+      const direct = await obsidianSearchRequest(apiKey, insecureMode, {
+        or: [
+          { "==": [{ var: "frontmatter.url" }, url] },
+          {
+            glob: [{ var: "frontmatter.url-glob" }, url],
+          },
+        ],
+      });
+      setDirectReferences(direct);
+    }
+
+    handleMentions();
+    handleDirect();
+  }, [url]);
+
+  useEffect(() => {
+    if (!sandboxReady) {
+      return;
+    }
+
+    async function handle() {
+      const preset = presets[selectedPreset];
 
       const context = {
         page: {
-          url: tab.url,
-          title: tab.title,
-          selectedText: selectedText,
+          url: url,
+          title: title,
+          selectedText: selection,
           content: pageContent,
         },
       };
 
-      const compiledUrl = await compileTemplate(preset.urlTemplate, context);
+      if (overrideUrl) {
+        setCompiledUrl(overrideUrl);
+        setOverrideUrl(undefined);
+      } else {
+        const compiledUrl = await compileTemplate(preset.urlTemplate, context);
+        setCompiledUrl(compiledUrl);
+      }
       const compiledContent = await compileTemplate(
         preset.contentTemplate,
         context
       );
 
-      setApiKey(localSettings.apiKey);
-      setInsecureMode(localSettings.insecureMode ?? false);
       setMethod(preset.method as OutputPreset["method"]);
-      setCompiledUrl(compiledUrl);
       setHeaders(preset.headers);
       setCompiledContent(compiledContent);
       setReady(true);
     }
 
     handle();
-  }, [sandboxReady, selectedPreset]);
+  }, [
+    sandboxReady,
+    selectedPreset,
+    presets,
+    url,
+    title,
+    selection,
+    pageContent,
+  ]);
 
   window.addEventListener("message", () => setSandboxReady(true), {
     once: true,
@@ -161,10 +243,14 @@ const Popup = () => {
       return;
     }
 
+    const requestHeaders = {
+      ...headers,
+      "Content-Type": "text/markdown",
+    };
     const request: RequestInit = {
       method: method,
       body: compiledContent,
-      headers,
+      headers: requestHeaders,
     };
     const result = await obsidianRequest(
       apiKey,
@@ -197,6 +283,15 @@ const Popup = () => {
         });
       }
     }
+  };
+
+  const acceptSuggestion = (filename: string, template: string) => {
+    const matchingPresetIdx = presets.findIndex(
+      (preset) => preset.name === template
+    );
+    setOverrideUrl(`/vault/${filename}`);
+    setSelectedPreset(matchingPresetIdx);
+    setSuggestionAccepted(true);
   };
 
   return (
@@ -238,7 +333,11 @@ const Popup = () => {
                       </MenuItem>
                     ))}
                   </Select>
-                  <Button variant="contained" onClick={sendToObsidian}>
+                  <Button
+                    variant="contained"
+                    disabled={!ready}
+                    onClick={sendToObsidian}
+                  >
                     Send to Obsidian
                   </Button>
                 </div>
@@ -260,6 +359,45 @@ const Popup = () => {
                   />
                 </AccordionDetails>
               </Accordion>
+              {!suggestionAccepted && (
+                <>
+                  {(mentions.length > 0 || directReferences.length > 0) && (
+                    <div className="mentions">
+                      {directReferences.map((ref) => (
+                        <MentionNotice
+                          key={ref.filename}
+                          type="direct"
+                          apiKey={apiKey}
+                          insecureMode={insecureMode}
+                          templateSuggestion={searchMatchDirectTemplate}
+                          mention={ref}
+                          presets={presets}
+                          acceptSuggestion={acceptSuggestion}
+                        />
+                      ))}
+                      {mentions
+                        .filter(
+                          (ref) =>
+                            !directReferences.find(
+                              (d) => d.filename === ref.filename
+                            )
+                        )
+                        .map((ref) => (
+                          <MentionNotice
+                            key={ref.filename}
+                            type="mention"
+                            apiKey={apiKey}
+                            insecureMode={insecureMode}
+                            templateSuggestion={searchMatchMentionTemplate}
+                            mention={ref}
+                            presets={presets}
+                            acceptSuggestion={acceptSuggestion}
+                          />
+                        ))}
+                    </div>
+                  )}
+                </>
+              )}
             </>
           )}
         </>

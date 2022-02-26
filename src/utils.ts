@@ -4,6 +4,7 @@ import {
   SandboxRenderRequest,
   SandboxRenderResponse,
   SandboxExceptionResponse,
+  SearchJsonResponseItem,
 } from "./types";
 import { DefaultSyncSettings, DefaultLocalSettings } from "./constants";
 
@@ -21,6 +22,40 @@ export async function getLocalSettings(
   return settings as ExtensionLocalSettings;
 }
 
+export async function openFileInObsidian(
+  apiKey: string,
+  insecureMode: boolean,
+  filename: string
+): ReturnType<typeof obsidianRequest> {
+  return obsidianRequest(
+    apiKey,
+    `/open/${filename}`,
+    { method: "post" },
+    insecureMode
+  );
+}
+
+export async function obsidianSearchRequest(
+  apiKey: string,
+  insecureMode: boolean,
+  query: Record<string, any>
+): Promise<SearchJsonResponseItem[]> {
+  const result = await obsidianRequest(
+    apiKey,
+    "/search/",
+    {
+      method: "post",
+      body: JSON.stringify(query),
+      headers: {
+        "Content-type": "application/vnd.olrapi.jsonlogic+json",
+      },
+    },
+    insecureMode
+  );
+
+  return await result.json();
+}
+
 export async function obsidianRequest(
   apiKey: string,
   path: string,
@@ -31,7 +66,6 @@ export async function obsidianRequest(
     ...options,
     headers: {
       ...options.headers,
-      "Content-Type": "text/markdown",
       Authorization: `Bearer ${apiKey}`,
     },
     method: options.method?.toUpperCase(),

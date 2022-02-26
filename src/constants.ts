@@ -39,10 +39,18 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
       headers: DefaultHeaders,
       method: DefaultMethod,
     },
+    {
+      name: "Append to existing note",
+      urlTemplate: "",
+      contentTemplate:
+        "## {{date}}\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}",
+      headers: {},
+      method: "post",
+    },
   ],
   searchEnabled: false,
   searchMatchMentionTemplate: "",
-  searchMatchDirectTemplate: "",
+  searchMatchDirectTemplate: "Append to existing note",
 };
 
 export const TurndownConfiguration: TurndownService.Options = {

@@ -86,3 +86,25 @@ div.loading > span {
   padding: 5px 20px 20px 20px;
   margin-top: 10px;
 }
+
+div.mentions {
+  display: flex;
+  flex-direction: column;
+}
+
+div.mentions div.mention-notice {
+  margin-top: 5px;
+}
+
+div.mentions div.mention-notice div.MuiAlert-message {
+  width: 100%;
+}
+
+div.mentions div.mention-notice a {
+  cursor: pointer;
+}
+
+.mention-cta {
+  padding: 0 !important;
+  float: right;
+}
