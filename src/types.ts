@@ -72,3 +72,10 @@ export interface StatusResponse {
   service: string;
   authenticated: boolean;
 }
+
+export interface FileMetadataObject {
+  tags: string[];
+  frontmatter: Record<string, unknown>;
+  path: string;
+  content: string;
+}

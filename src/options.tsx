@@ -509,6 +509,19 @@ const Options = () => {
                         </MenuItem>
                       ))}
                     </Select>
+                    <Paper className="protip">
+                      <Typography paragraph={true}>
+                        <strong>Protip:</strong> For page notes, try setting the
+                        frontmatter field
+                        <code>web-badge-color</code> to a hexadecimal color (be
+                        careful to wrap it in quotes -- a # symbol starts a
+                        comment in YAML) or <code>web-badge-message</code> to
+                        some short message (you have only a few characters of
+                        space). By default, the badge shows the count of matches
+                        in either gold or blue depending on whether the match
+                        was direct or just a mention.
+                      </Typography>
+                    </Paper>
                     <h3>Mentions</h3>
                     <Typography paragraph={true}>
                       When the URL of the page you are visiting has been found

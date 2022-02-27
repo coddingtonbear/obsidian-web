@@ -1,4 +1,4 @@
-import { getUrlMentions, getLocalSettings } from "./utils";
+import { getUrlMentions, getLocalSettings, obsidianRequest } from "./utils";
 import { ExtensionLocalSettings } from "./types";
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -46,6 +46,34 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         text: "",
         tabId,
       });
+    }
+
+    for (const mention of mentions.direct) {
+      const mentionData = await obsidianRequest(
+        localSettings.apiKey,
+        `/vault/${mention.filename}`,
+        {
+          method: "get",
+          headers: {
+            Accept: "application/vnd.olrapi.note+json",
+          },
+        },
+        localSettings.insecureMode || false
+      );
+      const result = await mentionData.json();
+
+      if (result.frontmatter["web-badge-color"]) {
+        chrome.action.setBadgeBackgroundColor({
+          color: result.frontmatter["web-badge-color"],
+          tabId,
+        });
+      }
+      if (result.frontmatter["web-badge-message"]) {
+        chrome.action.setBadgeText({
+          text: result.frontmatter["web-badge-message"],
+          tabId,
+        });
+      }
     }
   } catch (e) {
     chrome.action.setBadgeText({

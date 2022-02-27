@@ -108,3 +108,13 @@ div.mentions div.mention-notice a {
   padding: 0 !important;
   float: right;
 }
+
+div.protip {
+  margin-top: 10px;
+  padding: 20px;
+  background-color: #ede8ed;
+}
+
+div.protip p {
+  margin-bottom: 0px;
+}
