@@ -488,10 +488,8 @@ const Options = () => {
                     <Typography paragraph={true}>
                       When the URL of the page you are visiting has been found
                       to match the <code>url</code> field in the frontmatter of
-                      an existing note in your vault, or if a note in your vault
-                      has a frontmatter field <code>url-glob</code> holding a
-                      glob (a.k.a wildcard) string that matches your URL,
-                      suggest this template for updating the existing note:
+                      an existing note in your vault, suggest this template for
+                      updating the existing note:
                     </Typography>
                     <Select
                       label="When in frontmatter"
@@ -511,18 +509,6 @@ const Options = () => {
                         </MenuItem>
                       ))}
                     </Select>
-                    <Paper className="protip">
-                      <Typography paragraph={true}>
-                        <strong>Protip:</strong> By default, the badge shows the
-                        count of matches in either gold or blue depending on
-                        whether the match was direct or just a mention. For page
-                        notes, try setting the frontmatter field{" "}
-                        <code>web-badge-color</code> to a hexadecimal color (be
-                        careful to wrap it in quotes) or{" "}
-                        <code>web-badge-message</code> to some short message
-                        (you have only a few characters of space).
-                      </Typography>
-                    </Paper>
                     <h3>Mentions</h3>
                     <Typography paragraph={true}>
                       When the URL of the page you are visiting has been found

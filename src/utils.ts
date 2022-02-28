@@ -53,12 +53,7 @@ export async function getUrlMentions(
 
   async function handleDirect() {
     return await obsidianSearchRequest(apiKey, insecureMode, {
-      or: [
-        { "==": [{ var: "frontmatter.url" }, url] },
-        {
-          glob: [{ var: "frontmatter.url-glob" }, url],
-        },
-      ],
+      glob: [{ var: "frontmatter.url" }, url],
     });
   }
 
