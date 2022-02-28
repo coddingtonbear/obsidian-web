@@ -23,6 +23,7 @@ import FormGroup from "@mui/material/FormGroup";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
+import Snackbar from "@mui/material/Snackbar";
 
 import SecureConnection from "@mui/icons-material/GppGood";
 import InsecureConnection from "@mui/icons-material/GppMaybe";
@@ -344,7 +345,6 @@ const Options = () => {
       title: "Success",
       message: "Options saved",
     });
-    setTimeout(() => setStatus(undefined), 3000);
   };
 
   return (
@@ -366,7 +366,10 @@ const Options = () => {
               <Typography paragraph={true}>
                 Obsidian Web integrates with Obsidian via the interface provided
                 by the{" "}
-                <a href="https://github.com/coddingtonbear/obsidian-local-rest-api">
+                <a
+                  href="https://github.com/coddingtonbear/obsidian-local-rest-api"
+                  target="_blank"
+                >
                   Local REST API
                 </a>{" "}
                 plugin. Before beginning to use this, you will want to install
@@ -474,7 +477,7 @@ const Options = () => {
                     label={
                       <>
                         Search for previous notes about this page in the
-                        background?&nbsp;&nbsp;
+                        background?
                         <Chip size="small" label="Requires extra permissions" />
                       </>
                     }
@@ -640,7 +643,26 @@ const Options = () => {
                   </TableContainer>
                 </div>
               </div>
-              {status && <Alert value={status} />}
+              <Paper className="protip">
+                <Typography paragraph={true}>
+                  <strong>Protip:</strong> Looking for ideas about how you can
+                  use this plugin to improve your workflow; have a look at the{" "}
+                  <a
+                    href="https://github.com/coddingtonbear/obsidian-web/wiki"
+                    target="_blank"
+                  >
+                    Wiki
+                  </a>{" "}
+                  for tips.
+                </Typography>
+              </Paper>
+              <Snackbar
+                open={Boolean(status)}
+                autoHideDuration={5000}
+                onClose={() => setStatus(undefined)}
+              >
+                <div>{status && <Alert value={status} />}</div>
+              </Snackbar>
             </>
           )}
         </div>
@@ -758,7 +780,13 @@ const Options = () => {
               Save Changes
             </Button>
           </div>
-          {modalStatus && <Alert value={modalStatus} />}
+          <Snackbar
+            open={Boolean(modalStatus)}
+            autoHideDuration={5000}
+            onClose={() => setModalStatus(undefined)}
+          >
+            <div>{modalStatus && <Alert value={modalStatus} />}</div>
+          </Snackbar>
         </Paper>
       </Modal>
     </ThemeProvider>
