@@ -102,7 +102,6 @@ const Options = () => {
         let result: Response;
         try {
           result = await obsidianRequest(apiKey, "/", { method: "get" }, false);
-          result.type;
         } catch (e) {
           try {
             result = await obsidianRequest(
