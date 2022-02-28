@@ -439,13 +439,12 @@ const Options = () => {
               <div className="option">
                 <h2>Note Recall</h2>
                 <Typography paragraph={true}>
-                  Have you been to this page before &mdash; maybe you already
-                  have notes about it? Enabling this feature will let this
-                  extension search your notes when you click on the extension
-                  icon and, if you enable background searches, show a badge on
-                  the extension icon while you are browsing the web to let you
-                  know that you have notes about the page you are currently
-                  visiting.
+                  Have you been to this page before? Maybe you already have
+                  notes about it. Enabling this feature will let this extension
+                  search your notes when you click on the extension icon and, if
+                  you enable background searches, show a badge on the extension
+                  icon while you are browsing the web to let you know that you
+                  have notes about the page you are currently visiting.
                 </Typography>
                 <FormGroup>
                   <FormControlLabel
