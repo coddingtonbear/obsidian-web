@@ -5,7 +5,7 @@ import { ExtensionLocalSettings, ExtensionSyncSettings } from "./types";
 export const MinVersion = "1.3.1";
 
 export const DefaultContentTemplate =
-  '---\npage-title: {{json page.title}}\nurl: {{json page.url}}\ndate: "{{date}}"\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}';
+  '---\npage-title: {{json page.title}}\nurl: {{page.url}}\ndate: "{{date}}"\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}';
 export const DefaultUrlTemplate = "/vault/{{filename page.title}}.md";
 export const DefaultHeaders = {};
 export const DefaultMethod = "put";
@@ -37,7 +37,7 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
       name: "Capture page snapshot",
       urlTemplate: DefaultUrlTemplate,
       contentTemplate:
-        '---\npage-title: {{json page.title}}\nurl: {{json page.url}}\ndate: "{{date}}"\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n\n---\n\n{{/if}}{{page.content}}',
+        '---\npage-title: {{json page.title}}\nurl: {{page.url}}\ndate: "{{date}}"\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n\n---\n\n{{/if}}{{page.content}}',
       headers: DefaultHeaders,
       method: DefaultMethod,
     },
