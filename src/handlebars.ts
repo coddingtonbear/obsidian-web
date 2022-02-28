@@ -1,4 +1,5 @@
 import Handlebars from "handlebars";
+import { v4 as uuid } from "uuid";
 import { format as formatDate } from "date-fns";
 import {
   SandboxRequest,
@@ -38,6 +39,10 @@ Handlebars.registerHelper("json", (unsafe: string | undefined): string => {
     return JSON.stringify(unsafe);
   }
   return "";
+});
+
+Handlebars.registerHelper("uuid", (): string => {
+  return uuid();
 });
 
 const render = (request: SandboxRenderRequest): SandboxRenderResponse => {

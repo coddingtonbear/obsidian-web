@@ -31,7 +31,8 @@
     "handlebars": "^4.7.7",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "turndown": "^7.1.1"
+    "turndown": "^7.1.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/chrome": "0.0.158",
@@ -39,6 +40,7 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/turndown": "^5.0.1",
+    "@types/uuid": "^8.3.4",
     "copy-webpack-plugin": "^9.0.1",
     "glob": "^7.1.6",
     "jest": "^27.2.1",
