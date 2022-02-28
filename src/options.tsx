@@ -449,7 +449,13 @@ const Options = () => {
                   <FormControlLabel
                     control={
                       <Switch
-                        onChange={(evt) => setSearchEnabled(evt.target.checked)}
+                        onChange={(evt) => {
+                          // If background search is enabled; disable it first.
+                          if (searchBackgroundEnabled) {
+                            onToggleBackgroundSearch(false);
+                          }
+                          setSearchEnabled(evt.target.checked);
+                        }}
                         checked={searchEnabled}
                       />
                     }
@@ -469,7 +475,7 @@ const Options = () => {
                           onToggleBackgroundSearch(evt.target.checked)
                         }
                         disabled={!searchEnabled}
-                        checked={searchEnabled && searchBackgroundEnabled}
+                        checked={searchBackgroundEnabled}
                       />
                     }
                     label={
