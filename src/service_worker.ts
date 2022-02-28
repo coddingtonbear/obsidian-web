@@ -79,5 +79,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     chrome.action.setBadgeText({
       text: "ERR",
     });
+    console.error(e);
   }
 });

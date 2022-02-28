@@ -12,6 +12,7 @@ export const DefaultMethod = "put";
 
 export const DefaultLocalSettings: ExtensionLocalSettings = {
   version: "0.1",
+  insecureMode: false,
   apiKey: "",
 };
 
