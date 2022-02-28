@@ -35,7 +35,7 @@ const HeaderControl: React.FC<Props> = ({ headers, onChange }) => {
   return (
     <>
       <TextField
-        label="Headers"
+        label="HTTP Headers"
         multiline={true}
         fullWidth={true}
         value={headersAsText}

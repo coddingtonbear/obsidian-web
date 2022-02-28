@@ -118,3 +118,8 @@ div.protip {
 div.protip p {
   margin-bottom: 0px;
 }
+
+.send-to-obsidian {
+  width: 56px;
+  height: 56px;
+}
