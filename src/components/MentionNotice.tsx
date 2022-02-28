@@ -28,10 +28,7 @@ const MentionNotice: React.FC<Props> = ({
   mention,
   acceptSuggestion,
 }) => {
-  console.log(presets);
-  console.log(templateSuggestion);
   const preset = presets.find((val) => val.name === templateSuggestion);
-  console.log(preset);
 
   return (
     <MaterialAlert
