@@ -8,7 +8,7 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import ThemeProvider from "@mui/system/ThemeProvider";
-import { PurpleTheme } from "./theme";
+import IconButton from "@mui/material/IconButton";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -17,6 +17,9 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CircularProgress from "@mui/material/CircularProgress";
 import MaterialAlert from "@mui/material/Alert";
 
+import SendIcon from "@mui/icons-material/SaveAlt";
+
+import { PurpleTheme } from "./theme";
 import Alert from "./components/Alert";
 import {
   AlertStatus,
@@ -366,13 +369,16 @@ const Popup = () => {
                       </MenuItem>
                     ))}
                   </Select>
-                  <Button
-                    variant="contained"
+                  <IconButton
+                    className="send-to-obsidian"
+                    color="primary"
+                    size="large"
                     disabled={!ready}
                     onClick={sendToObsidian}
+                    title="Send to Obsidian"
                   >
-                    Send to Obsidian
-                  </Button>
+                    <SendIcon />
+                  </IconButton>
                 </div>
               </div>
               <Accordion>
