@@ -333,7 +333,7 @@ const Popup = () => {
 
   return (
     <ThemeProvider theme={PurpleTheme}>
-      {ready && !obsidianUnavailable && (
+      {ready && !status && !obsidianUnavailable && (
         <>
           {apiKey.length === 0 && (
             <>
