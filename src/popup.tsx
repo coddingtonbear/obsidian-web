@@ -124,7 +124,7 @@ const Popup = () => {
       }
     }
     handle();
-  }, []);
+  }, [apiKey]);
 
   useEffect(() => {
     async function handle() {
