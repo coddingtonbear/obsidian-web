@@ -14,6 +14,14 @@ export interface ExtensionLocalSettings {
   insecureMode?: boolean;
 }
 
+export interface ContentCache {
+  url?: string;
+  method?: "put" | "post" | "patch";
+  compiledUrl?: string;
+  headers?: Record<string, string>;
+  compiledContent?: string;
+}
+
 export interface ExtensionSyncSettings {
   version: string;
   presets: OutputPreset[];

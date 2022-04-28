@@ -23,6 +23,7 @@ import { PurpleTheme } from "./theme";
 import Alert from "./components/Alert";
 import {
   AlertStatus,
+  ContentCache,
   ExtensionLocalSettings,
   ExtensionSyncSettings,
   OutputPreset,
@@ -35,6 +36,9 @@ import {
   obsidianRequest,
   compileTemplate,
   getUrlMentions,
+  getContentCache,
+  setContentCache,
+  normalizeCacheUrl,
 } from "./utils";
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
@@ -47,6 +51,9 @@ const Popup = () => {
   const [obsidianUnavailable, setObsidianUnavailable] =
     useState<boolean>(false);
   const [ready, setReady] = useState<boolean>(false);
+  const [cacheData, setCacheData] = useState<ContentCache>({});
+  const [cacheAvailable, setCacheAvailable] = useState<boolean>(false);
+
   const [apiKey, setApiKey] = useState<string>("");
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
 
@@ -157,6 +164,33 @@ const Popup = () => {
   }, []);
 
   useEffect(() => {
+    if (!url) {
+      return;
+    }
+
+    async function handle() {
+      const cache = await getContentCache(chrome.storage.local);
+      if (cache) {
+        setCacheData(cache);
+        try {
+          if (
+            cache.url &&
+            normalizeCacheUrl(cache.url) === normalizeCacheUrl(url)
+          ) {
+            setCacheAvailable(true);
+            setSelectedPreset(-1);
+          }
+        } catch (e) {
+          setCacheData({});
+          setCacheAvailable(false);
+        }
+      }
+    }
+
+    handle();
+  }, [url]);
+
+  useEffect(() => {
     async function handle() {
       let tab: chrome.tabs.Tab;
       try {
@@ -263,7 +297,23 @@ const Popup = () => {
       setReady(true);
     }
 
-    handle();
+    if (selectedPreset === -1) {
+      if (cacheData.method) {
+        setMethod(cacheData.method);
+      }
+      if (cacheData.compiledUrl) {
+        setCompiledUrl(cacheData.compiledUrl);
+      }
+      if (cacheData.headers) {
+        setHeaders(cacheData.headers);
+      }
+      if (cacheData.compiledContent) {
+        setCompiledContent(cacheData.compiledContent);
+      }
+      setReady(true);
+    } else {
+      handle();
+    }
   }, [
     sandboxReady,
     selectedPreset,
@@ -273,6 +323,20 @@ const Popup = () => {
     selection,
     pageContent,
   ]);
+
+  useEffect(() => {
+    if (!url) {
+      return;
+    }
+
+    setContentCache(chrome.storage.local, {
+      url,
+      method,
+      compiledUrl,
+      headers,
+      compiledContent,
+    });
+  }, [url, method, compiledUrl, headers, compiledContent]);
 
   const sendToObsidian = async () => {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -365,6 +429,11 @@ const Popup = () => {
                       )
                     }
                   >
+                    {cacheAvailable && (
+                      <MenuItem key={"cached"} value={-1}>
+                        <i>Saved Draft</i>
+                      </MenuItem>
+                    )}
                     {presets.map((preset, idx) => (
                       <MenuItem key={preset.name} value={idx}>
                         {preset.name}

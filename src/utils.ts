@@ -2,6 +2,7 @@ import escapeStringRegexp from "escape-string-regexp";
 import { v4 as uuid } from "uuid";
 
 import {
+  ContentCache,
   ExtensionSyncSettings,
   ExtensionLocalSettings,
   SandboxRenderRequest,
@@ -33,6 +34,29 @@ export async function getLocalSettings(
 ): Promise<ExtensionLocalSettings> {
   const settings = await local.get(DefaultLocalSettings);
   return settings as ExtensionLocalSettings;
+}
+
+export async function setContentCache(
+  local: chrome.storage.LocalStorageArea,
+  content: ContentCache
+): Promise<void> {
+  await local.set({ contentCache: content });
+}
+
+export async function getContentCache(
+  local: chrome.storage.LocalStorageArea
+): Promise<ContentCache> {
+  const cache = await local.get({ contentCache: {} });
+  return cache.contentCache ?? {};
+}
+
+export function normalizeCacheUrl(urlString: string): string {
+  const url = new URL(urlString);
+  url.hash = "";
+  url.username = "";
+  url.password = "";
+
+  return url.toString();
 }
 
 export async function openFileInObsidian(
