@@ -76,8 +76,13 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       }
     }
   } catch (e) {
+    chrome.action.setBadgeBackgroundColor({
+      color: "#FF0000",
+      tabId,
+    });
     chrome.action.setBadgeText({
       text: "ERR",
+      tabId,
     });
     console.error(e);
   }
