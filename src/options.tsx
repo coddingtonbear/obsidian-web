@@ -422,20 +422,22 @@ const Options = () => {
           </div>
           <h1>Obsidian Web Settings</h1>
           <div className="right">
-            <IconButton
-              title="Import Settings as JSON"
-              aria-label="import settings as JSON"
-              onClick={onImportSettings}
-            >
-              <ImportSettings />
-            </IconButton>
-            <IconButton
-              title="Export Settings as JSON"
-              aria-label="export settings as JSON"
-              onClick={onExportSettings}
-            >
-              <ExportSettings />
-            </IconButton>
+            <div>
+              <IconButton
+                title="Import Settings as JSON"
+                aria-label="import settings as JSON"
+                onClick={onImportSettings}
+              >
+                <ImportSettings fontSize="small" />
+              </IconButton>
+              <IconButton
+                title="Export Settings as JSON"
+                aria-label="export settings as JSON"
+                onClick={onExportSettings}
+              >
+                <ExportSettings fontSize="small" />
+              </IconButton>
+            </div>
           </div>
         </div>
         <div className="option-panel">
