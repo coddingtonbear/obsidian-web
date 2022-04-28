@@ -8,6 +8,7 @@ import {
   SandboxRenderResponse,
   SandboxExceptionResponse,
   SearchJsonResponseItem,
+  SandboxLoadedResponse,
 } from "./types";
 import { DefaultSyncSettings, DefaultLocalSettings } from "./constants";
 
@@ -150,24 +151,32 @@ export function compileTemplate(
 }
 
 function compileTemplateCallback(
-  event: MessageEvent<SandboxRenderResponse | SandboxExceptionResponse>
+  event: MessageEvent<
+    SandboxRenderResponse | SandboxExceptionResponse | SandboxLoadedResponse
+  >
 ) {
-  const resolvers = HandlebarsCallbacks[event.data.request.id];
+  const eventData = event.data;
+
+  if (eventData.type !== "response") {
+    return;
+  }
+
+  const resolvers = HandlebarsCallbacks[eventData.request.id];
   if (!resolvers) {
     throw new Error(
       `Received template compilation callback, but could not identify message: ${JSON.stringify(
-        event.data
+        eventData
       )}`
     );
   }
 
-  if (event.data.success) {
-    resolvers.resolve(event.data.rendered);
+  if (eventData.success) {
+    resolvers.resolve(eventData.rendered);
   } else {
-    resolvers.reject(event.data.message);
+    resolvers.reject(eventData.message);
   }
 
-  delete HandlebarsCallbacks[event.data.request.id];
+  delete HandlebarsCallbacks[eventData.request.id];
 }
 
 window.addEventListener("message", compileTemplateCallback);

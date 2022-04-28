@@ -38,17 +38,27 @@ export interface SandboxRenderRequest {
 
 export type SandboxRequest = SandboxRenderRequest;
 
-export interface SandboxResponseBase {
-  request: SandboxRequest;
+export interface SandboxMessageBase {
+  type: string;
   success: boolean;
 }
 
+export interface SandboxLoadedResponse extends SandboxMessageBase {
+  type: "loaded";
+}
+
+export interface SandboxResponseBase extends SandboxMessageBase {
+  type: "response";
+}
+
 export interface SandboxExceptionResponse extends SandboxResponseBase {
+  request: SandboxRequest;
   success: false;
   message: string;
 }
 
 export interface SandboxSuccessResponse extends SandboxResponseBase {
+  request: SandboxRequest;
   success: true;
 }
 

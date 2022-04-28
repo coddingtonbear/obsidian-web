@@ -49,6 +49,7 @@ const render = (request: SandboxRenderRequest): SandboxRenderResponse => {
   const compiled = Handlebars.compile(request.template, { noEscape: true });
 
   return {
+    type: "response",
     success: true,
     request,
     rendered: compiled(request.context),
@@ -84,4 +85,4 @@ function handleEvent(evt: MessageEvent<SandboxRequest>): void {
 }
 
 window.addEventListener("message", handleEvent);
-window.parent.postMessage({ loaded: true }, "*");
+window.parent.postMessage({ success: true, thpe: "loaded" }, "*");
