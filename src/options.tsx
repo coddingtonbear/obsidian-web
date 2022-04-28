@@ -95,10 +95,11 @@ const Options = () => {
   useEffect(() => {
     async function handle() {
       setApiKeyOk(false);
+      let usedInsecureMode = false;
+
       if (apiKey === "") {
         setApiKeyError(undefined);
       } else {
-        let usedInsecureMode = false;
         let result: Response;
         try {
           result = await obsidianRequest(apiKey, "/", { method: "get" }, false);
@@ -149,7 +150,7 @@ const Options = () => {
         // it means you've changed something.
         await chrome.storage.local.set({
           apiKey,
-          insecureMode,
+          insecureMode: usedInsecureMode,
         } as ExtensionLocalSettings);
         showSaveNotice();
       }
