@@ -63,6 +63,14 @@ div.options-header {
   justify-content: left;
 }
 
+div.options-header div.right{
+  width: 100px;
+  flex-grow: 10;
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+}
+
 div.options-container {
   max-width: 800px;
   margin: 0 auto;

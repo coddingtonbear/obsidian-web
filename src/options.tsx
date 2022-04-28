@@ -35,6 +35,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CreateIcon from "@mui/icons-material/AddCircle";
 import RestoreIcon from "@mui/icons-material/SettingsBackupRestore";
+import ImportSettings from "@mui/icons-material/FileUpload";
+import ExportSettings from "@mui/icons-material/FileDownload";
 
 import {
   DefaultContentTemplate,
@@ -339,6 +341,70 @@ const Options = () => {
     }
   };
 
+  const onExportSettings = async () => {
+    const sync = await getSyncSettings(chrome.storage.sync);
+    const local = await getLocalSettings(chrome.storage.local);
+
+    const blob = new Blob([JSON.stringify({ sync, local }, null, 2)], {
+      type: "application/json",
+    });
+
+    const elem = window.document.createElement("a");
+    elem.href = window.URL.createObjectURL(blob);
+    elem.download = "obsidian-local-rest-api.settings.json";
+    document.body.appendChild(elem);
+    elem.click();
+    document.body.removeChild(elem);
+  };
+
+  const onImportSettings = async () => {
+    const input = window.document.createElement("input");
+    input.type = "file";
+
+    input.onchange = (e) => {
+      if (!e || !e.target) {
+        return;
+      }
+
+      const files = (e.target as HTMLInputElement).files;
+      if (!files) {
+        return;
+      }
+
+      const file = files[0];
+      const reader = new FileReader();
+      reader.readAsText(file, "UTF-8");
+
+      reader.onload = async (readerEvent) => {
+        if (!readerEvent.target) {
+          return;
+        }
+
+        const content = readerEvent.target.result as string;
+        const parsed = JSON.parse(content);
+
+        if (
+          !parsed ||
+          !parsed.sync ||
+          parsed.sync.version !== "0.1" ||
+          !parsed.local ||
+          parsed.local.version !== "0.1"
+        ) {
+          alert(
+            "Could not parse configuration file!  See console for details."
+          );
+          console.error("Could not parse configuration file!", parsed);
+        } else {
+          await chrome.storage.sync.set(parsed.sync);
+          await chrome.storage.local.set(parsed.local);
+          alert("Settings imported successfully!");
+          window.location.reload();
+        }
+      };
+    };
+    input.click();
+  };
+
   const showSaveNotice = () => {
     setStatus({
       severity: "success",
@@ -351,10 +417,26 @@ const Options = () => {
     <ThemeProvider theme={PurpleTheme}>
       <Paper className="options-container">
         <div className="options-header">
-          <div>
+          <div className="left">
             <img src="./icon48.png" />
           </div>
           <h1>Obsidian Web Settings</h1>
+          <div className="right">
+            <IconButton
+              title="Import Settings as JSON"
+              aria-label="import settings as JSON"
+              onClick={onImportSettings}
+            >
+              <ImportSettings />
+            </IconButton>
+            <IconButton
+              title="Export Settings as JSON"
+              aria-label="export settings as JSON"
+              onClick={onExportSettings}
+            >
+              <ExportSettings />
+            </IconButton>
+          </div>
         </div>
         <div className="option-panel">
           {editingPreset === undefined && (
