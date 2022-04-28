@@ -215,9 +215,18 @@ const Popup = () => {
       try {
         const selectedTextInjected = await chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          func: () => window.getSelection()?.toString(),
+          func: () => {
+            const selection = window.getSelection();
+            if (!selection) {
+              return "";
+            }
+            const contents = selection.getRangeAt(0).cloneContents();
+            const node = document.createElement("div");
+            node.appendChild(contents.cloneNode(true));
+            return node.innerHTML;
+          },
         });
-        selectedText = selectedTextInjected[0].result;
+        selectedText = turndown.turndown(selectedTextInjected[0].result);
       } catch (e) {
         selectedText = "";
       }
