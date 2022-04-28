@@ -355,12 +355,22 @@ const Popup = () => {
       body: compiledContent,
       headers: requestHeaders,
     };
-    const result = await obsidianRequest(
-      apiKey,
-      compiledUrl,
-      request,
-      insecureMode
-    );
+    let result: Response;
+    try {
+      result = await obsidianRequest(
+        apiKey,
+        compiledUrl,
+        request,
+        insecureMode
+      );
+    } catch (e) {
+      setStatus({
+        severity: "error",
+        title: "Error",
+        message: `Could not send content to Obsidian: ${e}`,
+      });
+      return;
+    }
     const text = await result.text();
 
     if (result.status < 300) {
