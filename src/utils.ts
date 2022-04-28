@@ -1,4 +1,5 @@
 import escapeStringRegexp from "escape-string-regexp";
+import { v4 as uuid } from "uuid";
 
 import {
   ExtensionSyncSettings,
@@ -9,6 +10,15 @@ import {
   SearchJsonResponseItem,
 } from "./types";
 import { DefaultSyncSettings, DefaultLocalSettings } from "./constants";
+
+const HandlebarsCallbacks: Record<
+  string,
+  | {
+      resolve: (value: string | PromiseLike<string>) => void;
+      reject: (reason?: any) => void;
+    }
+  | undefined
+> = {};
 
 export async function getSyncSettings(
   sync: chrome.storage.SyncStorageArea
@@ -117,30 +127,47 @@ export function compileTemplate(
       "handlebars-sandbox"
     ) as HTMLIFrameElement;
 
-    const message: SandboxRenderRequest = {
-      command: "render",
-      template,
-      context,
-    };
-
     if (!sandbox.contentWindow) {
       throw new Error("No content window found for handlebars sandbox!");
     }
 
-    const handler = (
-      event: MessageEvent<SandboxRenderResponse | SandboxExceptionResponse>
-    ) => {
-      if (event.data.success) {
-        resolve(event.data.rendered);
-      } else {
-        reject(event.data.message);
-      }
+    const requestId = uuid();
+    const message: SandboxRenderRequest = {
+      command: "render",
+      id: requestId,
+      template,
+      context,
     };
-
-    window.addEventListener("message", handler, { once: true });
+    HandlebarsCallbacks[requestId] = {
+      resolve,
+      reject,
+    };
 
     sandbox.contentWindow.postMessage(message, "*");
   });
 
   return result;
 }
+
+function compileTemplateCallback(
+  event: MessageEvent<SandboxRenderResponse | SandboxExceptionResponse>
+) {
+  const resolvers = HandlebarsCallbacks[event.data.request.id];
+  if (!resolvers) {
+    throw new Error(
+      `Received template compilation callback, but could not identify message: ${JSON.stringify(
+        event.data
+      )}`
+    );
+  }
+
+  if (event.data.success) {
+    resolvers.resolve(event.data.rendered);
+  } else {
+    resolvers.reject(event.data.message);
+  }
+
+  delete HandlebarsCallbacks[event.data.request.id];
+}
+
+window.addEventListener("message", compileTemplateCallback);

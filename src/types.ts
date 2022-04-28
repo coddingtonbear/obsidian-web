@@ -32,6 +32,7 @@ export interface AlertStatus {
 export interface SandboxRenderRequest {
   command: "render";
   template: string;
+  id: string;
   context: Record<string, any>;
 }
 
