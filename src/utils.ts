@@ -179,4 +179,6 @@ function compileTemplateCallback(
   delete HandlebarsCallbacks[eventData.request.id];
 }
 
-window.addEventListener("message", compileTemplateCallback);
+if (typeof window !== "undefined") {
+  window.addEventListener("message", compileTemplateCallback);
+}
