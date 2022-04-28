@@ -78,15 +78,17 @@ const Popup = () => {
 
   const turndown = new Turndown(TurndownConfiguration);
 
-  window.addEventListener(
-    "message",
-    () => {
-      setSandboxReady(true);
-    },
-    {
-      once: true,
-    }
-  );
+  useEffect(() => {
+    window.addEventListener(
+      "message",
+      () => {
+        setSandboxReady(true);
+      },
+      {
+        once: true,
+      }
+    );
+  }, []);
 
   useEffect(() => {
     if (!apiKey) {
