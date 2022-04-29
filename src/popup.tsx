@@ -154,11 +154,11 @@ const Popup = () => {
         return;
       }
 
+      setInsecureMode(localSettings.insecureMode ?? false);
       setApiKey(localSettings.apiKey);
       setSearchEnabled(syncSettings.searchEnabled);
       setSearchMatchMentionTemplate(syncSettings.searchMatchMentionTemplate);
       setSearchMatchDirectTemplate(syncSettings.searchMatchDirectTemplate);
-      setInsecureMode(localSettings.insecureMode ?? false);
     }
     handle();
   }, []);
