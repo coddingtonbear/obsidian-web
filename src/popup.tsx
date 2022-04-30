@@ -226,26 +226,26 @@ const Popup = () => {
             return node.innerHTML;
           },
         });
-        selectedText = turndown.turndown(selectedTextInjected[0].result);
+        selectedText = htmlToMarkdown(
+          selectedTextInjected[0].result,
+          tab.url ?? ""
+        );
       } catch (e) {
         selectedText = "";
       }
 
-      let pageContent: string = "";
+      let pageContent: string;
       try {
         const pageContentInjected = await chrome.scripting.executeScript({
           target: { tabId: tab.id },
           func: () => window.document.body.innerHTML,
         });
-        const tempDoc = document.implementation.createHTMLDocument();
-        tempDoc.body.innerHTML = pageContentInjected[0].result;
-        const reader = new Readability(tempDoc);
-        const parsed = reader.parse();
-        if (parsed) {
-          pageContent = turndown.turndown(parsed.content);
-        }
+        pageContent = htmlToMarkdown(
+          pageContentInjected[0].result,
+          tab.url ?? ""
+        );
       } catch (e) {
-        // Nothing -- we'll just have no pageContent
+        pageContent = "";
       }
 
       setUrl(tab.url ?? "");
@@ -346,6 +346,20 @@ const Popup = () => {
       compiledContent,
     });
   }, [url, method, compiledUrl, headers, compiledContent]);
+
+  const htmlToMarkdown = (html: string, baseUrl: string): string => {
+    const tempDoc = document.implementation.createHTMLDocument();
+    const base = tempDoc.createElement("base");
+    base.href = baseUrl;
+    tempDoc.head.append(base);
+    tempDoc.body.innerHTML = html;
+    const reader = new Readability(tempDoc);
+    const parsed = reader.parse();
+    if (parsed) {
+      return turndown.turndown(parsed.content);
+    }
+    return "";
+  };
 
   const sendToObsidian = async () => {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
