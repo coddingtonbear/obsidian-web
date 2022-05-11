@@ -55,6 +55,7 @@ div.modal {
   margin: 50px 100px;
   padding: 25px;
   overflow-y: scroll;
+  max-height: calc(100vh - 200px);
 }
 
 div.options-header {
