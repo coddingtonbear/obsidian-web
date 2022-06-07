@@ -113,6 +113,16 @@ div.mentions div.mention-notice a {
   cursor: pointer;
 }
 
+div.mentions blockquote {
+  font-style: italic;
+}
+div.mentions blockquote::before {
+  content: open-quote;
+}
+div.mentions blockquote::after {
+  content: close-quote;
+}
+
 .mention-cta {
   padding: 0 !important;
   float: right;

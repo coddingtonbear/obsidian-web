@@ -5,6 +5,7 @@ import {
   ContentCache,
   ExtensionSyncSettings,
   ExtensionLocalSettings,
+  FileMetadataObject,
   SandboxRenderRequest,
   SandboxRenderResponse,
   SandboxExceptionResponse,
@@ -70,6 +71,26 @@ export async function openFileInObsidian(
     { method: "post" },
     insecureMode
   );
+}
+
+export async function getPageMetadata(
+  apiKey: string,
+  insecureMode: boolean,
+  filename: string
+): Promise<FileMetadataObject> {
+  const result = await obsidianRequest(
+    apiKey,
+    `/vault/${filename}`,
+    {
+      method: "get",
+      headers: {
+        Accept: "application/vnd.olrapi.note+json",
+      },
+    },
+    insecureMode
+  );
+
+  return await result.json();
 }
 
 export async function getUrlMentions(

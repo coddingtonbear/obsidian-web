@@ -16,6 +16,7 @@ export interface Props {
   mention: SearchJsonResponseItem;
   presets: OutputPreset[];
   acceptSuggestion: (filename: string, template: string) => void;
+  directReferenceMessages: string[];
 }
 
 const MentionNotice: React.FC<Props> = ({
@@ -26,6 +27,7 @@ const MentionNotice: React.FC<Props> = ({
   presets,
   mention,
   acceptSuggestion,
+  directReferenceMessages,
 }) => {
   const preset = presets.find((val) => val.name === templateSuggestion);
 
@@ -56,6 +58,9 @@ const MentionNotice: React.FC<Props> = ({
         {mention.filename}
       </Link>
       .
+      {directReferenceMessages.map((mention) => {
+        return <blockquote>{mention}</blockquote>;
+      })}
     </MaterialAlert>
   );
 };

@@ -37,6 +37,7 @@ import {
   compileTemplate,
   getUrlMentions,
   getContentCache,
+  getPageMetadata,
   setContentCache,
   normalizeCacheUrl,
 } from "./utils";
@@ -66,6 +67,9 @@ const Popup = () => {
   const [mentions, setMentions] = useState<SearchJsonResponseItem[]>([]);
   const [directReferences, setDirectReferences] = useState<
     SearchJsonResponseItem[]
+  >([]);
+  const [directReferenceMessages, setDirectReferenceMessages] = useState<
+    string[]
   >([]);
 
   const [searchEnabled, setSearchEnabled] = useState<boolean>(false);
@@ -255,6 +259,26 @@ const Popup = () => {
     }
     handle();
   }, []);
+
+  useEffect(() => {
+    setDirectReferenceMessages([]);
+
+    async function handle() {
+      const messages: string[] = [];
+
+      for (const ref of directReferences) {
+        const meta = await getPageMetadata(apiKey, insecureMode, ref.filename);
+
+        if (typeof meta.frontmatter["web-badge-message"] === "string") {
+          messages.push(meta.frontmatter["web-badge-message"]);
+        }
+      }
+
+      setDirectReferenceMessages(messages);
+    }
+
+    handle();
+  }, [directReferences]);
 
   useEffect(() => {
     if (!searchEnabled) {
@@ -516,6 +540,7 @@ const Popup = () => {
                           mention={ref}
                           presets={presets}
                           acceptSuggestion={acceptSuggestion}
+                          directReferenceMessages={directReferenceMessages}
                         />
                       ))}
                       {mentions
@@ -535,6 +560,7 @@ const Popup = () => {
                             mention={ref}
                             presets={presets}
                             acceptSuggestion={acceptSuggestion}
+                            directReferenceMessages={directReferenceMessages}
                           />
                         ))}
                     </div>
