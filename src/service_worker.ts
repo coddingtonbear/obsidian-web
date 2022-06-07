@@ -32,6 +32,10 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         text: `${mentions.direct.length}`,
         tabId,
       });
+      chrome.action.setTitle({
+        title: `${mentions.direct.length} mentions`,
+        tabId,
+      });
     } else if (mentions.mentions.length > 0) {
       chrome.action.setBadgeBackgroundColor({
         color: "#3D7D98",
@@ -41,9 +45,17 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         text: `${mentions.mentions.length}`,
         tabId,
       });
+      chrome.action.setTitle({
+        title: `${mentions.mentions.length} mentions`,
+        tabId,
+      });
     } else {
       chrome.action.setBadgeText({
         text: "",
+        tabId,
+      });
+      chrome.action.setTitle({
+        title: "",
         tabId,
       });
     }
@@ -71,6 +83,10 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       if (result.frontmatter["web-badge-message"]) {
         chrome.action.setBadgeText({
           text: result.frontmatter["web-badge-message"],
+          tabId,
+        });
+        chrome.action.setTitle({
+          title: result.frontmatter["web-badge-message"],
           tabId,
         });
       }
