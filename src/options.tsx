@@ -814,6 +814,10 @@ const Options = () => {
               it to be displayed as a quote in your notes.
             </li>
             <li>
+              <code>&#123;&#123;slugify FIELD&#125;&#125;</code>: Returns a
+              slugified string.
+            </li>
+            <li>
               <code>&#123;&#123;uuid&#125;&#125;</code>: Returns a
               randomly-generated v4 UUID.
             </li>
