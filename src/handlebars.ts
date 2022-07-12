@@ -1,6 +1,7 @@
 import Handlebars from "handlebars";
 import { v4 as uuid } from "uuid";
 import { format as formatDate } from "date-fns";
+import slugify from "@sindresorhus/slugify";
 import {
   SandboxRequest,
   SandboxRenderResponse,
@@ -37,6 +38,13 @@ Handlebars.registerHelper("filename", (unsafe: string | undefined): string => {
 Handlebars.registerHelper("json", (unsafe: string | undefined): string => {
   if (typeof unsafe === "string") {
     return JSON.stringify(unsafe);
+  }
+  return "";
+});
+
+Handlebars.registerHelper("slugify", (unsafe: string | undefined): string => {
+  if (typeof unsafe === "string") {
+    return slugify(unsafe);
   }
   return "";
 });
