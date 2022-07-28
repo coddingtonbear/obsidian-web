@@ -800,6 +800,10 @@ const Options = () => {
               for a full list of formatting codes.
             </li>
             <li>
+              <code>&#123;&#123;slugify FIELD&#125;&#125;</code>: Slugifies
+              <code>FIELD</code>.
+            </li>
+            <li>
               <code>&#123;&#123;filename FIELD&#125;&#125;</code>: Strips any
               characters from <code>FIELD</code> that are not safe in a
               filename.
