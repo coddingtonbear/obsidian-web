@@ -3,7 +3,7 @@
 
   "name": "Obsidian Web",
   "description": "Connect your browser with your notes in Obsidian",
-  "version": "2.2.2",
+  "version": "2.2.3",
 
   "options_page": "options.html",
 
