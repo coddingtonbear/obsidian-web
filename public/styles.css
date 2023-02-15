@@ -28,6 +28,7 @@ body.options #root {
 
 body.popup {
   width: 600px;
+  height: 600px;
 }
 
 div.option-value {
