@@ -29,7 +29,7 @@ Handlebars.registerHelper(
 
 Handlebars.registerHelper("filename", (unsafe: string | undefined): string => {
   if (typeof unsafe === "string") {
-    return unsafe.replace(/[/\\?%*:|"<>]/g, "");
+    return unsafe.replace(/[/\\?%*:|"<>#]/g, "");
   }
   return "";
 });
