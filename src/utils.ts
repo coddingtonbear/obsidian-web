@@ -60,12 +60,44 @@ export function normalizeCacheUrl(urlString: string): string {
   return url.toString();
 }
 
+export async function checkHasHostPermission(host: string): Promise<boolean> {
+  const result = new Promise<boolean>((resolve, reject) => {
+    chrome.permissions.contains(
+      {
+        origins: [`http://${host}:27123/*`, `https://${host}:27124/*`],
+      },
+      (result) => {
+        resolve(result);
+      }
+    );
+  });
+
+  return result;
+}
+
+export async function requestHostPermission(host: string): Promise<boolean> {
+  const result = new Promise<boolean>((resolve, reject) => {
+    chrome.permissions.request(
+      {
+        origins: [`http://${host}:27123/*`, `https://${host}:27124/*`],
+      },
+      (granted) => {
+        resolve(granted);
+      }
+    );
+  });
+
+  return result;
+}
+
 export async function openFileInObsidian(
+  host: string,
   apiKey: string,
   insecureMode: boolean,
   filename: string
 ): ReturnType<typeof obsidianRequest> {
   return obsidianRequest(
+    host,
     apiKey,
     `/open/${filename}`,
     { method: "post" },
@@ -74,11 +106,13 @@ export async function openFileInObsidian(
 }
 
 export async function getPageMetadata(
+  host: string,
   apiKey: string,
   insecureMode: boolean,
   filename: string
 ): Promise<FileMetadataObject> {
   const result = await obsidianRequest(
+    host,
     apiKey,
     `/vault/${filename}`,
     {
@@ -94,6 +128,7 @@ export async function getPageMetadata(
 }
 
 export async function getUrlMentions(
+  host: string,
   apiKey: string,
   insecureMode: boolean,
   url: string
@@ -102,13 +137,13 @@ export async function getUrlMentions(
   direct: SearchJsonResponseItem[];
 }> {
   async function handleMentions() {
-    return await obsidianSearchRequest(apiKey, insecureMode, {
+    return await obsidianSearchRequest(host, apiKey, insecureMode, {
       regexp: [`${escapeStringRegexp(url)}(?=\\s|\\)|$)`, { var: "content" }],
     });
   }
 
   async function handleDirect() {
-    return await obsidianSearchRequest(apiKey, insecureMode, {
+    return await obsidianSearchRequest(host, apiKey, insecureMode, {
       glob: [{ var: "frontmatter.url" }, url],
     });
   }
@@ -120,11 +155,13 @@ export async function getUrlMentions(
 }
 
 export async function obsidianSearchRequest(
+  host: string,
   apiKey: string,
   insecureMode: boolean,
   query: Record<string, any>
 ): Promise<SearchJsonResponseItem[]> {
   const result = await obsidianRequest(
+    host,
     apiKey,
     "/search/",
     {
@@ -141,6 +178,7 @@ export async function obsidianSearchRequest(
 }
 
 export async function obsidianRequest(
+  hostname: string,
   apiKey: string,
   path: string,
   options: RequestInit,
@@ -157,7 +195,7 @@ export async function obsidianRequest(
   };
 
   return fetch(
-    `http${insecureMode ? "" : "s"}://127.0.0.1:${
+    `http${insecureMode ? "" : "s"}://${hostname}:${
       insecureMode ? "27123" : "27124"
     }${path}`,
     requestOptions

@@ -40,6 +40,7 @@ import {
   getPageMetadata,
   setContentCache,
   normalizeCacheUrl,
+  checkHasHostPermission,
 } from "./utils";
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
@@ -55,6 +56,10 @@ const Popup = () => {
   const [cacheData, setCacheData] = useState<ContentCache>({});
   const [cacheAvailable, setCacheAvailable] = useState<boolean>(false);
 
+  const [host, setHost] = useState<string | null>(null);
+  const [hasHostPermission, setHasHostPermission] = useState<boolean | null>(
+    null
+  );
   const [apiKey, setApiKey] = useState<string>("");
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
 
@@ -108,7 +113,12 @@ const Popup = () => {
 
     async function handle() {
       try {
+        if (!host) {
+          throw new Error("No hostname configured");
+        }
+
         const request = await obsidianRequest(
+          host,
           apiKey,
           "/",
           { method: "get" },
@@ -158,6 +168,7 @@ const Popup = () => {
         return;
       }
 
+      setHost(localSettings.host);
       setInsecureMode(localSettings.insecureMode ?? false);
       setApiKey(localSettings.apiKey);
       setSearchEnabled(syncSettings.searchEnabled);
@@ -166,6 +177,14 @@ const Popup = () => {
     }
     handle();
   }, []);
+
+  useEffect(() => {
+    if (host) {
+      checkHasHostPermission(host).then((hasPermission) => {
+        setHasHostPermission(hasPermission);
+      });
+    }
+  }, [host]);
 
   useEffect(() => {
     if (!url) {
@@ -266,8 +285,17 @@ const Popup = () => {
     async function handle() {
       const messages: string[] = [];
 
+      if (!host) {
+        return;
+      }
+
       for (const ref of directReferences) {
-        const meta = await getPageMetadata(apiKey, insecureMode, ref.filename);
+        const meta = await getPageMetadata(
+          host,
+          apiKey,
+          insecureMode,
+          ref.filename
+        );
 
         if (typeof meta.frontmatter["web-badge-message"] === "string") {
           messages.push(meta.frontmatter["web-badge-message"]);
@@ -286,7 +314,10 @@ const Popup = () => {
     }
 
     async function handle() {
-      const allMentions = await getUrlMentions(apiKey, insecureMode, url);
+      if (!host) {
+        return;
+      }
+      const allMentions = await getUrlMentions(host, apiKey, insecureMode, url);
 
       setMentions(allMentions.mentions);
       setDirectReferences(allMentions.direct);
@@ -403,8 +434,15 @@ const Popup = () => {
       headers: requestHeaders,
     };
     let result: Response;
+
+    if (host === null) {
+      console.error("Cannot send to Obsidian; no hostname set.");
+      return;
+    }
+
     try {
       result = await obsidianRequest(
+        host,
         apiKey,
         compiledUrl,
         request,
@@ -526,7 +564,7 @@ const Popup = () => {
                   />
                 </AccordionDetails>
               </Accordion>
-              {!suggestionAccepted && (
+              {!suggestionAccepted && host && (
                 <>
                   {(mentions.length > 0 || directReferences.length > 0) && (
                     <div className="mentions">
@@ -534,6 +572,7 @@ const Popup = () => {
                         <MentionNotice
                           key={ref.filename}
                           type="direct"
+                          host={host}
                           apiKey={apiKey}
                           insecureMode={insecureMode}
                           templateSuggestion={searchMatchDirectTemplate}
@@ -554,6 +593,7 @@ const Popup = () => {
                           <MentionNotice
                             key={ref.filename}
                             type="mention"
+                            host={host}
                             apiKey={apiKey}
                             insecureMode={insecureMode}
                             templateSuggestion={searchMatchMentionTemplate}

@@ -10,6 +10,7 @@ export interface OutputPreset {
 
 export interface ExtensionLocalSettings {
   version: string;
+  host: string;
   apiKey: string;
   insecureMode?: boolean;
 }

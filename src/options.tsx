@@ -58,6 +58,8 @@ import {
   getSyncSettings,
   obsidianRequest,
   compileTemplate,
+  checkHasHostPermission,
+  requestHostPermission,
 } from "./utils";
 import Alert from "./components/Alert";
 import RequestParameters from "./components/RequestParameters";
@@ -70,6 +72,12 @@ const Options = () => {
   const [status, setStatus] = useState<AlertStatus>();
   const [pluginVersion, setPluginVersion] = useState<string>();
   const [modalStatus, setModalStatus] = useState<AlertStatus>();
+
+  const [host, setHost] = useState<string>("127.0.0.1");
+  const [tempHost, setTempHost] = useState<string>("127.0.0.1");
+  const [hasHostPermission, setHasHostPermission] = useState<boolean | null>(
+    null
+  );
 
   const [apiKey, setApiKey] = useState<string>("");
   const [apiKeyOk, setApiKeyOk] = useState<boolean>(false);
@@ -104,10 +112,17 @@ const Options = () => {
       } else {
         let result: Response;
         try {
-          result = await obsidianRequest(apiKey, "/", { method: "get" }, false);
+          result = await obsidianRequest(
+            host,
+            apiKey,
+            "/",
+            { method: "get" },
+            false
+          );
         } catch (e) {
           try {
             result = await obsidianRequest(
+              host,
               apiKey,
               "/",
               { method: "get" },
@@ -159,7 +174,7 @@ const Options = () => {
     }
 
     handle();
-  }, [apiKey]);
+  }, [apiKey, hasHostPermission]);
 
   useEffect(() => {
     if (!loaded) {
@@ -192,6 +207,7 @@ const Options = () => {
       const syncSettings = await getSyncSettings(chrome.storage.sync);
       const localSettings = await getLocalSettings(chrome.storage.local);
 
+      setHost(localSettings.host);
       setApiKey(localSettings.apiKey);
       setPresets(syncSettings.presets);
       setSearchEnabled(syncSettings.searchEnabled);
@@ -217,6 +233,13 @@ const Options = () => {
 
     handle();
   }, []);
+
+  useEffect(() => {
+    setTempHost(host);
+    checkHasHostPermission(host).then((result) => {
+      setHasHostPermission(result);
+    });
+  }, [host]);
 
   const closeEditingModal = () => {
     setEditingPreset(undefined);
@@ -460,6 +483,30 @@ const Options = () => {
                 and enable that plugin from within Obsidian.
               </Typography>
               <div className="option">
+                <div className="option-value host">
+                  <TextField
+                    label="Hostname"
+                    onBlur={() => setHost(tempHost)}
+                    onChange={(event) => setTempHost(event.target.value)}
+                    value={tempHost}
+                    helperText="Hostname on which Obsidian is running (usually 127.0.0.1)."
+                  />
+                </div>
+                {!hasHostPermission && (
+                  <div className="option-value">
+                    <MaterialAlert severity="error">
+                      Obsidian Web does not have permissions to access the host{" "}
+                      {host}.
+                      <Button
+                        onClick={() => {
+                          requestHostPermission(host);
+                        }}
+                      >
+                        Grant Permissions to {host}
+                      </Button>
+                    </MaterialAlert>
+                  </div>
+                )}
                 <div className="option-value api-key">
                   <TextField
                     label="API Key"
