@@ -105,6 +105,16 @@ const Options = () => {
   const [presets, setPresets] = useState<OutputPreset[]>([]);
 
   useEffect(() => {
+    if (loaded) {
+      // If we are *not* loaded, it means we're just in the process
+      // of populating the form from stored settings.  If we are,
+      // it means you've changed something.
+      chrome.storage.local.set({
+        host,
+        apiKey,
+      } as ExtensionLocalSettings);
+      showSaveNotice();
+    }
     async function handle() {
       setApiKeyOk(false);
       let usedInsecureMode = false;
@@ -168,8 +178,6 @@ const Options = () => {
         // of populating the form from stored settings.  If we are,
         // it means you've changed something.
         await chrome.storage.local.set({
-          host,
-          apiKey,
           insecureMode: usedInsecureMode,
         } as ExtensionLocalSettings);
         showSaveNotice();
