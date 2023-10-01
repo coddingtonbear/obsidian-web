@@ -30,6 +30,10 @@ body.popup {
   width: 600px;
 }
 
+div.auth-field {
+  width: 90%;
+}
+
 div.option-value {
   display: flex;
   flex-direction: row;
@@ -37,11 +41,11 @@ div.option-value {
   justify-content: space-between;
 }
 
-div.option-value.api-key {
+div.option-value.host, div.option-value.api-key {
   justify-content: left;
 }
 
-div.api-key-valid-icon svg {
+div.validation-icon svg {
   margin-top: 30%;
 }
 
@@ -52,10 +56,30 @@ div.submit {
 }
 
 div.modal {
+  display: flex;
+  flex-direction: column;
   margin: 50px 100px;
   padding: 25px;
   overflow-y: scroll;
   max-height: calc(100vh - 200px);
+}
+
+svg.action-icon {
+  cursor: pointer;
+}
+
+div.permission-modal {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  height: 200px;
+  padding: 25px;
+  margin: 0 auto;
+  margin-top: 25vh;
+}
+
+div.modal-content {
+  flex-grow: 1;
 }
 
 div.options-header {

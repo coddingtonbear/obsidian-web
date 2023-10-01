@@ -99,6 +99,8 @@ const Options = () => {
   const [method, setMethod] = useState<OutputPreset["method"]>("post");
 
   const [editingPreset, setEditingPreset] = useState<number>();
+  const [requestingHostPermissionFor, setRequestingHostPermissionFor] =
+    useState<string>();
 
   const [presets, setPresets] = useState<OutputPreset[]>([]);
 
@@ -166,6 +168,7 @@ const Options = () => {
         // of populating the form from stored settings.  If we are,
         // it means you've changed something.
         await chrome.storage.local.set({
+          host,
           apiKey,
           insecureMode: usedInsecureMode,
         } as ExtensionLocalSettings);
@@ -174,7 +177,7 @@ const Options = () => {
     }
 
     handle();
-  }, [apiKey, hasHostPermission]);
+  }, [apiKey, host, hasHostPermission]);
 
   useEffect(() => {
     if (!loaded) {
@@ -208,6 +211,7 @@ const Options = () => {
       const localSettings = await getLocalSettings(chrome.storage.local);
 
       setHost(localSettings.host);
+      setTempHost(localSettings.host);
       setApiKey(localSettings.apiKey);
       setPresets(syncSettings.presets);
       setSearchEnabled(syncSettings.searchEnabled);
@@ -235,7 +239,6 @@ const Options = () => {
   }, []);
 
   useEffect(() => {
-    setTempHost(host);
     checkHasHostPermission(host).then((result) => {
       setHasHostPermission(result);
     });
@@ -486,35 +489,43 @@ const Options = () => {
                 <div className="option-value host">
                   <TextField
                     label="Hostname"
-                    onBlur={() => setHost(tempHost)}
+                    className="auth-field"
+                    onBlur={() => {
+                      setHost(tempHost);
+                      checkHasHostPermission(tempHost).then((result) => {
+                        setHasHostPermission(result);
+                        if (!result) {
+                          setRequestingHostPermissionFor(tempHost);
+                        }
+                      });
+                    }}
                     onChange={(event) => setTempHost(event.target.value)}
                     value={tempHost}
                     helperText="Hostname on which Obsidian is running (usually 127.0.0.1)."
                   />
-                </div>
-                {!hasHostPermission && (
-                  <div className="option-value">
-                    <MaterialAlert severity="error">
-                      Obsidian Web does not have permissions to access the host{" "}
-                      {host}.
-                      <Button
-                        onClick={() => {
-                          requestHostPermission(host);
-                        }}
-                      >
-                        Grant Permissions to {host}
-                      </Button>
-                    </MaterialAlert>
+                  <div className="validation-icon">
+                    {!hasHostPermission && (
+                      <Error
+                        className="action-icon"
+                        color="error"
+                        fontSize="large"
+                        titleAccess="Missing permissions.  Click to grant."
+                        onClick={() => setRequestingHostPermissionFor(host)}
+                      />
+                    )}
                   </div>
-                )}
+                </div>
+              </div>
+              <div className="option">
                 <div className="option-value api-key">
                   <TextField
                     label="API Key"
+                    className="auth-field"
                     value={apiKey}
                     helperText="You can find your API key in the 'Local REST API' section of your settings in Obsidian."
                     onChange={(event) => setApiKey(event.target.value)}
                   />
-                  <div className="api-key-valid-icon">
+                  <div className="validation-icon">
                     {apiKeyOk && (
                       <>
                         {insecureMode && (
@@ -537,7 +548,15 @@ const Options = () => {
                       <Error
                         color="error"
                         fontSize="large"
-                        titleAccess="Could not connect to the API."
+                        className="action-icon"
+                        onClick={() => {
+                          const tempApiKey = apiKey;
+                          setApiKey("");
+                          setTimeout(() => {
+                            setApiKey(tempApiKey);
+                          }, 1);
+                        }}
+                        titleAccess="Could not connect to the API. Click to retry."
                       />
                     )}
                   </div>
@@ -789,6 +808,46 @@ const Options = () => {
           )}
         </div>
       </Paper>
+      <Modal
+        open={requestingHostPermissionFor !== undefined}
+        onClose={() => {
+          setRequestingHostPermissionFor(undefined);
+        }}
+      >
+        <Paper elevation={3} className="permission-modal">
+          <div className="modal-content">
+            <Typography paragraph={true}>
+              Obsidian Web needs your permission before it can interact with
+              Obsidian's API on {requestingHostPermissionFor}.
+            </Typography>
+          </div>
+          <div className="submit">
+            <Button
+              variant="outlined"
+              onClick={() => setRequestingHostPermissionFor(undefined)}
+            >
+              Cancel
+            </Button>
+            {requestingHostPermissionFor && (
+              <Button
+                variant="contained"
+                onClick={() => {
+                  requestHostPermission(requestingHostPermissionFor).then(
+                    (result) => {
+                      setHasHostPermission(result);
+                      if (result) {
+                        setRequestingHostPermissionFor(undefined);
+                      }
+                    }
+                  );
+                }}
+              >
+                Grant Permissions
+              </Button>
+            )}
+          </div>
+        </Paper>
+      </Modal>
       <Modal
         open={editingPreset !== undefined}
         onClose={() => closeEditingModal()}
