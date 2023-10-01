@@ -145,7 +145,7 @@ const Options = () => {
             setApiKeyError(
               `Unable to connect to Obsidian: ${
                 (e as Error).message
-              }. Obsidian Local REST API is probably running in secure-only mode, and your browser probably does not trust its certificate.  Either enable insecure mode from Obsidian Local REST API's settings panel, or see the settings panel for instructions regarding where to acquire the certificate you need to configure your browser to trust.`
+              }. This error occurs when Obsidian Web does not have permission to access this hostname, or when Obsidian Local REST API is running in secure-only mode and your browser does not trust its certificate.  Make sure you have granted permission for this host, and either enable insecure mode from Obsidian Local REST API's settings panel, or see the settings panel for instructions regarding where to acquire the certificate you need to configure your browser to trust.`
             );
             return;
           }
