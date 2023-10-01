@@ -478,10 +478,6 @@ const Options = () => {
           {editingPreset === undefined && (
             <>
               <Typography paragraph={true}>
-                You can configure the connection between Obsidian Web and your
-                Obsidian notes here.
-              </Typography>
-              <Typography paragraph={true}>
                 Obsidian Web integrates with Obsidian via the interface provided
                 by the{" "}
                 <a
@@ -826,7 +822,7 @@ const Options = () => {
           <div className="modal-content">
             <Typography paragraph={true}>
               Obsidian Web needs your permission before it can interact with
-              Obsidian's API on {requestingHostPermissionFor}.
+              Obsidian's API on '{requestingHostPermissionFor}'.
             </Typography>
           </div>
           <div className="submit">
