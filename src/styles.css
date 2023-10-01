@@ -26,8 +26,33 @@ body.options #root {
   margin: 20px;
 }
 
-body.popup {
+div.background {
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgb(100, 100, 100, 0.25);
+
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s, opacity 0.25s linear;
+}
+
+div.background.displayed {
+  visibility: visible;
+  opacity: 100;
+  transition: visibility 0s, opacity 0.25s linear;
+}
+
+div.popup {
   width: 600px;
+  position: fixed;
+  right: 25px;
+  top: 25px;
+  z-index: 2147483647;
+  border: 1px solid lightgray;
+  box-shadow: 5px 5px 5px gray;
 }
 
 div.auth-field {

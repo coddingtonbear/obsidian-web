@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import classnames from "classnames";
 import ReactDOM from "react-dom";
 import Turndown from "turndown";
 import { Readability } from "@mozilla/readability";
@@ -16,8 +17,12 @@ import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CircularProgress from "@mui/material/CircularProgress";
 import MaterialAlert from "@mui/material/Alert";
+import { CacheProvider } from "@emotion/react";
+import createCache from "@emotion/cache";
 
 import SendIcon from "@mui/icons-material/SaveAlt";
+
+import styles from "./styles.css";
 
 import { PurpleTheme } from "./theme";
 import Alert from "./components/Alert";
@@ -49,6 +54,7 @@ import MentionNotice from "./components/MentionNotice";
 
 const Popup = () => {
   const [status, setStatus] = useState<AlertStatus>();
+  const [displayed, setDisplayed] = useState<boolean>(false);
 
   const [sandboxReady, setSandboxReady] = useState<boolean>(false);
   const [obsidianUnavailable, setObsidianUnavailable] =
@@ -97,6 +103,8 @@ const Popup = () => {
   const [articleDir, setArticleDir] = useState<string>();
   const [articleSiteName, setArticleSiteName] = useState<string>();
 
+  const [popupVisible, setPopupVisible] = useState<boolean>(true);
+
   const [presets, setPresets] = useState<OutputPreset[]>([]);
   const [selectedPreset, setSelectedPreset] = useState<number>(0);
 
@@ -140,6 +148,7 @@ const Popup = () => {
         once: true,
       }
     );
+    setDisplayed(true);
   }, []);
 
   useEffect(() => {
@@ -569,156 +578,193 @@ const Popup = () => {
 
   return (
     <ThemeProvider theme={PurpleTheme}>
-      {displayState === "welcome" && (
-        <>
-          <MaterialAlert severity="success">
-            Thanks for installing Obsidian Web! Obsidian Web needs some
-            information from you before it can connect to your Obsidian
-            instance.
-            <Button onClick={() => chrome.runtime.openOptionsPage()}>
-              Go to settings
-            </Button>
-          </MaterialAlert>
-        </>
-      )}
-      {displayState === "permission" && host && (
-        <MaterialAlert severity="warning">
-          Obsidian Web needs permission to access Obsidian on '{host}'.
-          <Button
-            onClick={() =>
-              requestHostPermission(host).then((result) => {
-                setHasHostPermission(result);
-              })
-            }
-          >
-            Grant
-          </Button>
-        </MaterialAlert>
-      )}
-      {displayState === "alert" && status && <Alert value={status} />}
-      {displayState === "error" && (
-        <MaterialAlert severity="error">
-          Could not connect to Obsidian! Make sure Obsidian is running and that
-          the Obsidian Local REST API plugin is enabled.
-        </MaterialAlert>
-      )}
-      {displayState === "loading" && (
-        <div className="loading">
-          {" "}
-          <Typography paragraph={true}>
-            Gathering page information...
-          </Typography>
-          <CircularProgress />
-        </div>
-      )}
-      {displayState === "form" && (
-        <>
-          <div className="option">
-            <div className="option-value">
-              <Select
-                label="Preset"
-                value={selectedPreset}
-                fullWidth={true}
-                onChange={(event) =>
-                  setSelectedPreset(
-                    typeof event.target.value === "number"
-                      ? event.target.value
-                      : parseInt(event.target.value, 10)
-                  )
+      <div
+        className={classnames("background", { displayed })}
+        onClick={() => setDisplayed(false)}
+      >
+        <div
+          className="popup"
+          onClick={(evt) => {
+            evt.stopPropagation();
+            evt.preventDefault();
+          }}
+        >
+          {displayState === "welcome" && (
+            <>
+              <MaterialAlert severity="success">
+                Thanks for installing Obsidian Web! Obsidian Web needs some
+                information from you before it can connect to your Obsidian
+                instance.
+                <Button onClick={() => chrome.runtime.openOptionsPage()}>
+                  Go to settings
+                </Button>
+              </MaterialAlert>
+            </>
+          )}
+          {displayState === "permission" && host && (
+            <MaterialAlert severity="warning">
+              Obsidian Web needs permission to access Obsidian on '{host}'.
+              <Button
+                onClick={() =>
+                  requestHostPermission(host).then((result) => {
+                    setHasHostPermission(result);
+                  })
                 }
               >
-                {cacheAvailable && (
-                  <MenuItem key={"cached"} value={-1}>
-                    <i>Saved Draft</i>
-                  </MenuItem>
-                )}
-                {presets.map((preset, idx) => (
-                  <MenuItem key={preset.name} value={idx}>
-                    {preset.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              <IconButton
-                className="send-to-obsidian"
-                color="primary"
-                size="large"
-                disabled={!ready}
-                onClick={sendToObsidian}
-                title="Send to Obsidian"
-              >
-                <SendIcon />
-              </IconButton>
+                Grant
+              </Button>
+            </MaterialAlert>
+          )}
+          {displayState === "alert" && status && <Alert value={status} />}
+          {displayState === "error" && (
+            <MaterialAlert severity="error">
+              Could not connect to Obsidian! Make sure Obsidian is running and
+              that the Obsidian Local REST API plugin is enabled.
+            </MaterialAlert>
+          )}
+          {displayState === "loading" && (
+            <div className="loading">
+              {" "}
+              <Typography paragraph={true}>
+                Gathering page information...
+              </Typography>
+              <CircularProgress />
             </div>
-          </div>
-          <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Entry Details</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <RequestParameters
-                method={method}
-                url={compiledUrl}
-                headers={headers}
-                content={compiledContent}
-                onChangeMethod={setMethod}
-                onChangeUrl={setCompiledUrl}
-                onChangeHeaders={setHeaders}
-                onChangeContent={setCompiledContent}
-              />
-            </AccordionDetails>
-          </Accordion>
-          {!suggestionAccepted && host && (
+          )}
+          {displayState === "form" && (
             <>
-              {(mentions.length > 0 || directReferences.length > 0) && (
-                <div className="mentions">
-                  {directReferences.map((ref) => (
-                    <MentionNotice
-                      key={ref.filename}
-                      type="direct"
-                      host={host}
-                      apiKey={apiKey}
-                      insecureMode={insecureMode}
-                      templateSuggestion={searchMatchDirectTemplate}
-                      mention={ref}
-                      presets={presets}
-                      acceptSuggestion={acceptSuggestion}
-                      directReferenceMessages={directReferenceMessages}
-                    />
-                  ))}
-                  {mentions
-                    .filter(
-                      (ref) =>
-                        !directReferences.find(
-                          (d) => d.filename === ref.filename
-                        )
-                    )
-                    .map((ref) => (
-                      <MentionNotice
-                        key={ref.filename}
-                        type="mention"
-                        host={host}
-                        apiKey={apiKey}
-                        insecureMode={insecureMode}
-                        templateSuggestion={searchMatchMentionTemplate}
-                        mention={ref}
-                        presets={presets}
-                        acceptSuggestion={acceptSuggestion}
-                        directReferenceMessages={directReferenceMessages}
-                      />
+              <div className="option">
+                <div className="option-value">
+                  <Select
+                    label="Preset"
+                    value={selectedPreset}
+                    fullWidth={true}
+                    onChange={(event) =>
+                      setSelectedPreset(
+                        typeof event.target.value === "number"
+                          ? event.target.value
+                          : parseInt(event.target.value, 10)
+                      )
+                    }
+                  >
+                    {cacheAvailable && (
+                      <MenuItem key={"cached"} value={-1}>
+                        <i>Saved Draft</i>
+                      </MenuItem>
+                    )}
+                    {presets.map((preset, idx) => (
+                      <MenuItem key={preset.name} value={idx}>
+                        {preset.name}
+                      </MenuItem>
                     ))}
+                  </Select>
+                  <IconButton
+                    className="send-to-obsidian"
+                    color="primary"
+                    size="large"
+                    disabled={!ready}
+                    onClick={sendToObsidian}
+                    title="Send to Obsidian"
+                  >
+                    <SendIcon />
+                  </IconButton>
                 </div>
+              </div>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography>Entry Details</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <RequestParameters
+                    method={method}
+                    url={compiledUrl}
+                    headers={headers}
+                    content={compiledContent}
+                    onChangeMethod={setMethod}
+                    onChangeUrl={setCompiledUrl}
+                    onChangeHeaders={setHeaders}
+                    onChangeContent={setCompiledContent}
+                  />
+                </AccordionDetails>
+              </Accordion>
+              {!suggestionAccepted && host && (
+                <>
+                  {(mentions.length > 0 || directReferences.length > 0) && (
+                    <div className="mentions">
+                      {directReferences.map((ref) => (
+                        <MentionNotice
+                          key={ref.filename}
+                          type="direct"
+                          host={host}
+                          apiKey={apiKey}
+                          insecureMode={insecureMode}
+                          templateSuggestion={searchMatchDirectTemplate}
+                          mention={ref}
+                          presets={presets}
+                          acceptSuggestion={acceptSuggestion}
+                          directReferenceMessages={directReferenceMessages}
+                        />
+                      ))}
+                      {mentions
+                        .filter(
+                          (ref) =>
+                            !directReferences.find(
+                              (d) => d.filename === ref.filename
+                            )
+                        )
+                        .map((ref) => (
+                          <MentionNotice
+                            key={ref.filename}
+                            type="mention"
+                            host={host}
+                            apiKey={apiKey}
+                            insecureMode={insecureMode}
+                            templateSuggestion={searchMatchMentionTemplate}
+                            mention={ref}
+                            presets={presets}
+                            acceptSuggestion={acceptSuggestion}
+                            directReferenceMessages={directReferenceMessages}
+                          />
+                        ))}
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
-        </>
-      )}
+        </div>
+      </div>
     </ThemeProvider>
   );
 };
 
+const root = document.createElement("div");
+root.attachShadow({ mode: "open" });
+
+const emotionStyleNode = document.createElement("style");
+root.shadowRoot?.appendChild(emotionStyleNode);
+
+const cache = createCache({
+  key: "css",
+  prepend: true,
+  container: emotionStyleNode,
+});
+
+const styleNode = document.createElement("style");
+styleNode.innerHTML = styles;
+root.shadowRoot?.appendChild(styleNode);
+
+const popupRoot = document.createElement("div");
+root.shadowRoot?.appendChild(popupRoot);
+
+document.body.appendChild(root);
+console.log(root.shadowRoot);
+
 ReactDOM.render(
   <React.StrictMode>
-    <Popup />
+    <CacheProvider value={cache}>
+      <Popup />
+    </CacheProvider>
   </React.StrictMode>,
-  document.getElementById("root")
+  popupRoot
 );

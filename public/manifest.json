@@ -23,13 +23,13 @@
   },
 
   "action": {
+    "default_title": "Take Note",
     "default_icon": {
       "16": "icon16.png",
       "48": "icon48.png",
       "128": "icon128.png",
       "256": "icon256.png"
-    },
-    "default_popup": "popup.html"
+    }
   },
 
   "optional_permissions": ["tabs"],
