@@ -65,7 +65,7 @@ const Popup = () => {
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
 
   const [url, setUrl] = useState<string>("");
-  const [title, setTitle] = useState<string>("");
+  const [pageTitle, setPageTitle] = useState<string>("");
   const [selection, setSelection] = useState<string>("");
   const [pageContent, setPageContent] = useState<string>("");
 
@@ -89,6 +89,13 @@ const Popup = () => {
   const [compiledUrl, setCompiledUrl] = useState<string>("");
   const [headers, setHeaders] = useState<Record<string, string>>({});
   const [compiledContent, setCompiledContent] = useState<string>("");
+
+  const [articleTitle, setArticleTitle] = useState<string>();
+  const [articleLength, setArticleLength] = useState<number>();
+  const [articleExcerpt, setArticleExcerpt] = useState<string>();
+  const [articleByline, setArticleByline] = useState<string>();
+  const [articleDir, setArticleDir] = useState<string>();
+  const [articleSiteName, setArticleSiteName] = useState<string>();
 
   const [presets, setPresets] = useState<OutputPreset[]>([]);
   const [selectedPreset, setSelectedPreset] = useState<number>(0);
@@ -278,10 +285,11 @@ const Popup = () => {
             return node.innerHTML;
           },
         });
-        selectedText = htmlToMarkdown(
+        const selectionReadability = htmlToReadabilityData(
           selectedTextInjected[0].result,
           tab.url ?? ""
         );
+        selectedText = readabilityDataToMarkdown(selectionReadability);
       } catch (e) {
         selectedText = "";
       }
@@ -292,16 +300,38 @@ const Popup = () => {
           target: { tabId: tab.id },
           func: () => window.document.body.innerHTML,
         });
-        pageContent = htmlToMarkdown(
+        const pageReadability = htmlToReadabilityData(
           pageContentInjected[0].result,
           tab.url ?? ""
         );
+        if (pageReadability) {
+          setArticleTitle(pageReadability.title);
+          setArticleLength(pageReadability.length);
+          setArticleExcerpt(pageReadability.excerpt);
+          setArticleByline(pageReadability.byline);
+          setArticleDir(pageReadability.dir);
+          setArticleSiteName(pageReadability.siteName);
+        } else {
+          setArticleTitle(undefined);
+          setArticleLength(undefined);
+          setArticleExcerpt(undefined);
+          setArticleByline(undefined);
+          setArticleDir(undefined);
+          setArticleSiteName(undefined);
+        }
+        pageContent = readabilityDataToMarkdown(pageReadability);
       } catch (e) {
         pageContent = "";
+        setArticleTitle(undefined);
+        setArticleLength(undefined);
+        setArticleExcerpt(undefined);
+        setArticleByline(undefined);
+        setArticleDir(undefined);
+        setArticleSiteName(undefined);
       }
 
       setUrl(tab.url ?? "");
-      setTitle(tab.title ?? "");
+      setPageTitle(tab.title ?? "");
       setSelection(selectedText);
       setPageContent(pageContent);
     }
@@ -366,9 +396,17 @@ const Popup = () => {
       const context = {
         page: {
           url: url,
-          title: title,
+          tiitle: pageTitle,
           selectedText: selection,
           content: pageContent,
+        },
+        article: {
+          title: articleTitle,
+          length: articleLength,
+          excerpt: articleExcerpt,
+          byline: articleByline,
+          dir: articleDir,
+          siteName: articleSiteName,
         },
       };
 
@@ -412,7 +450,7 @@ const Popup = () => {
     selectedPreset,
     presets,
     url,
-    title,
+    pageTitle,
     selection,
     pageContent,
   ]);
@@ -431,16 +469,24 @@ const Popup = () => {
     });
   }, [url, method, compiledUrl, headers, compiledContent]);
 
-  const htmlToMarkdown = (html: string, baseUrl: string): string => {
+  const htmlToReadabilityData = (
+    html: string,
+    baseUrl: string
+  ): ReturnType<Readability["parse"]> => {
     const tempDoc = document.implementation.createHTMLDocument();
     const base = tempDoc.createElement("base");
     base.href = baseUrl;
     tempDoc.head.append(base);
     tempDoc.body.innerHTML = html;
     const reader = new Readability(tempDoc);
-    const parsed = reader.parse();
-    if (parsed) {
-      return turndown.turndown(parsed.content);
+    return reader.parse();
+  };
+
+  const readabilityDataToMarkdown = (
+    data: ReturnType<Readability["parse"]>
+  ): string => {
+    if (data) {
+      return turndown.turndown(data.content);
     }
     return "";
   };
