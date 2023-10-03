@@ -31,6 +31,13 @@
       "256": "icon256.png"
     }
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["options.html"],
+      "matches": ["<all_urls>"]
+    }
+
+  ],
 
   "optional_permissions": ["tabs"],
   "permissions": ["storage", "activeTab", "scripting"],

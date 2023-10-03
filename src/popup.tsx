@@ -586,7 +586,6 @@ const Popup = () => {
           className="popup"
           onClick={(evt) => {
             evt.stopPropagation();
-            evt.preventDefault();
           }}
         >
           {displayState === "welcome" && (
@@ -595,7 +594,10 @@ const Popup = () => {
                 Thanks for installing Obsidian Web! Obsidian Web needs some
                 information from you before it can connect to your Obsidian
                 instance.
-                <Button onClick={() => chrome.runtime.openOptionsPage()}>
+                <Button
+                  target="_blank"
+                  href={`chrome-extension://${chrome.runtime.id}/options.html`}
+                >
                   Go to settings
                 </Button>
               </MaterialAlert>
