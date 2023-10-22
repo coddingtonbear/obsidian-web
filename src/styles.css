@@ -34,15 +34,13 @@ div.background {
   height: 100vh;
   background-color: rgb(100, 100, 100, 0.25);
 
-  visibility: hidden;
   opacity: 0;
-  transition: visibility 0s, opacity 0.25s linear;
+  transition: opacity 0.25s linear;
 }
 
 div.background.displayed {
-  visibility: visible;
   opacity: 100;
-  transition: visibility 0s, opacity 0.25s linear;
+  transition: opacity 0.25s linear;
 }
 
 div.popup {
@@ -50,8 +48,7 @@ div.popup {
   position: fixed;
   right: 25px;
   top: 25px;
-  z-index: 2147483647;
-  border: 1px solid lightgray;
+  z-index: 9999999;
   box-shadow: 5px 5px 5px gray;
 }
 

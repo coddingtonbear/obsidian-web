@@ -10,5 +10,6 @@
         "noEmitOnError": true,
         "jsx": "react",
         "typeRoots": [ "node_modules/@types" ]
-    }
+    },
+    "exclude": ["node_modules/**"]
 }

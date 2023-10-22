@@ -17,8 +17,8 @@ import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CircularProgress from "@mui/material/CircularProgress";
 import MaterialAlert from "@mui/material/Alert";
-import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
+import { CacheProvider } from "@emotion/react";
 
 import SendIcon from "@mui/icons-material/SaveAlt";
 
@@ -51,6 +51,9 @@ import {
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
 import MentionNotice from "./components/MentionNotice";
+import { Stack } from "@mui/material";
+
+const ROOT_CONTAINER_ID = "obsidian-web-container";
 
 const Popup = () => {
   const [status, setStatus] = useState<AlertStatus>();
@@ -102,8 +105,6 @@ const Popup = () => {
   const [articleByline, setArticleByline] = useState<string>();
   const [articleDir, setArticleDir] = useState<string>();
   const [articleSiteName, setArticleSiteName] = useState<string>();
-
-  const [popupVisible, setPopupVisible] = useState<boolean>(true);
 
   const [presets, setPresets] = useState<OutputPreset[]>([]);
   const [selectedPreset, setSelectedPreset] = useState<number>(0);
@@ -224,11 +225,12 @@ const Popup = () => {
   }, []);
 
   useEffect(() => {
+    /*
     if (host) {
       checkHasHostPermission(host).then((hasPermission) => {
         setHasHostPermission(hasPermission);
       });
-    }
+    }*/
   }, [host]);
 
   useEffect(() => {
@@ -576,11 +578,18 @@ const Popup = () => {
     setSuggestionAccepted(true);
   };
 
+  const onFinished = () => {
+    setDisplayed(false);
+    setTimeout(() => {
+      document.getElementById(ROOT_CONTAINER_ID)?.remove();
+    }, 300);
+  };
+
   return (
     <ThemeProvider theme={PurpleTheme}>
       <div
         className={classnames("background", { displayed })}
-        onClick={() => setDisplayed(false)}
+        onClick={() => onFinished()}
       >
         <div
           className="popup"
@@ -591,30 +600,49 @@ const Popup = () => {
           {displayState === "welcome" && (
             <>
               <MaterialAlert severity="success">
-                Thanks for installing Obsidian Web! Obsidian Web needs some
-                information from you before it can connect to your Obsidian
-                instance.
-                <Button
-                  target="_blank"
-                  href={`chrome-extension://${chrome.runtime.id}/options.html`}
-                >
-                  Go to settings
-                </Button>
+                <Stack>
+                  <Typography>
+                    Thanks for installing Obsidian Web! Obsidian Web needs some
+                    information from you before it can connect to your Obsidian
+                    instance.
+                  </Typography>
+                  <div className="submit">
+                    <Button
+                      target="_blank"
+                      variant="contained"
+                      href={`chrome-extension://${chrome.runtime.id}/options.html`}
+                    >
+                      Go to settings
+                    </Button>
+                  </div>
+                </Stack>
               </MaterialAlert>
             </>
           )}
           {displayState === "permission" && host && (
             <MaterialAlert severity="warning">
-              Obsidian Web needs permission to access Obsidian on '{host}'.
-              <Button
-                onClick={() =>
-                  requestHostPermission(host).then((result) => {
-                    setHasHostPermission(result);
-                  })
-                }
-              >
-                Grant
-              </Button>
+              <Typography>
+                Obsidian Web needs permission to access Obsidian on '{host}'.
+              </Typography>
+              <div className="submit">
+                <Button
+                  target="_blank"
+                  variant="outlined"
+                  href={`chrome-extension://${chrome.runtime.id}/options.html`}
+                >
+                  Go to settings
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() =>
+                    requestHostPermission(host).then((result) => {
+                      setHasHostPermission(result);
+                    })
+                  }
+                >
+                  Grant
+                </Button>
+              </div>
             </MaterialAlert>
           )}
           {displayState === "alert" && status && <Alert value={status} />}
@@ -741,31 +769,38 @@ const Popup = () => {
 };
 
 const root = document.createElement("div");
-root.attachShadow({ mode: "open" });
+root.id = ROOT_CONTAINER_ID;
+const shadowContainer = root.attachShadow({ mode: "open" });
 
-const emotionStyleNode = document.createElement("style");
-root.shadowRoot?.appendChild(emotionStyleNode);
+const popupRoot = document.createElement("div");
+shadowContainer.appendChild(popupRoot);
+
+const styleResetRoot = document.createElement("style");
+styleResetRoot.innerHTML = ":host {all: initial;}";
+shadowContainer.appendChild(styleResetRoot);
+
+const emotionRoot = document.createElement("style");
+shadowContainer.appendChild(emotionRoot);
+
+const stylesRoot = document.createElement("style");
+stylesRoot.innerHTML = styles;
+shadowContainer.appendChild(stylesRoot);
 
 const cache = createCache({
   key: "css",
   prepend: true,
-  container: emotionStyleNode,
+  container: emotionRoot,
 });
 
-const styleNode = document.createElement("style");
-styleNode.innerHTML = styles;
-root.shadowRoot?.appendChild(styleNode);
-
-const popupRoot = document.createElement("div");
-root.shadowRoot?.appendChild(popupRoot);
-
-document.body.appendChild(root);
-console.log(root.shadowRoot);
+document.body.prepend(root);
 
 ReactDOM.render(
   <React.StrictMode>
     <CacheProvider value={cache}>
-      <Popup />
+      {/* Allows us to be sure we're positioned far above the page zIndex" */}
+      <div style={{ position: "relative", zIndex: "999999999" }}>
+        <Popup />
+      </div>
     </CacheProvider>
   </React.StrictMode>,
   popupRoot

@@ -111,7 +111,7 @@ chrome.action.onClicked.addListener((tab) => {
   if (tab.id) {
     chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      files: ["js/vendor.js", "js/popup.js"],
+      files: ["js/popup.js"],
     });
   } else {
     console.log("No tab ID");
