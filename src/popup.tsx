@@ -787,7 +787,7 @@ stylesRoot.innerHTML = styles;
 shadowContainer.appendChild(stylesRoot);
 
 const cache = createCache({
-  key: "css",
+  key: "obsidian-web",
   prepend: true,
   container: emotionRoot,
 });
