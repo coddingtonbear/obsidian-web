@@ -13,7 +13,6 @@ import IconButton from "@mui/material/IconButton";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CircularProgress from "@mui/material/CircularProgress";
 import MaterialAlert from "@mui/material/Alert";
@@ -600,30 +599,28 @@ const Popup = () => {
           {displayState === "welcome" && (
             <>
               <MaterialAlert severity="success">
-                <Stack>
-                  <Typography>
-                    Thanks for installing Obsidian Web! Obsidian Web needs some
-                    information from you before it can connect to your Obsidian
-                    instance.
-                  </Typography>
-                  <div className="submit">
-                    <Button
-                      target="_blank"
-                      variant="contained"
-                      href={`chrome-extension://${chrome.runtime.id}/options.html`}
-                    >
-                      Go to settings
-                    </Button>
-                  </div>
-                </Stack>
+                <p className="popup-text">
+                  Thanks for installing Obsidian Web! Obsidian Web needs some
+                  information from you before it can connect to your Obsidian
+                  instance.
+                </p>
+                <div className="submit">
+                  <Button
+                    target="_blank"
+                    variant="contained"
+                    href={`chrome-extension://${chrome.runtime.id}/options.html`}
+                  >
+                    Go to settings
+                  </Button>
+                </div>
               </MaterialAlert>
             </>
           )}
           {displayState === "permission" && host && (
-            <MaterialAlert severity="warning">
-              <Typography>
+            <MaterialAlert severity="warning" style={{ flexGrow: 1 }}>
+              <p className="popup-text">
                 Obsidian Web needs permission to access Obsidian on '{host}'.
-              </Typography>
+              </p>
               <div className="submit">
                 <Button
                   target="_blank"
@@ -655,9 +652,7 @@ const Popup = () => {
           {displayState === "loading" && (
             <div className="loading">
               {" "}
-              <Typography paragraph={true}>
-                Gathering page information...
-              </Typography>
+              <div>Gathering page information...</div>
               <CircularProgress />
             </div>
           )}
@@ -702,7 +697,7 @@ const Popup = () => {
               </div>
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography>Entry Details</Typography>
+                  <p>Entry Details</p>
                 </AccordionSummary>
                 <AccordionDetails>
                   <RequestParameters

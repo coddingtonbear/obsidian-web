@@ -26,6 +26,12 @@ body.options #root {
   margin: 20px;
 }
 
+p.popup-text {
+  font-size: 16px;
+  margin-top: 0px;
+  margin-bottom: 20px;
+}
+
 div.background {
   position: fixed;
   left: 0px;
@@ -187,4 +193,8 @@ div.protip p {
 .send-to-obsidian {
   width: 56px;
   height: 56px;
+}
+
+.MuiAlert-message {
+  flex-grow: 1
 }
