@@ -56,6 +56,8 @@ div.popup {
   top: 25px;
   z-index: 9999999;
   box-shadow: 5px 5px 5px gray;
+  background-color: #fff;
+  padding: 5px;
 }
 
 div.auth-field {

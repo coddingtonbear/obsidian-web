@@ -363,12 +363,12 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   }, [url]);
 
   useEffect(() => {
-    const preset = presets[selectedPreset];
-    if (!sandboxReady || !preset) {
+    if (!sandboxReady) {
       return;
     }
 
     async function handle() {
+      const preset = presets[selectedPreset];
       const context = {
         page: {
           url: url,
