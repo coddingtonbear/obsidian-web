@@ -1,5 +1,5 @@
 import { getUrlMentions, getLocalSettings, obsidianRequest } from "./utils";
-import { ExtensionLocalSettings } from "./types";
+import { BackgroundRequest, ExtensionLocalSettings } from "./types";
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   const localSettings: ExtensionLocalSettings = await getLocalSettings(
@@ -117,3 +117,35 @@ chrome.action.onClicked.addListener((tab) => {
     console.log("No tab ID");
   }
 });
+
+chrome.runtime.onMessage.addListener(
+  (message: BackgroundRequest, sender, sendResponse) => {
+    if (message.type === "check-has-host-permission") {
+      chrome.permissions.contains(
+        {
+          origins: [
+            `http://${message.host}:27123/*`,
+            `https://${message.host}:27124/*`,
+          ],
+        },
+        (result) => {
+          sendResponse(result);
+        }
+      );
+    } else if (message.type === "request-host-permission") {
+      chrome.permissions.request(
+        {
+          origins: [
+            `http://${message.host}:27123/*`,
+            `https://${message.host}:27124/*`,
+          ],
+        },
+        (result) => {
+          sendResponse(result);
+        }
+      );
+    }
+
+    return true;
+  }
+);

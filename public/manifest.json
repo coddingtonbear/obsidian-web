@@ -33,7 +33,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["options.html"],
+      "resources": ["options.html", "handlebars.html"],
       "matches": ["<all_urls>"]
     }
 

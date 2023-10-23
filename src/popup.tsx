@@ -46,15 +46,19 @@ import {
   normalizeCacheUrl,
   checkHasHostPermission,
   requestHostPermission,
+  getWindowSelectionAsHtml,
 } from "./utils";
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
 import MentionNotice from "./components/MentionNotice";
-import { Stack } from "@mui/material";
 
 const ROOT_CONTAINER_ID = "obsidian-web-container";
 
-const Popup = () => {
+export interface Props {
+  sandbox: HTMLIFrameElement;
+}
+
+const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [status, setStatus] = useState<AlertStatus>();
   const [displayed, setDisplayed] = useState<boolean>(false);
 
@@ -224,12 +228,11 @@ const Popup = () => {
   }, []);
 
   useEffect(() => {
-    /*
     if (host) {
       checkHasHostPermission(host).then((hasPermission) => {
         setHasHostPermission(hasPermission);
       });
-    }*/
+    }
   }, [host]);
 
   useEffect(() => {
@@ -261,43 +264,11 @@ const Popup = () => {
 
   useEffect(() => {
     async function handle() {
-      let tab: chrome.tabs.Tab;
-      try {
-        const tabs = await chrome.tabs.query({
-          active: true,
-          currentWindow: true,
-        });
-        tab = tabs[0];
-      } catch (e) {
-        setStatus({
-          severity: "error",
-          title: "Error",
-          message: "Could not get current tab!",
-        });
-        return;
-      }
-      if (!tab.id) {
-        return;
-      }
-
       let selectedText: string;
       try {
-        const selectedTextInjected = await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => {
-            const selection = window.getSelection();
-            if (!selection) {
-              return "";
-            }
-            const contents = selection.getRangeAt(0).cloneContents();
-            const node = document.createElement("div");
-            node.appendChild(contents.cloneNode(true));
-            return node.innerHTML;
-          },
-        });
         const selectionReadability = htmlToReadabilityData(
-          selectedTextInjected[0].result,
-          tab.url ?? ""
+          getWindowSelectionAsHtml(),
+          window.document.location.href
         );
         selectedText = readabilityDataToMarkdown(selectionReadability);
       } catch (e) {
@@ -306,13 +277,9 @@ const Popup = () => {
 
       let pageContent: string;
       try {
-        const pageContentInjected = await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => window.document.body.innerHTML,
-        });
         const pageReadability = htmlToReadabilityData(
-          pageContentInjected[0].result,
-          tab.url ?? ""
+          window.document.body.innerHTML,
+          window.document.location.href
         );
         if (pageReadability) {
           setArticleTitle(pageReadability.title);
@@ -340,8 +307,8 @@ const Popup = () => {
         setArticleSiteName(undefined);
       }
 
-      setUrl(tab.url ?? "");
-      setPageTitle(tab.title ?? "");
+      setUrl(window.document.location.href ?? "");
+      setPageTitle(window.document.title ?? "");
       setSelection(selectedText);
       setPageContent(pageContent);
     }
@@ -396,13 +363,12 @@ const Popup = () => {
   }, [url]);
 
   useEffect(() => {
-    if (!sandboxReady) {
+    const preset = presets[selectedPreset];
+    if (!sandboxReady || !preset) {
       return;
     }
 
     async function handle() {
-      const preset = presets[selectedPreset];
-
       const context = {
         page: {
           url: url,
@@ -424,10 +390,15 @@ const Popup = () => {
         setCompiledUrl(overrideUrl);
         setOverrideUrl(undefined);
       } else {
-        const compiledUrl = await compileTemplate(preset.urlTemplate, context);
+        const compiledUrl = await compileTemplate(
+          sandbox,
+          preset.urlTemplate,
+          context
+        );
         setCompiledUrl(compiledUrl);
       }
       const compiledContent = await compileTemplate(
+        sandbox,
         preset.contentTemplate,
         context
       );
@@ -502,13 +473,6 @@ const Popup = () => {
   };
 
   const sendToObsidian = async () => {
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    const tab = tabs[0];
-
-    if (!tab.id) {
-      return;
-    }
-
     const requestHeaders = {
       ...headers,
       "Content-Type": "text/markdown",
@@ -781,6 +745,12 @@ const stylesRoot = document.createElement("style");
 stylesRoot.innerHTML = styles;
 shadowContainer.appendChild(stylesRoot);
 
+const sandbox = document.createElement("iframe");
+sandbox.id = "handlebars-sandbox";
+sandbox.src = chrome.runtime.getURL("handlebars.html");
+sandbox.hidden = true;
+shadowContainer.appendChild(sandbox);
+
 const cache = createCache({
   key: "obsidian-web",
   prepend: true,
@@ -794,7 +764,7 @@ ReactDOM.render(
     <CacheProvider value={cache}>
       {/* Allows us to be sure we're positioned far above the page zIndex" */}
       <div style={{ position: "relative", zIndex: "999999999" }}>
-        <Popup />
+        <Popup sandbox={sandbox} />
       </div>
     </CacheProvider>
   </React.StrictMode>,

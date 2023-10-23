@@ -65,7 +65,11 @@ import Alert from "./components/Alert";
 import RequestParameters from "./components/RequestParameters";
 import { PurpleTheme } from "./theme";
 
-const Options = () => {
+export interface Props {
+  sandbox: HTMLIFrameElement | null;
+}
+
+const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const minVersion = MinVersion;
 
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -310,14 +314,14 @@ const Options = () => {
     let errorMessage: string | undefined = undefined;
 
     try {
-      await compileTemplate(contentTemplate, {});
+      await compileTemplate(sandbox, contentTemplate, {});
     } catch (e) {
       errorMessage = "Could not compile content template.";
     }
 
     if (!errorMessage) {
       try {
-        await compileTemplate(urlTemplate, {});
+        await compileTemplate(sandbox, urlTemplate, {});
       } catch (e) {
         errorMessage = "Could not compile url template.";
       }
@@ -980,7 +984,11 @@ const Options = () => {
 
 ReactDOM.render(
   <React.StrictMode>
-    <Options />
+    <Options
+      sandbox={
+        document.getElementById("handlebars-sandbox") as HTMLIFrameElement
+      }
+    />
   </React.StrictMode>,
   document.getElementById("root")
 );

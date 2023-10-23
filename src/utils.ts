@@ -11,6 +11,9 @@ import {
   SandboxExceptionResponse,
   SearchJsonResponseItem,
   SandboxLoadedResponse,
+  BackgroundRequest,
+  CheckHasHostPermissionRequest,
+  RequestHostPermissionRequest,
 } from "./types";
 import { DefaultSyncSettings, DefaultLocalSettings } from "./constants";
 
@@ -60,34 +63,30 @@ export function normalizeCacheUrl(urlString: string): string {
   return url.toString();
 }
 
-export async function checkHasHostPermission(host: string): Promise<boolean> {
-  const result = new Promise<boolean>((resolve, reject) => {
-    chrome.permissions.contains(
-      {
-        origins: [`http://${host}:27123/*`, `https://${host}:27124/*`],
-      },
-      (result) => {
-        resolve(result);
-      }
-    );
-  });
+export async function sendBackroundRequest(
+  message: CheckHasHostPermissionRequest
+): Promise<boolean>;
+export async function sendBackroundRequest(
+  message: RequestHostPermissionRequest
+): Promise<boolean>;
+export async function sendBackroundRequest(
+  message: BackgroundRequest
+): Promise<unknown> {
+  return await chrome.runtime.sendMessage(message);
+}
 
-  return result;
+export async function checkHasHostPermission(host: string): Promise<boolean> {
+  return await sendBackroundRequest({
+    type: "check-has-host-permission",
+    host,
+  });
 }
 
 export async function requestHostPermission(host: string): Promise<boolean> {
-  const result = new Promise<boolean>((resolve, reject) => {
-    chrome.permissions.request(
-      {
-        origins: [`http://${host}:27123/*`, `https://${host}:27124/*`],
-      },
-      (granted) => {
-        resolve(granted);
-      }
-    );
+  return await sendBackroundRequest({
+    type: "request-host-permission",
+    host,
   });
-
-  return result;
 }
 
 export async function openFileInObsidian(
@@ -203,14 +202,15 @@ export async function obsidianRequest(
 }
 
 export function compileTemplate(
+  sandbox: HTMLIFrameElement | null,
   template: string,
   context: Record<string, any>
 ): Promise<string> {
-  const result = new Promise<string>((resolve, reject) => {
-    const sandbox = document.getElementById(
-      "handlebars-sandbox"
-    ) as HTMLIFrameElement;
+  if (!sandbox || !sandbox.contentWindow) {
+    throw new Error("No sandbox available");
+  }
 
+  const result = new Promise<string>((resolve, reject) => {
     if (!sandbox.contentWindow) {
       throw new Error("No content window found for handlebars sandbox!");
     }
@@ -231,6 +231,17 @@ export function compileTemplate(
   });
 
   return result;
+}
+
+export function getWindowSelectionAsHtml(): string {
+  const selection = window.getSelection();
+  if (!selection) {
+    return "";
+  }
+  const contents = selection.getRangeAt(0).cloneContents();
+  const node = document.createElement("div");
+  node.appendChild(contents.cloneNode(true));
+  return node.innerHTML;
 }
 
 function compileTemplateCallback(

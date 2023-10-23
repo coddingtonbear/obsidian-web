@@ -99,3 +99,21 @@ export interface FileMetadataObject {
   path: string;
   content: string;
 }
+
+export interface BaseBackgroundRequest {
+  type: string;
+}
+
+export interface RequestHostPermissionRequest extends BaseBackgroundRequest {
+  type: "request-host-permission";
+  host: string;
+}
+
+export interface CheckHasHostPermissionRequest extends BaseBackgroundRequest {
+  type: "check-has-host-permission";
+  host: string;
+}
+
+export type BackgroundRequest =
+  | RequestHostPermissionRequest
+  | CheckHasHostPermissionRequest;
