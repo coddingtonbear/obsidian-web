@@ -47,6 +47,7 @@ import {
   checkHasHostPermission,
   requestHostPermission,
   getWindowSelectionAsHtml,
+  unregisterCompileTemplateCallback,
 } from "./utils";
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
@@ -543,6 +544,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const onFinished = () => {
     setDisplayed(false);
+    unregisterCompileTemplateCallback();
     setTimeout(() => {
       document.getElementById(ROOT_CONTAINER_ID)?.remove();
     }, 300);

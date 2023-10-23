@@ -244,6 +244,12 @@ export function getWindowSelectionAsHtml(): string {
   return node.innerHTML;
 }
 
+const compileTemplateCallbackController = new AbortController();
+
+export function unregisterCompileTemplateCallback(): void {
+  compileTemplateCallbackController.abort();
+}
+
 function compileTemplateCallback(
   event: MessageEvent<
     SandboxRenderResponse | SandboxExceptionResponse | SandboxLoadedResponse
@@ -274,5 +280,7 @@ function compileTemplateCallback(
 }
 
 if (typeof window !== "undefined") {
-  window.addEventListener("message", compileTemplateCallback);
+  window.addEventListener("message", compileTemplateCallback, {
+    signal: compileTemplateCallbackController.signal,
+  });
 }
