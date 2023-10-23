@@ -770,16 +770,16 @@ const Popup = () => {
 
 const root = document.createElement("div");
 root.id = ROOT_CONTAINER_ID;
-const shadowContainer = root.attachShadow({ mode: "open" });
+const shadowContainer = root.attachShadow({ mode: "closed" });
+
+const styleResetRoot = document.createElement("style");
+styleResetRoot.innerHTML = ":host {all: initial}";
+shadowContainer.appendChild(styleResetRoot);
 
 const popupRoot = document.createElement("div");
 shadowContainer.appendChild(popupRoot);
 
-const styleResetRoot = document.createElement("style");
-styleResetRoot.innerHTML = ":host {all: initial;}";
-shadowContainer.appendChild(styleResetRoot);
-
-const emotionRoot = document.createElement("style");
+const emotionRoot = document.createElement("div");
 shadowContainer.appendChild(emotionRoot);
 
 const stylesRoot = document.createElement("style");
