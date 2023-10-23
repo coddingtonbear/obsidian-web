@@ -628,6 +628,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                     label="Preset"
                     value={selectedPreset}
                     fullWidth={true}
+                    MenuProps={{ disablePortal: true }}
                     onChange={(event) =>
                       setSelectedPreset(
                         typeof event.target.value === "number"
