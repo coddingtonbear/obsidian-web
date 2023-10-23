@@ -544,10 +544,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const onFinished = () => {
     setDisplayed(false);
-    unregisterCompileTemplateCallback();
-    setTimeout(() => {
-      document.getElementById(ROOT_CONTAINER_ID)?.remove();
-    }, 300);
+    popupTeardown();
   };
 
   return (
@@ -730,46 +727,57 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   );
 };
 
-const root = document.createElement("div");
-root.id = ROOT_CONTAINER_ID;
-const shadowContainer = root.attachShadow({ mode: "closed" });
+function popupTeardown() {
+  unregisterCompileTemplateCallback();
+  setTimeout(() => {
+    document.getElementById(ROOT_CONTAINER_ID)?.remove();
+  }, 300);
+}
 
-const styleResetRoot = document.createElement("style");
-styleResetRoot.innerHTML = ":host {all: initial}";
-shadowContainer.appendChild(styleResetRoot);
+if (!document.getElementById(ROOT_CONTAINER_ID)) {
+  const root = document.createElement("div");
+  root.id = ROOT_CONTAINER_ID;
+  const shadowContainer = root.attachShadow({ mode: "closed" });
 
-const popupRoot = document.createElement("div");
-shadowContainer.appendChild(popupRoot);
+  const styleResetRoot = document.createElement("style");
+  styleResetRoot.innerHTML = ":host {all: initial}";
+  shadowContainer.appendChild(styleResetRoot);
 
-const emotionRoot = document.createElement("div");
-shadowContainer.appendChild(emotionRoot);
+  const popupRoot = document.createElement("div");
+  shadowContainer.appendChild(popupRoot);
 
-const stylesRoot = document.createElement("style");
-stylesRoot.innerHTML = styles;
-shadowContainer.appendChild(stylesRoot);
+  const emotionRoot = document.createElement("div");
+  shadowContainer.appendChild(emotionRoot);
 
-const sandbox = document.createElement("iframe");
-sandbox.id = "handlebars-sandbox";
-sandbox.src = chrome.runtime.getURL("handlebars.html");
-sandbox.hidden = true;
-shadowContainer.appendChild(sandbox);
+  const stylesRoot = document.createElement("style");
+  stylesRoot.innerHTML = styles;
+  shadowContainer.appendChild(stylesRoot);
 
-const cache = createCache({
-  key: "obsidian-web",
-  prepend: true,
-  container: emotionRoot,
-});
+  const sandbox = document.createElement("iframe");
+  sandbox.id = "handlebars-sandbox";
+  sandbox.src = chrome.runtime.getURL("handlebars.html");
+  sandbox.hidden = true;
+  shadowContainer.appendChild(sandbox);
 
-document.body.prepend(root);
+  const cache = createCache({
+    key: "obsidian-web",
+    prepend: true,
+    container: emotionRoot,
+  });
 
-ReactDOM.render(
-  <React.StrictMode>
-    <CacheProvider value={cache}>
-      {/* Allows us to be sure we're positioned far above the page zIndex" */}
-      <div style={{ position: "relative", zIndex: "999999999" }}>
-        <Popup sandbox={sandbox} />
-      </div>
-    </CacheProvider>
-  </React.StrictMode>,
-  popupRoot
-);
+  document.body.prepend(root);
+
+  ReactDOM.render(
+    <React.StrictMode>
+      <CacheProvider value={cache}>
+        {/* Allows us to be sure we're positioned far above the page zIndex" */}
+        <div style={{ position: "relative", zIndex: "999999999" }}>
+          <Popup sandbox={sandbox} />
+        </div>
+      </CacheProvider>
+    </React.StrictMode>,
+    popupRoot
+  );
+} else {
+  popupTeardown();
+}
