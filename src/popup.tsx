@@ -110,7 +110,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [articleDir, setArticleDir] = useState<string>();
   const [articleSiteName, setArticleSiteName] = useState<string>();
 
-  const [presets, setPresets] = useState<OutputPreset[]>([]);
+  const [presets, setPresets] = useState<OutputPreset[]>();
   const [selectedPreset, setSelectedPreset] = useState<number>(0);
 
   const [displayState, setDisplayState] = useState<
@@ -364,11 +364,15 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   }, [url]);
 
   useEffect(() => {
-    if (!sandboxReady) {
+    if (!sandboxReady || presets === undefined) {
       return;
     }
 
     async function handle() {
+      if (!presets) {
+        throw new Error("Unexpectedly had no presets when compiling template.");
+      }
+
       const preset = presets[selectedPreset];
       const context = {
         page: {
@@ -410,6 +414,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       setReady(true);
     }
 
+    // -1 is our signal for loading the draft
     if (selectedPreset === -1) {
       if (cacheData.method) {
         setMethod(cacheData.method);
@@ -534,6 +539,9 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   };
 
   const acceptSuggestion = (filename: string, template: string) => {
+    if (presets === undefined) {
+      throw new Error("Unexpectedly had no presets when accepting suggestion");
+    }
     const matchingPresetIdx = presets.findIndex(
       (preset) => preset.name === template
     );
@@ -641,11 +649,12 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                         <i>Saved Draft</i>
                       </MenuItem>
                     )}
-                    {presets.map((preset, idx) => (
-                      <MenuItem key={preset.name} value={idx}>
-                        {preset.name}
-                      </MenuItem>
-                    ))}
+                    {presets &&
+                      presets.map((preset, idx) => (
+                        <MenuItem key={preset.name} value={idx}>
+                          {preset.name}
+                        </MenuItem>
+                      ))}
                   </Select>
                   <IconButton
                     className="send-to-obsidian"
@@ -689,7 +698,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                           insecureMode={insecureMode}
                           templateSuggestion={searchMatchDirectTemplate}
                           mention={ref}
-                          presets={presets}
+                          presets={presets ?? []}
                           acceptSuggestion={acceptSuggestion}
                           directReferenceMessages={directReferenceMessages}
                         />
@@ -710,7 +719,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                             insecureMode={insecureMode}
                             templateSuggestion={searchMatchMentionTemplate}
                             mention={ref}
-                            presets={presets}
+                            presets={presets ?? []}
                             acceptSuggestion={acceptSuggestion}
                             directReferenceMessages={directReferenceMessages}
                           />
