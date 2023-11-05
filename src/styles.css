@@ -136,6 +136,7 @@ div.options-container {
 div.loading {
   display: flex;
   flex-direction: column;
+  padding: 20px;
 }
 
 div.loading > p {

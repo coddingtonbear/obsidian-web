@@ -124,6 +124,10 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       setDisplayState("welcome");
       return;
     }
+    if (!ready) {
+      setDisplayState("loading");
+      return;
+    }
     if (!hasHostPermission) {
       setDisplayState("permission");
       return;
@@ -134,10 +138,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
     }
     if (obsidianUnavailable) {
       setDisplayState("error");
-      return;
-    }
-    if (!ready) {
-      setDisplayState("loading");
       return;
     }
     setDisplayState("form");
@@ -623,7 +623,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
           {displayState === "loading" && (
             <div className="loading">
               {" "}
-              <div>Gathering page information...</div>
               <CircularProgress />
             </div>
           )}
