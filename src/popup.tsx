@@ -664,7 +664,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                     onClick={sendToObsidian}
                     title="Send to Obsidian"
                   >
-                    <SendIcon />
+                    <SendIcon className="send-to-obsidian-icon" />
                   </IconButton>
                 </div>
               </div>

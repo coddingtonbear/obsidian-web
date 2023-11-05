@@ -1,6 +1,13 @@
 import { createTheme } from "@mui/material/styles";
 
 export const PurpleTheme = createTheme({
+  typography: {
+    allVariants: {
+      fontFamily: ["Roboto", "Helvetica", "Arial"].join(","),
+      fontSize: 16,
+    },
+    htmlFontSize: 16,
+  },
   palette: {
     primary: {
       light: "#7a61cb",

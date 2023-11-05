@@ -3,7 +3,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(chrome-extension://__MSG_@@extension_id__/Roboto-Regular.ttf);
+  src: local("Roboto"), url(chrome-extension://__MSG_@@extension_id__/Roboto-Regular.ttf);
 }
 
 @font-face {
@@ -58,6 +58,7 @@ div.popup {
   box-shadow: 5px 5px 5px gray;
   background-color: #fff;
   padding: 5px;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
 div.auth-field {
@@ -195,6 +196,11 @@ div.protip p {
 .send-to-obsidian {
   width: 56px;
   height: 56px;
+}
+
+.send-to-obsidian-icon {
+  width: 30px;
+  height: 30px;
 }
 
 .MuiAlert-message {
