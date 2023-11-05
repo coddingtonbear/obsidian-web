@@ -746,7 +746,7 @@ function popupTeardown() {
 if (!document.getElementById(ROOT_CONTAINER_ID)) {
   const root = document.createElement("div");
   root.id = ROOT_CONTAINER_ID;
-  const shadowContainer = root.attachShadow({ mode: "closed" });
+  const shadowContainer = root.attachShadow({ mode: "open" });
 
   const styleResetRoot = document.createElement("style");
   styleResetRoot.innerHTML = ":host {all: initial}";
