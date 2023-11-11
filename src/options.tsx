@@ -256,7 +256,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     });
   }, [host]);
 
-  const closeEditingModal = () => {
+  const closeEditingPresetModal = () => {
     setEditingPreset(undefined);
   };
 
@@ -349,7 +349,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         newPresets[editingPreset] = preset;
         setPresets(newPresets);
       }
-      closeEditingModal();
+      closeEditingPresetModal();
     }
   };
 
@@ -858,7 +858,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       </Modal>
       <Modal
         open={editingPreset !== undefined}
-        onClose={() => closeEditingModal()}
+        onClose={() => closeEditingPresetModal()}
       >
         <Paper elevation={3} className="modal">
           <div className="option">
@@ -962,7 +962,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             onChangeContent={setContentTemplate}
           />
           <div className="submit">
-            <Button variant="outlined" onClick={() => closeEditingModal()}>
+            <Button
+              variant="outlined"
+              onClick={() => closeEditingPresetModal()}
+            >
               Cancel
             </Button>
             <Button variant="contained" onClick={savePreset}>
