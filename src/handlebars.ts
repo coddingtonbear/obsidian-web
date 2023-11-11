@@ -85,4 +85,7 @@ function handleEvent(evt: MessageEvent<SandboxRequest>): void {
 }
 
 window.addEventListener("message", handleEvent);
-window.parent.postMessage({ success: true, thpe: "loaded" }, "*");
+window.parent.postMessage(
+  { source: "obsidian-web-sandbox", success: true },
+  "*"
+);

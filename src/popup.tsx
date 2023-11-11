@@ -144,15 +144,16 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   }, [status, apiKey, obsidianUnavailable, ready, hasHostPermission]);
 
   useEffect(() => {
-    window.addEventListener(
-      "message",
-      () => {
+    window.addEventListener("message", (message) => {
+      if (
+        message.data.source === "obsidian-web-sandbox" &&
+        message.data.success === true
+      ) {
         setSandboxReady(true);
-      },
-      {
-        once: true,
+      } else {
+        console.error("Received non-sandbox event; ignoring");
       }
-    );
+    });
     setDisplayed(true);
   }, []);
 
