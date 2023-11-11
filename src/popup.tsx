@@ -120,15 +120,15 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const turndown = new Turndown(TurndownConfiguration);
 
   useEffect(() => {
-    if (apiKey.length === 0) {
-      setDisplayState("welcome");
-      return;
-    }
     if (!ready) {
       setDisplayState("loading");
       return;
     }
-    if (!hasHostPermission) {
+    if (apiKey.length === 0) {
+      setDisplayState("welcome");
+      return;
+    }
+    if (hasHostPermission != null && !hasHostPermission) {
       setDisplayState("permission");
       return;
     }
