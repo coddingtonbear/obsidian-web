@@ -1,11 +1,10 @@
 import React from "react";
 
 import TextField from "@mui/material/TextField";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 
 import { OutputPreset } from "../types";
 import HeaderControl from "./HeaderControl";
+import { NativeSelect } from "@mui/material";
 
 interface Props {
   method: OutputPreset["method"];
@@ -33,17 +32,16 @@ const RequestParameters: React.FC<Props> = ({
     <>
       <div className="option">
         <div className="option-value">
-          <Select
-            label="HTTP Method"
+          <NativeSelect
             value={method}
             onChange={(event) =>
               onChangeMethod(event.target.value as OutputPreset["method"])
             }
           >
-            <MenuItem value="post">POST</MenuItem>
-            <MenuItem value="put">PUT</MenuItem>
-            <MenuItem value="patch">PATCH</MenuItem>
-          </Select>
+            <option value="post">POST</option>
+            <option value="put">PUT</option>
+            <option value="patch">PATCH</option>
+          </NativeSelect>
           <TextField
             label="API URL"
             fullWidth={true}

@@ -6,8 +6,6 @@ import Turndown from "turndown";
 import { Readability } from "@mozilla/readability";
 
 import Button from "@mui/material/Button";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import ThemeProvider from "@mui/system/ThemeProvider";
 import IconButton from "@mui/material/IconButton";
 import Accordion from "@mui/material/Accordion";
@@ -52,6 +50,7 @@ import {
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
 import MentionNotice from "./components/MentionNotice";
+import { NativeSelect } from "@mui/material";
 
 const ROOT_CONTAINER_ID = "obsidian-web-container";
 
@@ -629,12 +628,10 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
             <>
               <div className="option">
                 <div className="option-value">
-                  <Select
-                    label="Preset"
+                  <NativeSelect
                     autoFocus={true}
                     value={selectedPreset}
                     fullWidth={true}
-                    MenuProps={{ disablePortal: true }}
                     onChange={(event) =>
                       setSelectedPreset(
                         typeof event.target.value === "number"
@@ -644,17 +641,17 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                     }
                   >
                     {cacheAvailable && (
-                      <MenuItem key={"cached"} value={-1}>
-                        <i>Saved Draft</i>
-                      </MenuItem>
+                      <option key={"cached"} value={-1}>
+                        Saved Draft
+                      </option>
                     )}
                     {presets &&
                       presets.map((preset, idx) => (
-                        <MenuItem key={preset.name} value={idx}>
+                        <option key={preset.name} value={idx}>
                           {preset.name}
-                        </MenuItem>
+                        </option>
                       ))}
-                  </Select>
+                  </NativeSelect>
                   <IconButton
                     className="send-to-obsidian"
                     color="primary"
