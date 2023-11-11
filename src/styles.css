@@ -62,6 +62,10 @@ div.popup {
   font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
+div.popup div.preset-selector {
+  padding-left: 10px;
+}
+
 div.auth-field {
   width: 90%;
 }

@@ -630,6 +630,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                 <div className="option-value">
                   <NativeSelect
                     autoFocus={true}
+                    className="preset-selector"
                     value={selectedPreset}
                     fullWidth={true}
                     onChange={(event) =>
