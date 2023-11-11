@@ -150,8 +150,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
         message.data.success === true
       ) {
         setSandboxReady(true);
-      } else {
-        console.error("Received non-sandbox event; ignoring");
       }
     });
     setDisplayed(true);
