@@ -14,6 +14,7 @@ import {
   BackgroundRequest,
   CheckHasHostPermissionRequest,
   RequestHostPermissionRequest,
+  CheckKeyboardShortcutRequest,
 } from "./types";
 import { DefaultSyncSettings, DefaultLocalSettings } from "./constants";
 
@@ -63,29 +64,38 @@ export function normalizeCacheUrl(urlString: string): string {
   return url.toString();
 }
 
-export async function sendBackroundRequest(
+export async function sendBackgroundRequest(
   message: CheckHasHostPermissionRequest
 ): Promise<boolean>;
-export async function sendBackroundRequest(
+export async function sendBackgroundRequest(
   message: RequestHostPermissionRequest
 ): Promise<boolean>;
-export async function sendBackroundRequest(
+export async function sendBackgroundRequest(
+  message: CheckKeyboardShortcutRequest
+): Promise<string>;
+export async function sendBackgroundRequest(
   message: BackgroundRequest
 ): Promise<unknown> {
   return await chrome.runtime.sendMessage(message);
 }
 
 export async function checkHasHostPermission(host: string): Promise<boolean> {
-  return await sendBackroundRequest({
+  return await sendBackgroundRequest({
     type: "check-has-host-permission",
     host,
   });
 }
 
 export async function requestHostPermission(host: string): Promise<boolean> {
-  return await sendBackroundRequest({
+  return await sendBackgroundRequest({
     type: "request-host-permission",
     host,
+  });
+}
+
+export async function checkKeyboardShortcut(): Promise<string> {
+  return await sendBackgroundRequest({
+    type: "check-keyboard-shortcut",
   });
 }
 

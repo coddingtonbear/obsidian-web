@@ -114,6 +114,11 @@ export interface CheckHasHostPermissionRequest extends BaseBackgroundRequest {
   host: string;
 }
 
+export interface CheckKeyboardShortcutRequest extends BaseBackgroundRequest {
+  type: "check-keyboard-shortcut";
+}
+
 export type BackgroundRequest =
   | RequestHostPermissionRequest
-  | CheckHasHostPermissionRequest;
+  | CheckHasHostPermissionRequest
+  | CheckKeyboardShortcutRequest;

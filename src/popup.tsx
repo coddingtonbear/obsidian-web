@@ -633,6 +633,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                 <div className="option-value">
                   <Select
                     label="Preset"
+                    autoFocus={true}
                     value={selectedPreset}
                     fullWidth={true}
                     MenuProps={{ disablePortal: true }}

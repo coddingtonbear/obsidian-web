@@ -144,6 +144,14 @@ chrome.runtime.onMessage.addListener(
           sendResponse(result);
         }
       );
+    } else if (message.type === "check-keyboard-shortcut") {
+      chrome.commands.getAll((commands) => {
+        for (const command of commands) {
+          if (command.name === "_execute_action") {
+            sendResponse(command.shortcut);
+          }
+        }
+      });
     }
 
     return true;

@@ -60,6 +60,7 @@ import {
   compileTemplate,
   checkHasHostPermission,
   requestHostPermission,
+  checkKeyboardShortcut,
 } from "./utils";
 import Alert from "./components/Alert";
 import RequestParameters from "./components/RequestParameters";
@@ -76,6 +77,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [status, setStatus] = useState<AlertStatus>();
   const [pluginVersion, setPluginVersion] = useState<string>();
   const [modalStatus, setModalStatus] = useState<AlertStatus>();
+
+  const [keyboardShortcut, setKeyboardShortcut] = useState<string>("");
 
   const [host, setHost] = useState<string>("127.0.0.1");
   const [tempHost, setTempHost] = useState<string>("127.0.0.1");
@@ -247,6 +250,14 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       );
     }
 
+    handle();
+  }, []);
+
+  useEffect(() => {
+    async function handle() {
+      const shortcut = await checkKeyboardShortcut();
+      setKeyboardShortcut(shortcut);
+    }
     handle();
   }, []);
 
@@ -593,6 +604,26 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                       </div>
                     </>
                   )}
+              </div>
+              <div className="option">
+                <h2>Keyboard Shortcut</h2>
+                <Typography paragraph={true}>
+                  You can launch Obsidian Web by pressing &nbsp;
+                  <code>{keyboardShortcut}</code>. If you would like to select a
+                  different shortcut, you can do so via&nbsp;
+                  <a
+                    href="#"
+                    onClick={(event) => {
+                      chrome.tabs.create({
+                        url: "chrome://extensions/shortcuts",
+                      });
+                      event.preventDefault();
+                    }}
+                  >
+                    Chrome's shortcut settings
+                  </a>
+                  .
+                </Typography>
               </div>
               <div className="option">
                 <h2>Note Recall</h2>
