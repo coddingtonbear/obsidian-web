@@ -50,12 +50,13 @@ div.background.displayed {
 }
 
 div.popup {
+  border-radius: 10px;
   width: 600px;
   position: fixed;
   right: 25px;
   top: 25px;
   z-index: 9999999;
-  box-shadow: 5px 5px 5px gray;
+  box-shadow: 5px 5px 5px black;
   background-color: #fff;
   padding: 5px;
   font-family: Roboto, Helvetica, Arial, sans-serif;
