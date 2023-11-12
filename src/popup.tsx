@@ -467,6 +467,17 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
     return reader.parse();
   };
 
+  useEffect(() => {
+    function handleEscapeKey(event: KeyboardEvent) {
+      if (event.code === "Escape") {
+        onFinished();
+      }
+    }
+
+    document.addEventListener("keydown", handleEscapeKey);
+    return () => document.removeEventListener("keydown", handleEscapeKey);
+  }, []);
+
   const readabilityDataToMarkdown = (
     data: ReturnType<Readability["parse"]>
   ): string => {
