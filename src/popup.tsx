@@ -517,6 +517,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
         title: "All done!",
         message: "Your content was sent to Obsidian successfully.",
       });
+      setTimeout(() => onFinished(), 1500);
     } else {
       try {
         const body = JSON.parse(text);
