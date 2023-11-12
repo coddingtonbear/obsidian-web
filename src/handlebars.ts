@@ -15,7 +15,7 @@ Handlebars.registerHelper("quote", (value: string): string => {
   return lines.join("\n");
 });
 
-Handlebars.registerHelper("date", (format: string): string => {
+Handlebars.registerHelper("date", (format: string | undefined): string => {
   const now = new Date();
   return formatDate(now, format ?? "yyyy-MM-dd HH:mm:ss");
 });
@@ -69,6 +69,7 @@ function handleEvent(evt: MessageEvent<SandboxRequest>): void {
     (evt.source as WindowProxy).postMessage(
       {
         success: false,
+        type: "response",
         request: evt.data,
         message: (e as Error).message,
       },

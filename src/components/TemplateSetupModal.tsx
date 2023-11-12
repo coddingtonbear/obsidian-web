@@ -71,6 +71,7 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
     async function handle() {
       try {
         await compileTemplate(sandbox, contentTemplate, {});
+        setSaveError(undefined);
       } catch (e) {
         setSaveError({
           severity: "error",
@@ -142,21 +143,19 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
           onChangeHeaders={setHeaders}
           onChangeContent={setContentTemplate}
         />
+        {saveError && <Alert value={saveError} />}
         <div className="submit">
           <Button variant="outlined" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={onAttemptSave}>
+          <Button
+            variant="contained"
+            onClick={onAttemptSave}
+            disabled={Boolean(saveError)}
+          >
             Save Changes
           </Button>
         </div>
-        <Snackbar
-          open={Boolean(saveError)}
-          autoHideDuration={5000}
-          onClose={() => setSaveError(undefined)}
-        >
-          <div>{saveError && <Alert value={saveError} />}</div>
-        </Snackbar>
       </Paper>
     </Modal>
   );
