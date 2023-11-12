@@ -12,13 +12,13 @@ const DefaultThemeOptions: ThemeOptions = {
     primary: {
       light: "#7a61cb",
       main: "#483699",
-      dark: "#0c0e6a",
+      dark: "#7a61cb",
       contrastText: "#ffffff",
     },
     secondary: {
       light: "#525252",
       main: "#2a2a2a",
-      dark: "#000000",
+      dark: "#525252",
       contrastText: "#ffffff",
     },
   },
@@ -29,6 +29,7 @@ export const PurpleTheme = createTheme(DefaultThemeOptions);
 export const DarkPurpleTheme = createTheme({
   ...DefaultThemeOptions,
   palette: {
+    ...DefaultThemeOptions.palette,
     mode: "dark",
   },
 });
