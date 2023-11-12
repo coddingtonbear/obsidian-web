@@ -16,7 +16,16 @@ import {
   RequestHostPermissionRequest,
   CheckKeyboardShortcutRequest,
 } from "./types";
-import { DefaultSyncSettings, DefaultLocalSettings } from "./constants";
+import {
+  DefaultSyncSettings,
+  DefaultLocalSettings,
+  KnownSyncSettingKeys,
+  KnownLocalSettingKeys,
+} from "./constants";
+import {
+  migrateLocalSettings,
+  migrateSyncSettings,
+} from "./settings_migrations";
 
 const HandlebarsCallbacks: Record<
   string,
@@ -30,14 +39,36 @@ const HandlebarsCallbacks: Record<
 export async function getSyncSettings(
   sync: chrome.storage.SyncStorageArea
 ): Promise<ExtensionSyncSettings> {
-  const settings = await sync.get(DefaultSyncSettings);
+  let settings = await sync.get(KnownSyncSettingKeys);
+
+  settings = await migrateSyncSettings(sync, settings);
+
+  for (const key in DefaultSyncSettings) {
+    if (settings[key] === undefined) {
+      settings[key] =
+        DefaultSyncSettings[key as keyof typeof DefaultSyncSettings];
+    }
+  }
+  await sync.set(settings);
+
   return settings as ExtensionSyncSettings;
 }
 
 export async function getLocalSettings(
   local: chrome.storage.LocalStorageArea
 ): Promise<ExtensionLocalSettings> {
-  const settings = await local.get(DefaultLocalSettings);
+  let settings = await local.get(KnownLocalSettingKeys);
+
+  settings = await migrateLocalSettings(local, settings);
+
+  for (const key in DefaultLocalSettings) {
+    if (settings[key] === undefined) {
+      settings[key] =
+        DefaultLocalSettings[key as keyof typeof DefaultLocalSettings];
+    }
+  }
+  await local.set(settings);
+
   return settings as ExtensionLocalSettings;
 }
 

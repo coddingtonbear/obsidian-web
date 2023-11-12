@@ -20,8 +20,6 @@ import Modal from "@mui/material/Modal";
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 
@@ -42,29 +40,31 @@ import {
   DefaultContentTemplate,
   DefaultHeaders,
   DefaultMethod,
+  DefaultSearchMatchTemplate,
   DefaultSyncSettings,
   DefaultUrlTemplate,
   MinVersion,
 } from "./constants";
 import {
   ExtensionSyncSettings,
-  OutputPreset,
+  UrlOutputPreset,
   AlertStatus,
   ExtensionLocalSettings,
   StatusResponse,
+  OutputPreset,
+  ConfiguredTemplate,
 } from "./types";
 import {
   getLocalSettings,
   getSyncSettings,
   obsidianRequest,
-  compileTemplate,
   checkHasHostPermission,
   requestHostPermission,
   checkKeyboardShortcut,
 } from "./utils";
 import Alert from "./components/Alert";
-import RequestParameters from "./components/RequestParameters";
 import { PurpleTheme } from "./theme";
+import TemplateSetupModal from "./components/TemplateSetupModal";
 
 export interface Props {
   sandbox: HTMLIFrameElement | null;
@@ -76,7 +76,14 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [status, setStatus] = useState<AlertStatus>();
   const [pluginVersion, setPluginVersion] = useState<string>();
-  const [modalStatus, setModalStatus] = useState<AlertStatus>();
+
+  const [presetEditorShown, setPresetEditorShown] = useState<boolean>(false);
+  const [presetEditorIncludesName, setPresetEditorIncludesName] =
+    useState<boolean>(false);
+  const [presetUnderEdit, setPresetUnderEdit] = useState<ConfiguredTemplate>();
+  const [presetEditorSave, setPresetEditorSave] = useState<
+    (preset: ConfiguredTemplate) => void
+  >(() => () => null);
 
   const [keyboardShortcut, setKeyboardShortcut] = useState<string>("");
 
@@ -93,23 +100,21 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [searchEnabled, setSearchEnabled] = useState<boolean>(false);
   const [searchBackgroundEnabled, setSearchBackgroundEnabled] =
     useState<boolean>(false);
+  const [searchMatchMentionEnabled, setSearchMatchMentionEnabled] =
+    useState<boolean>(false);
   const [searchMatchMentionTemplate, setSearchMatchMentionTemplate] =
-    useState<string>("");
+    useState<OutputPreset>(DefaultSearchMatchTemplate);
+  const [searchMatchDirectEnabled, setSearchMatchDirectEnabled] =
+    useState<boolean>(false);
   const [searchMatchDirectTemplate, setSearchMatchDirectTemplate] =
-    useState<string>("");
+    useState<OutputPreset>(DefaultSearchMatchTemplate);
 
-  const [presetName, setPresetName] = useState<string>("");
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
-  const [contentTemplate, setContentTemplate] = useState<string>("");
-  const [urlTemplate, setUrlTemplate] = useState<string>("");
-  const [headers, setHeaders] = useState<Record<string, string>>({});
-  const [method, setMethod] = useState<OutputPreset["method"]>("post");
 
-  const [editingPreset, setEditingPreset] = useState<number>();
   const [requestingHostPermissionFor, setRequestingHostPermissionFor] =
     useState<string>();
 
-  const [presets, setPresets] = useState<OutputPreset[]>([]);
+  const [presets, setPresets] = useState<UrlOutputPreset[]>([]);
 
   useEffect(() => {
     if (loaded) {
@@ -199,13 +204,23 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       return;
     }
     async function handle() {
-      await chrome.storage.sync.set({
+      const syncSettings: ExtensionSyncSettings = {
+        version: "2.0",
         presets,
-        searchEnabled,
-        searchBackgroundEnabled,
-        searchMatchDirectTemplate,
-        searchMatchMentionTemplate,
-      } as ExtensionSyncSettings);
+        searchMatch: {
+          enabled: searchEnabled,
+          backgroundEnabled: searchBackgroundEnabled,
+          mentions: {
+            suggestionEnabled: searchMatchMentionEnabled,
+            template: searchMatchMentionTemplate,
+          },
+          direct: {
+            suggestionEnabled: searchMatchDirectEnabled,
+            template: searchMatchDirectTemplate,
+          },
+        },
+      };
+      await chrome.storage.sync.set(syncSettings);
       showSaveNotice();
     }
 
@@ -214,7 +229,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     presets,
     searchEnabled,
     searchBackgroundEnabled,
+    searchMatchDirectEnabled,
     searchMatchDirectTemplate,
+    searchMatchMentionEnabled,
     searchMatchMentionTemplate,
   ]);
 
@@ -229,10 +246,16 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       setTempHost(localSettings.host);
       setApiKey(localSettings.apiKey);
       setPresets(syncSettings.presets);
-      setSearchEnabled(syncSettings.searchEnabled);
-      setSearchBackgroundEnabled(syncSettings.searchBackgroundEnabled);
-      setSearchMatchDirectTemplate(syncSettings.searchMatchDirectTemplate);
-      setSearchMatchMentionTemplate(syncSettings.searchMatchMentionTemplate);
+      setSearchEnabled(syncSettings.searchMatch.enabled);
+      setSearchBackgroundEnabled(syncSettings.searchMatch.backgroundEnabled);
+      setSearchMatchDirectEnabled(
+        syncSettings.searchMatch.direct.suggestionEnabled
+      );
+      setSearchMatchDirectTemplate(syncSettings.searchMatch.direct.template);
+      setSearchMatchMentionEnabled(
+        syncSettings.searchMatch.mentions.suggestionEnabled
+      );
+      setSearchMatchMentionTemplate(syncSettings.searchMatch.mentions.template);
       setLoaded(true);
 
       // If we do not have "tabs" permission; we can't really use
@@ -267,33 +290,72 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     });
   }, [host]);
 
-  const closeEditingPresetModal = () => {
-    setEditingPreset(undefined);
-  };
-
-  const openEditingModal = (
+  const openEditingModal = async (
     idx: number | null,
     template?: number | undefined
   ) => {
     prepareForm(template ?? idx ?? null, template !== undefined);
-    setEditingPreset(idx ?? -1);
+  };
+
+  const showPresetEditor = (
+    data: ConfiguredTemplate,
+    showName: boolean,
+    onSave: (preset: ConfiguredTemplate) => void
+  ): void => {
+    setPresetEditorIncludesName(showName);
+    setPresetUnderEdit(data);
+    setPresetEditorSave(() => (preset: ConfiguredTemplate) => {
+      onSave(preset);
+      hidePresetEditor();
+    });
+    setPresetEditorShown(true);
+  };
+
+  const hidePresetEditor = (): void => {
+    setPresetUnderEdit(undefined);
+    setPresetEditorShown(false);
   };
 
   const prepareForm = (idx: number | null, fromTemplate?: boolean) => {
     if (idx !== null) {
       const preset = presets[idx];
 
-      setPresetName(fromTemplate ? `Copy of ${preset.name}` : preset.name);
-      setContentTemplate(preset.contentTemplate);
-      setUrlTemplate(preset.urlTemplate);
-      setMethod(preset.method);
-      setHeaders(preset.headers);
+      const underEdit: ConfiguredTemplate = {
+        name: fromTemplate ? `Copy of ${preset.name}` : preset.name,
+        urlTemplate: preset.urlTemplate,
+        contentTemplate: preset.contentTemplate,
+        headers: preset.headers,
+        method: preset.method,
+      };
+      showPresetEditor(underEdit, true, (preset: ConfiguredTemplate) => {
+        const newPresets = presets.slice();
+        newPresets[idx] = {
+          ...preset,
+          name: preset.name ?? "Untitled",
+          urlTemplate: preset.urlTemplate ?? "/",
+        };
+        setPresets(newPresets);
+        hidePresetEditor();
+      });
     } else {
-      setPresetName("Untitled Preset");
-      setContentTemplate(DefaultContentTemplate);
-      setUrlTemplate(DefaultUrlTemplate);
-      setMethod(DefaultMethod);
-      setHeaders(DefaultHeaders);
+      const underEdit: ConfiguredTemplate = {
+        name: "Untitled Preset",
+        urlTemplate: DefaultUrlTemplate,
+        contentTemplate: DefaultContentTemplate,
+        headers: DefaultHeaders,
+        method: DefaultMethod,
+      };
+      showPresetEditor(underEdit, true, (newPreset: ConfiguredTemplate) => {
+        setPresets([
+          ...presets,
+          {
+            ...newPreset,
+            name: newPreset.name ?? "Untitled",
+            urlTemplate: newPreset.urlTemplate ?? "/",
+          },
+        ]);
+        hidePresetEditor();
+      });
     }
   };
 
@@ -315,53 +377,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const restoreDefaultTemplates = () => {
     setPresets([...presets, ...DefaultSyncSettings.presets]);
-  };
-
-  const savePreset = async () => {
-    if (editingPreset === undefined) {
-      return;
-    }
-
-    let errorMessage: string | undefined = undefined;
-
-    try {
-      await compileTemplate(sandbox, contentTemplate, {});
-    } catch (e) {
-      errorMessage = "Could not compile content template.";
-    }
-
-    if (!errorMessage) {
-      try {
-        await compileTemplate(sandbox, urlTemplate, {});
-      } catch (e) {
-        errorMessage = "Could not compile url template.";
-      }
-    }
-
-    if (errorMessage) {
-      setModalStatus({
-        severity: "error",
-        title: "Error",
-        message: `Could not save preset: ${errorMessage}`,
-      });
-    } else {
-      setModalStatus(undefined);
-      const preset = {
-        name: presetName,
-        urlTemplate: urlTemplate,
-        contentTemplate: contentTemplate,
-        headers: headers,
-        method: method,
-      };
-      if (editingPreset === -1) {
-        setPresets([...presets, preset]);
-      } else {
-        const newPresets = presets.slice();
-        newPresets[editingPreset] = preset;
-        setPresets(newPresets);
-      }
-      closeEditingPresetModal();
-    }
   };
 
   const onToggleBackgroundSearch = (targetStateEnabled: boolean) => {
@@ -435,16 +450,18 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         if (
           !parsed ||
           !parsed.sync ||
-          parsed.sync.version !== "0.1" ||
+          (parsed.sync.version !== "0.1" && parsed.sync.version !== "0.2") ||
           !parsed.local ||
-          parsed.local.version !== "0.1"
+          (parsed.local.version !== "0.1" && parsed.sync.version !== "0.2")
         ) {
           alert(
             "Could not parse configuration file!  See console for details."
           );
           console.error("Could not parse configuration file!", parsed);
         } else {
+          await chrome.storage.sync.clear();
           await chrome.storage.sync.set(parsed.sync);
+          await chrome.storage.local.clear();
           await chrome.storage.local.set(parsed.local);
           alert("Settings imported successfully!");
           window.location.reload();
@@ -490,361 +507,376 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           </div>
         </div>
         <div className="option-panel">
-          {editingPreset === undefined && (
-            <>
-              <Typography paragraph={true}>
-                Obsidian Web integrates with Obsidian via the interface provided
-                by the{" "}
-                <a
-                  href="https://github.com/coddingtonbear/obsidian-local-rest-api"
-                  target="_blank"
-                >
-                  Local REST API
-                </a>{" "}
-                plugin. Before beginning to use this, you will want to install
-                and enable that plugin from within Obsidian.
-              </Typography>
-              <div className="option">
-                <div className="option-value host">
-                  <TextField
-                    label="Hostname"
-                    className="auth-field"
-                    onBlur={() => {
-                      setHost(tempHost);
-                      checkHasHostPermission(tempHost).then((result) => {
-                        setHasHostPermission(result);
-                        if (!result) {
-                          setRequestingHostPermissionFor(tempHost);
-                        }
-                      });
-                    }}
-                    onChange={(event) => setTempHost(event.target.value)}
-                    value={tempHost}
-                    helperText="Hostname on which Obsidian is running (usually 127.0.0.1)."
+          <Typography paragraph={true}>
+            Obsidian Web integrates with Obsidian via the interface provided by
+            the{" "}
+            <a
+              href="https://github.com/coddingtonbear/obsidian-local-rest-api"
+              target="_blank"
+            >
+              Local REST API
+            </a>{" "}
+            plugin. Before beginning to use this, you will want to install and
+            enable that plugin from within Obsidian.
+          </Typography>
+          <div className="option">
+            <div className="option-value host">
+              <TextField
+                label="Hostname"
+                className="auth-field"
+                onBlur={() => {
+                  setHost(tempHost);
+                  checkHasHostPermission(tempHost).then((result) => {
+                    setHasHostPermission(result);
+                    if (!result) {
+                      setRequestingHostPermissionFor(tempHost);
+                    }
+                  });
+                }}
+                onChange={(event) => setTempHost(event.target.value)}
+                value={tempHost}
+                helperText="Hostname on which Obsidian is running (usually 127.0.0.1)."
+              />
+              <div className="validation-icon">
+                {!hasHostPermission && (
+                  <Error
+                    className="action-icon"
+                    color="error"
+                    fontSize="large"
+                    titleAccess="Missing permissions.  Click to grant."
+                    onClick={() => setRequestingHostPermissionFor(host)}
                   />
-                  <div className="validation-icon">
-                    {!hasHostPermission && (
-                      <Error
-                        className="action-icon"
-                        color="error"
-                        fontSize="large"
-                        titleAccess="Missing permissions.  Click to grant."
-                        onClick={() => setRequestingHostPermissionFor(host)}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="option">
-                <div className="option-value api-key">
-                  <TextField
-                    label="API Key"
-                    className="auth-field"
-                    value={apiKey}
-                    helperText="You can find your API key in the 'Local REST API' section of your settings in Obsidian."
-                    onChange={(event) => setApiKey(event.target.value)}
-                  />
-                  <div className="validation-icon">
-                    {apiKeyOk && (
-                      <>
-                        {insecureMode && (
-                          <InsecureConnection
-                            color="warning"
-                            fontSize="large"
-                            titleAccess="Connected insecurely to the API via HTTP."
-                          />
-                        )}
-                        {!insecureMode && (
-                          <SecureConnection
-                            color="success"
-                            fontSize="large"
-                            titleAccess="Connected securely to the API via HTTPS."
-                          />
-                        )}
-                      </>
-                    )}
-                    {apiKeyError && (
-                      <Error
-                        color="error"
-                        fontSize="large"
-                        className="action-icon"
-                        onClick={() => {
-                          const tempApiKey = apiKey;
-                          setApiKey("");
-                          setTimeout(() => {
-                            setApiKey(tempApiKey);
-                          }, 1);
-                        }}
-                        titleAccess="Could not connect to the API. Click to retry."
-                      />
-                    )}
-                  </div>
-                </div>
-                {apiKeyError && (
-                  <div className="option-value">
-                    <MaterialAlert severity="error">
-                      {apiKeyError}
-                    </MaterialAlert>
-                  </div>
                 )}
-                {pluginVersion &&
-                  compareVersions(pluginVersion, minVersion) < 0 && (
-                    <>
-                      <div className="option-value">
-                        <MaterialAlert severity="warning">
-                          <strong>
-                            Your install of Obsidian Local REST API is
-                            out-of-date and missing some important capabilities.
-                          </strong>{" "}
-                          Some features may not work correctly as a result.
-                          Please go to the "Community Plugins" section of your
-                          settings in Obsidian to update the "Obsidian Local
-                          REST API" plugin to the latest version.
-                        </MaterialAlert>
-                      </div>
-                    </>
-                  )}
               </div>
-              <div className="option">
-                <h2>Keyboard Shortcut</h2>
-                <Typography paragraph={true}>
-                  You can launch Obsidian Web by pressing &nbsp;
-                  <code>{keyboardShortcut}</code>. If you would like to select a
-                  different shortcut, you can do so via&nbsp;
-                  <a
-                    href="#"
-                    onClick={(event) => {
-                      chrome.tabs.create({
-                        url: "chrome://extensions/shortcuts",
-                      });
-                      event.preventDefault();
-                    }}
-                  >
-                    Chrome's shortcut settings
-                  </a>
-                  .
-                </Typography>
-              </div>
-              <div className="option">
-                <h2>Note Recall</h2>
-                <Typography paragraph={true}>
-                  Have you been to this page before? Maybe you already have
-                  notes about it. Enabling this feature will let this extension
-                  search your notes when you click on the extension icon and, if
-                  you enable background searches, show a badge on the extension
-                  icon while you are browsing the web to let you know that you
-                  have notes about the page you are currently visiting.
-                </Typography>
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        onChange={(evt) => {
-                          // If background search is enabled; disable it first.
-                          if (searchBackgroundEnabled) {
-                            onToggleBackgroundSearch(false);
-                          }
-                          setSearchEnabled(evt.target.checked);
-                        }}
-                        checked={searchEnabled}
+            </div>
+          </div>
+          <div className="option">
+            <div className="option-value api-key">
+              <TextField
+                label="API Key"
+                className="auth-field"
+                value={apiKey}
+                helperText="You can find your API key in the 'Local REST API' section of your settings in Obsidian."
+                onChange={(event) => setApiKey(event.target.value)}
+              />
+              <div className="validation-icon">
+                {apiKeyOk && (
+                  <>
+                    {insecureMode && (
+                      <InsecureConnection
+                        color="warning"
+                        fontSize="large"
+                        titleAccess="Connected insecurely to the API via HTTP."
                       />
-                    }
-                    label={
-                      <>
-                        Search for previous notes about this page when you open
-                        the extension menu?
-                      </>
-                    }
+                    )}
+                    {!insecureMode && (
+                      <SecureConnection
+                        color="success"
+                        fontSize="large"
+                        titleAccess="Connected securely to the API via HTTPS."
+                      />
+                    )}
+                  </>
+                )}
+                {apiKeyError && (
+                  <Error
+                    color="error"
+                    fontSize="large"
+                    className="action-icon"
+                    onClick={() => {
+                      const tempApiKey = apiKey;
+                      setApiKey("");
+                      setTimeout(() => {
+                        setApiKey(tempApiKey);
+                      }, 1);
+                    }}
+                    titleAccess="Could not connect to the API. Click to retry."
                   />
-                </FormGroup>
+                )}
+              </div>
+            </div>
+            {apiKeyError && (
+              <div className="option-value">
+                <MaterialAlert severity="error">{apiKeyError}</MaterialAlert>
+              </div>
+            )}
+            {pluginVersion && compareVersions(pluginVersion, minVersion) < 0 && (
+              <>
+                <div className="option-value">
+                  <MaterialAlert severity="warning">
+                    <strong>
+                      Your install of Obsidian Local REST API is out-of-date and
+                      missing some important capabilities.
+                    </strong>{" "}
+                    Some features may not work correctly as a result. Please go
+                    to the "Community Plugins" section of your settings in
+                    Obsidian to update the "Obsidian Local REST API" plugin to
+                    the latest version.
+                  </MaterialAlert>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="option">
+            <h2>Keyboard Shortcut</h2>
+            <Typography paragraph={true}>
+              You can launch Obsidian Web by pressing &nbsp;
+              <code>{keyboardShortcut}</code>. If you would like to select a
+              different shortcut, you can do so via&nbsp;
+              <a
+                href="#"
+                onClick={(event) => {
+                  chrome.tabs.create({
+                    url: "chrome://extensions/shortcuts",
+                  });
+                  event.preventDefault();
+                }}
+              >
+                Chrome's shortcut settings
+              </a>
+              .
+            </Typography>
+          </div>
+          <div className="option">
+            <h2>Note Recall</h2>
+            <Typography paragraph={true}>
+              Have you been to this page before? Maybe you already have notes
+              about it. Enabling this feature will let this extension search
+              your notes when you click on the extension icon and, if you enable
+              background searches, show a badge on the extension icon while you
+              are browsing the web to let you know that you have notes about the
+              page you are currently visiting.
+            </Typography>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    onChange={(evt) => {
+                      // If background search is enabled; disable it first.
+                      if (searchBackgroundEnabled) {
+                        onToggleBackgroundSearch(false);
+                      }
+                      setSearchEnabled(evt.target.checked);
+                    }}
+                    checked={searchEnabled}
+                  />
+                }
+                label={
+                  <>
+                    Search for previous notes about this page when you open the
+                    extension menu?
+                  </>
+                }
+              />
+            </FormGroup>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    onChange={(evt) =>
+                      onToggleBackgroundSearch(evt.target.checked)
+                    }
+                    disabled={!searchEnabled}
+                    checked={searchBackgroundEnabled}
+                  />
+                }
+                label={
+                  <>
+                    Search for previous notes about this page in the background?
+                    <Chip size="small" label="Requires extra permissions" />
+                  </>
+                }
+              />
+            </FormGroup>
+            {searchEnabled && (
+              <Paper className="paper-option-panel">
+                <h3>Page Notes</h3>
+                <Typography paragraph={true}></Typography>
                 <FormGroup>
                   <FormControlLabel
                     control={
                       <Switch
                         onChange={(evt) =>
-                          onToggleBackgroundSearch(evt.target.checked)
+                          setSearchMatchDirectEnabled(evt.target.checked)
                         }
                         disabled={!searchEnabled}
-                        checked={searchBackgroundEnabled}
+                        checked={searchMatchDirectEnabled}
                       />
                     }
                     label={
                       <>
-                        Search for previous notes about this page in the
-                        background?
-                        <Chip size="small" label="Requires extra permissions" />
+                        When the URL of the page you are visiting has been found
+                        to match the <code>url</code> field in the frontmatter
+                        of an existing note in your vault, suggest a template
+                        for updating the existing note?
                       </>
                     }
                   />
-                </FormGroup>
-                {searchEnabled && (
-                  <Paper className="paper-option-panel">
-                    <h3>Page Notes</h3>
-                    <Typography paragraph={true}>
-                      When the URL of the page you are visiting has been found
-                      to match the <code>url</code> field in the frontmatter of
-                      an existing note in your vault, suggest this template for
-                      updating the existing note:
-                    </Typography>
-                    <Select
-                      label="When in frontmatter"
-                      value={searchMatchDirectTemplate}
-                      fullWidth={true}
-                      displayEmpty={true}
-                      onChange={(event) =>
-                        setSearchMatchDirectTemplate(event.target.value)
-                      }
-                    >
-                      <MenuItem value="">
-                        None (Do not suggest updating the existing note)
-                      </MenuItem>
-                      {presets.map((preset) => (
-                        <MenuItem key={preset.name} value={preset.name}>
-                          {preset.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    <h3>Mentions</h3>
-                    <Typography paragraph={true}>
-                      When the URL of the page you are visiting has been found
-                      in the content of a note in your vault, suggest this
-                      template for updating the existing note:
-                    </Typography>
-                    <Select
-                      label="When mentioned"
-                      value={searchMatchMentionTemplate}
-                      fullWidth={true}
-                      displayEmpty={true}
-                      onChange={(event) =>
-                        setSearchMatchMentionTemplate(event.target.value)
-                      }
-                    >
-                      <MenuItem value="">
-                        None (Do not suggest updating the existing note)
-                      </MenuItem>
-                      {presets.map((preset) => (
-                        <MenuItem key={preset.name} value={preset.name}>
-                          {preset.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </Paper>
-                )}
-              </div>
-              <div className="option">
-                <h2>Templates</h2>
-                <Typography paragraph={true}>
-                  You can configure multiple templates for use when inserting
-                  content into Obsidian. Each template describes how to convert
-                  information about the current tab into content for insertion
-                  into your notes.
-                </Typography>
-                <div className="option-value">
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell></TableCell>
-                          <TableCell>Name</TableCell>
-                          <TableCell align="right">Options</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {presets.map((preset, idx) => (
-                          <TableRow key={preset.name + idx}>
-                            <TableCell>
-                              {idx === 0 && (
-                                <Star fontSize="small" titleAccess="Default" />
-                              )}
-                            </TableCell>
-                            <TableCell component="th" scope="row">
-                              {preset.name}
-                            </TableCell>
-                            <TableCell align="right">
-                              {idx !== 0 && (
-                                <IconButton
-                                  title="Make Default"
-                                  aria-label="make default"
-                                  onClick={() => {
-                                    setAsDefault(idx);
-                                  }}
-                                >
-                                  <Promote />
-                                </IconButton>
-                              )}
-                              <IconButton
-                                title="Edit"
-                                aria-label="edit"
-                                onClick={() => {
-                                  openEditingModal(idx);
-                                }}
-                              >
-                                <EditIcon />
-                              </IconButton>
-                              <IconButton
-                                title="Duplicate"
-                                aria-label="duplicate"
-                                onClick={() => {
-                                  openEditingModal(null, idx);
-                                }}
-                              >
-                                <Copy />
-                              </IconButton>
-                              {presets.length > 1 && (
-                                <IconButton
-                                  title="Delete"
-                                  aria-label="delete"
-                                  onClick={() => {
-                                    deletePreset(idx);
-                                  }}
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        <TableRow key="new">
-                          <TableCell></TableCell>
-                          <TableCell component="th" scope="row"></TableCell>
-                          <TableCell align="right">
-                            <IconButton
-                              onClick={() => restoreDefaultTemplates()}
-                            >
-                              <RestoreIcon titleAccess="Restore default templates" />
-                            </IconButton>
-                            <IconButton onClick={() => openEditingModal(null)}>
-                              <CreateIcon titleAccess="Create new template" />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </div>
-              </div>
-              <Paper className="protip">
-                <Typography paragraph={true}>
-                  <strong>Protip:</strong> Looking for ideas about how you can
-                  use this plugin to improve your workflow; have a look at the{" "}
-                  <a
-                    href="https://github.com/coddingtonbear/obsidian-web/wiki"
-                    target="_blank"
+                  <Button
+                    disabled={!searchMatchDirectEnabled}
+                    onClick={() => {
+                      showPresetEditor(
+                        searchMatchDirectTemplate,
+                        false,
+                        (preset: ConfiguredTemplate) => {
+                          setSearchMatchDirectTemplate(preset);
+                        }
+                      );
+                    }}
+                    variant="outlined"
                   >
-                    Wiki
-                  </a>{" "}
-                  for tips.
-                </Typography>
+                    Configure Template to use for Page Notes
+                  </Button>
+                </FormGroup>
+                <h3>Mentions</h3>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(evt) =>
+                          setSearchMatchMentionEnabled(evt.target.checked)
+                        }
+                        disabled={!searchEnabled}
+                        checked={searchMatchMentionEnabled}
+                      />
+                    }
+                    label={
+                      <>
+                        When the URL of the page you are visiting has been found
+                        in the content of a note in your vault, suggest a
+                        template for updating the existing note?
+                      </>
+                    }
+                  />
+                  <Button
+                    disabled={!searchMatchMentionEnabled}
+                    onClick={() => {
+                      showPresetEditor(
+                        searchMatchMentionTemplate,
+                        false,
+                        (preset: ConfiguredTemplate) => {
+                          setSearchMatchMentionTemplate(preset);
+                        }
+                      );
+                    }}
+                    variant="outlined"
+                  >
+                    Configure Template to use for Mentions
+                  </Button>
+                </FormGroup>
               </Paper>
-              <Snackbar
-                open={Boolean(status)}
-                autoHideDuration={5000}
-                onClose={() => setStatus(undefined)}
+            )}
+          </div>
+          <div className="option">
+            <h2>Templates</h2>
+            <Typography paragraph={true}>
+              You can configure multiple templates for use when inserting
+              content into Obsidian. Each template describes how to convert
+              information about the current tab into content for insertion into
+              your notes.
+            </Typography>
+            <div className="option-value">
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell></TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell align="right">Options</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {presets.map((preset, idx) => (
+                      <TableRow key={preset.name + idx}>
+                        <TableCell>
+                          {idx === 0 && (
+                            <Star fontSize="small" titleAccess="Default" />
+                          )}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {preset.name}
+                        </TableCell>
+                        <TableCell align="right">
+                          {idx !== 0 && (
+                            <IconButton
+                              title="Make Default"
+                              aria-label="make default"
+                              onClick={() => {
+                                setAsDefault(idx);
+                              }}
+                            >
+                              <Promote />
+                            </IconButton>
+                          )}
+                          <IconButton
+                            title="Edit"
+                            aria-label="edit"
+                            onClick={() => {
+                              openEditingModal(idx);
+                            }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            title="Duplicate"
+                            aria-label="duplicate"
+                            onClick={() => {
+                              openEditingModal(null, idx);
+                            }}
+                          >
+                            <Copy />
+                          </IconButton>
+                          {presets.length > 1 && (
+                            <IconButton
+                              title="Delete"
+                              aria-label="delete"
+                              onClick={() => {
+                                deletePreset(idx);
+                              }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow key="new">
+                      <TableCell></TableCell>
+                      <TableCell component="th" scope="row"></TableCell>
+                      <TableCell align="right">
+                        <IconButton onClick={() => restoreDefaultTemplates()}>
+                          <RestoreIcon titleAccess="Restore default templates" />
+                        </IconButton>
+                        <IconButton onClick={() => openEditingModal(null)}>
+                          <CreateIcon titleAccess="Create new template" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+          </div>
+          <Paper className="protip">
+            <Typography paragraph={true}>
+              <strong>Protip:</strong> Looking for ideas about how you can use
+              this plugin to improve your workflow; have a look at the{" "}
+              <a
+                href="https://github.com/coddingtonbear/obsidian-web/wiki"
+                target="_blank"
               >
-                <div>{status && <Alert value={status} />}</div>
-              </Snackbar>
-            </>
-          )}
+                Wiki
+              </a>{" "}
+              for tips.
+            </Typography>
+          </Paper>
+          <Snackbar
+            open={Boolean(status)}
+            autoHideDuration={5000}
+            onClose={() => setStatus(undefined)}
+          >
+            <div>{status && <Alert value={status} />}</div>
+          </Snackbar>
         </div>
       </Paper>
       <Modal
@@ -887,131 +919,20 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           </div>
         </Paper>
       </Modal>
-      <Modal
-        open={editingPreset !== undefined}
-        onClose={() => closeEditingPresetModal()}
-      >
-        <Paper elevation={3} className="modal">
-          <div className="option">
-            <div className="option-value">
-              <TextField
-                label="Template Name"
-                fullWidth={true}
-                value={presetName}
-                onChange={(event) => setPresetName(event.target.value)}
-              />
-            </div>
-          </div>
-          <Typography paragraph={true}>
-            Enter your template information below. You may use the following
-            template properties in the "Content" and "API URL" fields:
-          </Typography>
-          <ul>
-            <li>
-              <code>&#123;&#123;page.url&#125;&#125;</code>: The URL of your the
-              page you are on.
-            </li>
-            <li>
-              <code>&#123;&#123;page.title&#125;&#125;</code>: The title of the
-              page you are on.
-            </li>
-            <li>
-              <code>&#123;&#123;page.content&#125;&#125;</code>: The page
-              content of the page you are currently on as Markdown text.
-            </li>
-            <li>
-              <code>&#123;&#123;page.selectedText&#125;&#125;</code>: The text
-              (if any) that is currently selected on the page you are on.
-            </li>
-          </ul>
-          <Typography paragraph={true}>
-            Additionally, you have access to the following helpers for
-            formatting your notes:
-          </Typography>
-          <ul>
-            <li>
-              <code>&#123;&#123;date&#125;&#125;</code>: Displays a timestamp.
-              By default this uses the format "yyyy-MM-dd HH:mm:ss", but you can
-              configure the format used by providing a second parameter; for
-              example:
-              <code>&#123;&#123;date "EEEE, MMMM do"&#125;&#125;</code> would
-              display a timestamp like "Friday, February 18th". See{" "}
-              <a
-                href="https://date-fns.org/v2.28.0/docs/format"
-                target="_blank"
-              >
-                here
-              </a>{" "}
-              for a full list of formatting codes.
-            </li>
-            <li>
-              <code>&#123;&#123;filename FIELD&#125;&#125;</code>: Strips any
-              characters from <code>FIELD</code> that are not safe in a
-              filename.
-            </li>
-            <li>
-              <code>&#123;&#123;json FIELD&#125;&#125;</code>: Encodes value in{" "}
-              <code>FIELD</code> as a JSON string.
-            </li>
-            <li>
-              <code>&#123;&#123;quote FIELD&#125;&#125;</code>: Prefixes each
-              line in <code>FIELD</code> with <code>&gt; </code> so as to cause
-              it to be displayed as a quote in your notes.
-            </li>
-            <li>
-              <code>&#123;&#123;uuid&#125;&#125;</code>: Returns a
-              randomly-generated v4 UUID.
-            </li>
-          </ul>
-
-          <Typography paragraph={true}>
-            These templates use the{" "}
-            <a href="https://handlebarsjs.com/guide/" target="_blank">
-              Handlebars template language
-            </a>
-            ; so you also have access to any features provided by it.
-          </Typography>
-          <Typography paragraph={true}>
-            See{" "}
-            <a
-              target="_blank"
-              href="https://coddingtonbear.github.io/obsidian-local-rest-api/"
-            >
-              Local REST API for Obsidian
-            </a>
-            's documentation for more information about how to construct these
-            templates.
-          </Typography>
-          <RequestParameters
-            method={method}
-            url={urlTemplate}
-            headers={headers}
-            content={contentTemplate}
-            onChangeMethod={setMethod}
-            onChangeUrl={setUrlTemplate}
-            onChangeHeaders={setHeaders}
-            onChangeContent={setContentTemplate}
-          />
-          <div className="submit">
-            <Button
-              variant="outlined"
-              onClick={() => closeEditingPresetModal()}
-            >
-              Cancel
-            </Button>
-            <Button variant="contained" onClick={savePreset}>
-              Save Changes
-            </Button>
-          </div>
-          <Snackbar
-            open={Boolean(modalStatus)}
-            autoHideDuration={5000}
-            onClose={() => setModalStatus(undefined)}
-          >
-            <div>{modalStatus && <Alert value={modalStatus} />}</div>
-          </Snackbar>
-        </Paper>
-      </Modal>
+      {sandbox && presetUnderEdit && (
+        <TemplateSetupModal
+          open={presetEditorShown}
+          sandbox={sandbox}
+          isAdhocSelectedTemplate={presetEditorIncludesName}
+          name={presetUnderEdit.name}
+          method={presetUnderEdit.method}
+          urlTemplate={presetUnderEdit.urlTemplate}
+          headers={presetUnderEdit.headers}
+          contentTemplate={presetUnderEdit?.contentTemplate}
+          onSave={presetEditorSave}
+          onClose={hidePresetEditor}
+        />
+      )}
     </ThemeProvider>
   );
 };

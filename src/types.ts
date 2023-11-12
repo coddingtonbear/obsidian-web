@@ -1,11 +1,19 @@
 import { AlertProps } from "@mui/material/Alert";
 
 export interface OutputPreset {
-  name: string;
-  urlTemplate: string;
   contentTemplate: string;
   headers: Record<string, string>;
   method: "post" | "put" | "patch";
+}
+
+export interface UrlOutputPreset extends OutputPreset {
+  name: string;
+  urlTemplate: string;
+}
+
+export interface ConfiguredTemplate extends OutputPreset {
+  name?: string;
+  urlTemplate?: string;
 }
 
 export interface ExtensionLocalSettings {
@@ -23,13 +31,30 @@ export interface ContentCache {
   compiledContent?: string;
 }
 
-export interface ExtensionSyncSettings {
+export interface ExtensionSyncSettings__0_1 {
   version: string;
-  presets: OutputPreset[];
+  presets: UrlOutputPreset[];
   searchEnabled: boolean;
   searchBackgroundEnabled: boolean;
   searchMatchMentionTemplate: string;
   searchMatchDirectTemplate: string;
+}
+
+export interface ExtensionSyncSettings {
+  version: string;
+  presets: UrlOutputPreset[];
+  searchMatch: {
+    enabled: boolean;
+    backgroundEnabled: boolean;
+    mentions: {
+      suggestionEnabled: boolean;
+      template: OutputPreset;
+    };
+    direct: {
+      suggestionEnabled: boolean;
+      template: OutputPreset;
+    };
+  };
 }
 
 export interface AlertStatus {

@@ -1,6 +1,10 @@
 import TurndownService from "turndown";
 
-import { ExtensionLocalSettings, ExtensionSyncSettings } from "./types";
+import {
+  ExtensionLocalSettings,
+  ExtensionSyncSettings,
+  OutputPreset,
+} from "./types";
 
 export const MinVersion = "1.3.1";
 
@@ -11,14 +15,28 @@ export const DefaultHeaders = {};
 export const DefaultMethod = "put";
 
 export const DefaultLocalSettings: ExtensionLocalSettings = {
-  version: "0.1",
+  version: "0.2",
   host: "127.0.0.1",
   insecureMode: false,
   apiKey: "",
 };
 
+export const KnownLocalSettingKeys = [
+  "version",
+  "host",
+  "insecureMode",
+  "apiKey",
+];
+
+export const DefaultSearchMatchTemplate: OutputPreset = {
+  contentTemplate:
+    "## {{date}}\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}",
+  headers: {},
+  method: "post",
+};
+
 export const DefaultSyncSettings: ExtensionSyncSettings = {
-  version: "0.1",
+  version: "0.2",
   presets: [
     {
       name: "Append to current daily note",
@@ -43,20 +61,30 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
       headers: DefaultHeaders,
       method: DefaultMethod,
     },
-    {
-      name: "Append to existing note",
-      urlTemplate: "",
-      contentTemplate:
-        "## {{date}}\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}",
-      headers: {},
-      method: "post",
-    },
   ],
-  searchEnabled: false,
-  searchBackgroundEnabled: false,
-  searchMatchMentionTemplate: "",
-  searchMatchDirectTemplate: "Append to existing note",
+  searchMatch: {
+    enabled: false,
+    backgroundEnabled: false,
+    mentions: {
+      suggestionEnabled: false,
+      template: DefaultSearchMatchTemplate,
+    },
+    direct: {
+      suggestionEnabled: true,
+      template: DefaultSearchMatchTemplate,
+    },
+  },
 };
+
+export const KnownSyncSettingKeys = [
+  "version",
+  "presets",
+  "searchMatch",
+  "searchEnabled",
+  "searchBackgroundEnabled",
+  "searchMatchMentionTemplate",
+  "searchMatchDirectTemplate",
+];
 
 export const TurndownConfiguration: TurndownService.Options = {
   headingStyle: "atx",

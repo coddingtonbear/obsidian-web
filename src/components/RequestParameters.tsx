@@ -2,17 +2,18 @@ import React from "react";
 
 import TextField from "@mui/material/TextField";
 
-import { OutputPreset } from "../types";
+import { UrlOutputPreset } from "../types";
 import HeaderControl from "./HeaderControl";
-import { NativeSelect } from "@mui/material";
+import { NativeSelect, Typography } from "@mui/material";
 
 interface Props {
-  method: OutputPreset["method"];
+  method: UrlOutputPreset["method"];
+  allowUrlConfiguration?: boolean;
   url: string;
   headers: Record<string, string>;
   content: string;
 
-  onChangeMethod: (method: OutputPreset["method"]) => void;
+  onChangeMethod: (method: UrlOutputPreset["method"]) => void;
   onChangeUrl: (url: string) => void;
   onChangeHeaders: (headers: Record<string, string>) => void;
   onChangeContent: (content: string) => void;
@@ -20,6 +21,7 @@ interface Props {
 
 const RequestParameters: React.FC<Props> = ({
   method,
+  allowUrlConfiguration = true,
   url,
   headers,
   content,
@@ -35,19 +37,29 @@ const RequestParameters: React.FC<Props> = ({
           <NativeSelect
             value={method}
             onChange={(event) =>
-              onChangeMethod(event.target.value as OutputPreset["method"])
+              onChangeMethod(event.target.value as UrlOutputPreset["method"])
             }
           >
             <option value="post">POST</option>
             <option value="put">PUT</option>
             <option value="patch">PATCH</option>
           </NativeSelect>
-          <TextField
-            label="API URL"
-            fullWidth={true}
-            value={url}
-            onChange={(event) => onChangeUrl(event.target.value)}
-          />
+          {allowUrlConfiguration && (
+            <TextField
+              label="API URL"
+              fullWidth={true}
+              value={url}
+              onChange={(event) => onChangeUrl(event.target.value)}
+            />
+          )}
+          {!allowUrlConfiguration && (
+            <Typography
+              paragraph={true}
+              className="request-params-no-url-notice"
+            >
+              URL will be set to address file in which match was found.
+            </Typography>
+          )}
         </div>
       </div>
       <div className="option">

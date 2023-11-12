@@ -28,9 +28,10 @@ import {
   ContentCache,
   ExtensionLocalSettings,
   ExtensionSyncSettings,
-  OutputPreset,
+  UrlOutputPreset,
   SearchJsonResponseItem,
   StatusResponse,
+  OutputPreset,
 } from "./types";
 import {
   getLocalSettings,
@@ -92,11 +93,13 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const [searchEnabled, setSearchEnabled] = useState<boolean>(false);
   const [searchMatchMentionTemplate, setSearchMatchMentionTemplate] =
-    useState<string>("");
+    useState<OutputPreset>();
   const [searchMatchDirectTemplate, setSearchMatchDirectTemplate] =
-    useState<string>("");
+    useState<OutputPreset>();
+  const [searchMatchTemplate, setSearchMatchtemplate] =
+    useState<UrlOutputPreset>();
 
-  const [method, setMethod] = useState<OutputPreset["method"]>("post");
+  const [method, setMethod] = useState<UrlOutputPreset["method"]>("post");
   const [overrideUrl, setOverrideUrl] = useState<string>();
   const [compiledUrl, setCompiledUrl] = useState<string>("");
   const [headers, setHeaders] = useState<Record<string, string>>({});
@@ -109,7 +112,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [articleDir, setArticleDir] = useState<string>();
   const [articleSiteName, setArticleSiteName] = useState<string>();
 
-  const [presets, setPresets] = useState<OutputPreset[]>();
+  const [presets, setPresets] = useState<UrlOutputPreset[]>();
   const [selectedPreset, setSelectedPreset] = useState<number>(0);
 
   const [displayState, setDisplayState] = useState<
@@ -219,9 +222,9 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       setHost(localSettings.host);
       setInsecureMode(localSettings.insecureMode ?? false);
       setApiKey(localSettings.apiKey);
-      setSearchEnabled(syncSettings.searchEnabled);
-      setSearchMatchMentionTemplate(syncSettings.searchMatchMentionTemplate);
-      setSearchMatchDirectTemplate(syncSettings.searchMatchDirectTemplate);
+      setSearchEnabled(syncSettings.searchMatch.enabled);
+      setSearchMatchMentionTemplate(syncSettings.searchMatch.mentions.template);
+      setSearchMatchDirectTemplate(syncSettings.searchMatch.direct.template);
     }
     handle();
   }, []);
@@ -366,16 +369,11 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       return;
     }
 
-    async function handle() {
-      if (!presets) {
-        throw new Error("Unexpectedly had no presets when compiling template.");
-      }
-
-      const preset = presets[selectedPreset];
+    async function handle(preset: UrlOutputPreset) {
       const context = {
         page: {
           url: url,
-          tiitle: pageTitle,
+          title: pageTitle,
           selectedText: selection,
           content: pageContent,
         },
@@ -406,7 +404,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
         context
       );
 
-      setMethod(preset.method as OutputPreset["method"]);
+      setMethod(preset.method as UrlOutputPreset["method"]);
       setHeaders(preset.headers);
       setCompiledContent(compiledContent);
       setReady(true);
@@ -428,7 +426,19 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       }
       setReady(true);
     } else {
-      handle();
+      let preset: UrlOutputPreset;
+      if (selectedPreset === -2 && searchMatchTemplate) {
+        preset = searchMatchTemplate;
+      } else {
+        if (!presets) {
+          throw new Error(
+            "Unexpectedly had no presets when compiling template."
+          );
+        }
+
+        preset = presets[selectedPreset];
+      }
+      handle(preset);
     }
   }, [
     sandboxReady,
@@ -547,15 +557,19 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
     }
   };
 
-  const acceptSuggestion = (filename: string, template: string) => {
+  const acceptSuggestion = async (filename: string, template: OutputPreset) => {
     if (presets === undefined) {
       throw new Error("Unexpectedly had no presets when accepting suggestion");
     }
-    const matchingPresetIdx = presets.findIndex(
-      (preset) => preset.name === template
-    );
-    setOverrideUrl(`/vault/${filename}`);
-    setSelectedPreset(matchingPresetIdx);
+    setSearchMatchtemplate({
+      name: "",
+      urlTemplate: `/vault/${filename}`,
+      method: template.method,
+      headers: template.headers,
+      contentTemplate: template.contentTemplate,
+    });
+    setSelectedPreset(-2);
+
     setSuggestionAccepted(true);
   };
 
@@ -650,7 +664,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                           insecureMode={insecureMode}
                           templateSuggestion={searchMatchDirectTemplate}
                           mention={ref}
-                          presets={presets ?? []}
                           acceptSuggestion={acceptSuggestion}
                           directReferenceMessages={directReferenceMessages}
                         />
@@ -671,9 +684,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                             insecureMode={insecureMode}
                             templateSuggestion={searchMatchMentionTemplate}
                             mention={ref}
-                            presets={presets ?? []}
                             acceptSuggestion={acceptSuggestion}
-                            directReferenceMessages={directReferenceMessages}
                           />
                         ))}
                     </div>
@@ -696,8 +707,13 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                     }
                   >
                     {cacheAvailable && (
-                      <option key={"cached"} value={-1}>
+                      <option key={"___cached"} value={-1}>
                         [Saved Draft]
+                      </option>
+                    )}
+                    {suggestionAccepted && searchMatchTemplate && (
+                      <option key={"___suggestion"} value={-2}>
+                        [Suggested Template]
                       </option>
                     )}
                     {presets &&

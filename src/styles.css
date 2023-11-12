@@ -50,7 +50,7 @@ div.background.displayed {
 }
 
 div.popup {
-  opacity: 0.9;
+  opacity: 0.95;
   border-radius: 10px;
   width: 600px;
   position: fixed;
@@ -108,7 +108,7 @@ svg.action-icon {
   cursor: pointer;
 }
 
-div.permission-modal {
+.permission-modal {
   display: flex;
   flex-direction: column;
   width: 300px;
@@ -118,7 +118,7 @@ div.permission-modal {
   margin-top: 25vh;
 }
 
-div.modal-content {
+.modal-content {
   flex-grow: 1;
 }
 
@@ -215,4 +215,11 @@ div.protip p {
 
 .MuiAlert-message {
   flex-grow: 1
+}
+
+p.request-params-no-url-notice {
+  flex-grow: 1;
+  margin: auto 10px;
+  color: gray;
+  font-style: italic;
 }

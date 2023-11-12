@@ -15,17 +15,10 @@ Handlebars.registerHelper("quote", (value: string): string => {
   return lines.join("\n");
 });
 
-Handlebars.registerHelper(
-  "date",
-  (format: string | { [key: string]: string }): string => {
-    const now = new Date();
-    let formatStr: string = "yyyy-MM-dd HH:mm:ss";
-    if (typeof format === "string") {
-      formatStr = format;
-    }
-    return formatDate(now, formatStr);
-  }
-);
+Handlebars.registerHelper("date", (format: string): string => {
+  const now = new Date();
+  return formatDate(now, format ?? "yyyy-MM-dd HH:mm:ss");
+});
 
 Handlebars.registerHelper("filename", (unsafe: string | undefined): string => {
   if (typeof unsafe === "string") {
