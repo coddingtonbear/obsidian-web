@@ -38,7 +38,7 @@ div.background {
   top: 0px;
   width: 100vw;
   height: 100vh;
-  background-color: rgb(100, 100, 100, 0.25);
+  background-color: rgb(100, 100, 100, 0.33);
 
   opacity: 0;
   transition: opacity 0.25s linear;
