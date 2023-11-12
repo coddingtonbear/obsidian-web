@@ -21,7 +21,7 @@ import SendIcon from "@mui/icons-material/SaveAlt";
 
 import styles from "./styles.css";
 
-import { PurpleTheme } from "./theme";
+import { DarkPurpleTheme } from "./theme";
 import Alert from "./components/Alert";
 import {
   AlertStatus,
@@ -50,7 +50,7 @@ import {
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
 import MentionNotice from "./components/MentionNotice";
-import { NativeSelect } from "@mui/material";
+import { NativeSelect, Paper } from "@mui/material";
 
 const ROOT_CONTAINER_ID = "obsidian-web-container";
 
@@ -554,12 +554,12 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   };
 
   return (
-    <ThemeProvider theme={PurpleTheme}>
+    <ThemeProvider theme={DarkPurpleTheme}>
       <div
         className={classnames("background", { displayed })}
         onClick={() => onFinished()}
       >
-        <div
+        <Paper
           className="popup"
           onClick={(evt) => {
             evt.stopPropagation();
@@ -643,7 +643,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                   >
                     {cacheAvailable && (
                       <option key={"cached"} value={-1}>
-                        Saved Draft
+                        [Saved Draft]
                       </option>
                     )}
                     {presets &&
@@ -667,7 +667,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
               </div>
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <p>Entry Details</p>
+                  <p>View Request Details</p>
                 </AccordionSummary>
                 <AccordionDetails>
                   <RequestParameters
@@ -727,7 +727,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
               )}
             </>
           )}
-        </div>
+        </Paper>
       </div>
     </ThemeProvider>
   );

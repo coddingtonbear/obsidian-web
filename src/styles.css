@@ -56,14 +56,17 @@ div.popup {
   right: 25px;
   top: 25px;
   z-index: 9999999;
-  box-shadow: 5px 5px 5px black;
-  background-color: #fff;
   padding: 5px;
   font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
 div.popup div.preset-selector {
   padding-left: 10px;
+}
+
+div.popup .MuiAccordion-root {
+  font-size: 12px;
+  color: lightgray;
 }
 
 div.auth-field {

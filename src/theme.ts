@@ -1,6 +1,6 @@
-import { createTheme } from "@mui/material/styles";
+import { ThemeOptions, createTheme } from "@mui/material/styles";
 
-export const PurpleTheme = createTheme({
+const DefaultThemeOptions: ThemeOptions = {
   typography: {
     allVariants: {
       fontFamily: ["Roboto", "Helvetica", "Arial"].join(","),
@@ -21,5 +21,14 @@ export const PurpleTheme = createTheme({
       dark: "#000000",
       contrastText: "#ffffff",
     },
+  },
+};
+
+export const PurpleTheme = createTheme(DefaultThemeOptions);
+
+export const DarkPurpleTheme = createTheme({
+  ...DefaultThemeOptions,
+  palette: {
+    mode: "dark",
   },
 });
