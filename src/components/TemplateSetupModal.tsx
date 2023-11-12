@@ -7,6 +7,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { ConfiguredTemplate } from "../types";
+import { DefaultPreviewContext } from "../constants";
 
 export interface Props {
   open: boolean;
@@ -100,7 +101,7 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
           allowUrlConfiguration={isAdhocSelectedTemplate}
           method={method}
           sandbox={sandbox}
-          previewContext={{}}
+          previewContext={DefaultPreviewContext}
           url={urlTemplate}
           headers={headers}
           content={contentTemplate}

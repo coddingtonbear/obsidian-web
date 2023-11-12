@@ -4,6 +4,7 @@ import {
   ExtensionLocalSettings,
   ExtensionSyncSettings,
   OutputPreset,
+  PreviewContext,
 } from "./types";
 
 export const MinVersion = "1.3.1";
@@ -19,6 +20,26 @@ export const DefaultLocalSettings: ExtensionLocalSettings = {
   host: "127.0.0.1",
   insecureMode: false,
   apiKey: "",
+};
+
+export const DefaultPreviewContext: PreviewContext = {
+  page: {
+    url: "https://fortelabs.com/blog/para/",
+    title:
+      "The PARA Method: The Simple System for Organizing Your Digital Life in Seconds",
+    selectedText: "Imagine for a moment the perfect organizational system.",
+    content: "CONTENT",
+  },
+  article: {
+    title:
+      "The PARA Method: The Simple System for Organizing Your Digital Life in Seconds",
+    length: 1000,
+    excerpt:
+      "It’s called PARA – a simple, comprehensive, yet extremely flexible system for organizing any type of digital information across any platform.",
+    byline: "Tiago Forte",
+    dir: "ltr",
+    siteName: "Forte Labs",
+  },
 };
 
 export const KnownLocalSettingKeys = [

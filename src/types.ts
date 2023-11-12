@@ -147,3 +147,20 @@ export type BackgroundRequest =
   | RequestHostPermissionRequest
   | CheckHasHostPermissionRequest
   | CheckKeyboardShortcutRequest;
+
+export interface PreviewContext {
+  page: {
+    url: string;
+    title: string;
+    selectedText: string;
+    content: string;
+  };
+  article: {
+    title: string;
+    length: number;
+    excerpt: string;
+    byline: string;
+    dir: string;
+    siteName: string;
+  };
+}
