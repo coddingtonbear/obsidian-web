@@ -359,7 +359,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
     }
 
     handle();
-  }, [url]);
+  }, [url, searchEnabled]);
 
   useEffect(() => {
     if (!sandboxReady || presets === undefined) {
@@ -626,6 +626,49 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
           )}
           {displayState === "form" && (
             <>
+              {!suggestionAccepted && host && (
+                <>
+                  {(mentions.length > 0 || directReferences.length > 0) && (
+                    <div className="mentions">
+                      {directReferences.map((ref) => (
+                        <MentionNotice
+                          key={ref.filename}
+                          type="direct"
+                          host={host}
+                          apiKey={apiKey}
+                          insecureMode={insecureMode}
+                          templateSuggestion={searchMatchDirectTemplate}
+                          mention={ref}
+                          presets={presets ?? []}
+                          acceptSuggestion={acceptSuggestion}
+                          directReferenceMessages={directReferenceMessages}
+                        />
+                      ))}
+                      {mentions
+                        .filter(
+                          (ref) =>
+                            !directReferences.find(
+                              (d) => d.filename === ref.filename
+                            )
+                        )
+                        .map((ref) => (
+                          <MentionNotice
+                            key={ref.filename}
+                            type="mention"
+                            host={host}
+                            apiKey={apiKey}
+                            insecureMode={insecureMode}
+                            templateSuggestion={searchMatchMentionTemplate}
+                            mention={ref}
+                            presets={presets ?? []}
+                            acceptSuggestion={acceptSuggestion}
+                            directReferenceMessages={directReferenceMessages}
+                          />
+                        ))}
+                    </div>
+                  )}
+                </>
+              )}
               <div className="option">
                 <div className="option-value">
                   <NativeSelect
@@ -682,49 +725,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                   />
                 </AccordionDetails>
               </Accordion>
-              {!suggestionAccepted && host && (
-                <>
-                  {(mentions.length > 0 || directReferences.length > 0) && (
-                    <div className="mentions">
-                      {directReferences.map((ref) => (
-                        <MentionNotice
-                          key={ref.filename}
-                          type="direct"
-                          host={host}
-                          apiKey={apiKey}
-                          insecureMode={insecureMode}
-                          templateSuggestion={searchMatchDirectTemplate}
-                          mention={ref}
-                          presets={presets ?? []}
-                          acceptSuggestion={acceptSuggestion}
-                          directReferenceMessages={directReferenceMessages}
-                        />
-                      ))}
-                      {mentions
-                        .filter(
-                          (ref) =>
-                            !directReferences.find(
-                              (d) => d.filename === ref.filename
-                            )
-                        )
-                        .map((ref) => (
-                          <MentionNotice
-                            key={ref.filename}
-                            type="mention"
-                            host={host}
-                            apiKey={apiKey}
-                            insecureMode={insecureMode}
-                            templateSuggestion={searchMatchMentionTemplate}
-                            mention={ref}
-                            presets={presets ?? []}
-                            acceptSuggestion={acceptSuggestion}
-                            directReferenceMessages={directReferenceMessages}
-                          />
-                        ))}
-                    </div>
-                  )}
-                </>
-              )}
             </>
           )}
         </Paper>

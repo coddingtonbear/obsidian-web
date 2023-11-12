@@ -3,7 +3,7 @@ import MaterialAlert from "@mui/material/Alert";
 import Link from "@mui/material/Link";
 import IconButton from "@mui/material/IconButton";
 
-import UpgradeIcon from "@mui/icons-material/Upgrade";
+import UseSuggestionIcon from "@mui/icons-material/ArrowCircleDown";
 
 import { OutputPreset, SearchJsonResponseItem } from "../types";
 import { openFileInObsidian } from "../utils";
@@ -46,7 +46,7 @@ const MentionNotice: React.FC<Props> = ({
           aria-label="Use existing note"
           title="Use existing note"
         >
-          <UpgradeIcon />
+          <UseSuggestionIcon />
         </IconButton>
       )}
       {type === "direct" && <>This URL has a dedicated note: </>}
