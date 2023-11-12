@@ -6,10 +6,7 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "./Alert";
-import { AlertStatus, ConfiguredTemplate } from "../types";
-import { compileTemplate } from "../utils";
+import { ConfiguredTemplate } from "../types";
 
 export interface Props {
   open: boolean;
@@ -49,40 +46,7 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
   const [method, setMethod] =
     React.useState<ConfiguredTemplate["method"]>(originalMethod);
 
-  const [saveError, setSaveError] = React.useState<AlertStatus>();
-
-  React.useEffect(() => {
-    async function handle() {
-      try {
-        await compileTemplate(sandbox, urlTemplate, {});
-      } catch (e) {
-        setSaveError({
-          severity: "error",
-          title: "Error",
-          message: "Could not compile URL template",
-        });
-      }
-    }
-
-    handle();
-  }, [urlTemplate]);
-
-  React.useEffect(() => {
-    async function handle() {
-      try {
-        await compileTemplate(sandbox, contentTemplate, {});
-        setSaveError(undefined);
-      } catch (e) {
-        setSaveError({
-          severity: "error",
-          title: "Error",
-          message: "Could not compile content template",
-        });
-      }
-    }
-
-    handle();
-  }, [contentTemplate]);
+  const [saveError, setSaveError] = React.useState<boolean>(false);
 
   const onAttemptSave = () => {
     const preset: ConfiguredTemplate = {
@@ -135,6 +99,8 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
         <RequestParameters
           allowUrlConfiguration={isAdhocSelectedTemplate}
           method={method}
+          sandbox={sandbox}
+          previewContext={{}}
           url={urlTemplate}
           headers={headers}
           content={contentTemplate}
@@ -142,8 +108,8 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
           onChangeUrl={setUrlTemplate}
           onChangeHeaders={setHeaders}
           onChangeContent={setContentTemplate}
+          onChangeIsValid={(valid) => setSaveError(!valid)}
         />
-        {saveError && <Alert value={saveError} />}
         <div className="submit">
           <Button variant="outlined" onClick={onClose}>
             Cancel
@@ -151,7 +117,7 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
           <Button
             variant="contained"
             onClick={onAttemptSave}
-            disabled={Boolean(saveError)}
+            disabled={saveError}
           >
             Save Changes
           </Button>

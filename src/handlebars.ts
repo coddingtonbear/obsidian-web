@@ -15,9 +15,14 @@ Handlebars.registerHelper("quote", (value: string): string => {
   return lines.join("\n");
 });
 
-Handlebars.registerHelper("date", (format: string | undefined): string => {
+Handlebars.registerHelper("date", (format: string | unknown): string => {
   const now = new Date();
-  return formatDate(now, format ?? "yyyy-MM-dd HH:mm:ss");
+  // Helpers are handed extra args by default -- we need to check
+  // whether `format` above is what we're looking for (a string)
+  if (typeof format !== "string") {
+    format = "yyyy-MM-dd HH:mm:ss";
+  }
+  return formatDate(now, format as string);
 });
 
 Handlebars.registerHelper("filename", (unsafe: string | undefined): string => {
