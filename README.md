@@ -18,7 +18,7 @@ Do you find yourself on a webpage somewhere and want to add it to your notes so 
 
 Now you should be able to click on the icon in your toolbar to submit the page you're on to Obsidian:
 
-![popup](http://coddingtonbear-public.s3.amazonaws.com/github/obsidian-web/popup.png)
+![popup](http://coddingtonbear-public.s3.amazonaws.com/github/obsidian-web/popup.3.png)
 
 ## Options
 
