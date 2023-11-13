@@ -1,6 +1,7 @@
 import React from "react";
 
 import TextField from "@mui/material/TextField";
+import { useDebounce } from "usehooks-ts";
 
 import { UrlOutputPreset } from "../types";
 import HeaderControl from "./HeaderControl";
@@ -48,6 +49,25 @@ const RequestParameters: React.FC<Props> = ({
   const [compiledContent, setCompiledContent] = React.useState<string>(content);
   const [compiledContentError, setCompiledContentError] =
     React.useState<string>();
+
+  const [compiledUrlMatches, setCompiledUrlMatches] =
+    React.useState<boolean>(true);
+  const debouncedCompiledUrlMatches = useDebounce(compiledUrlMatches, 500);
+
+  const [compiledContentMatches, setCompiledContentMatches] =
+    React.useState<boolean>(true);
+  const debouncedCompiledContentMatches = useDebounce(
+    compiledContentMatches,
+    500
+  );
+
+  React.useEffect(() => {
+    setCompiledUrlMatches(url === compiledUrl);
+  }, [url, compiledUrl]);
+
+  React.useEffect(() => {
+    setCompiledContentMatches(content === compiledContent);
+  }, [content, compiledContent]);
 
   React.useEffect(() => {
     async function handle() {
@@ -126,7 +146,7 @@ const RequestParameters: React.FC<Props> = ({
             </Typography>
           )}
         </div>
-        {allowUrlConfiguration && url !== compiledUrl && (
+        {allowUrlConfiguration && !debouncedCompiledUrlMatches && (
           <pre
             className="template-rendered-preview url"
             title="Rendered URL preview (double-click to crystalize)"
@@ -163,7 +183,7 @@ const RequestParameters: React.FC<Props> = ({
             onChange={(event) => onChangeContent(event.target.value)}
           />
         </div>
-        {content !== compiledContent && (
+        {!debouncedCompiledContentMatches && (
           <pre
             className="template-rendered-preview"
             title="Rendered content preview (double-click to crystalize)"
