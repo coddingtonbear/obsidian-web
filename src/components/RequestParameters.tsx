@@ -5,9 +5,11 @@ import { useDebounce } from "usehooks-ts";
 
 import { UrlOutputPreset } from "../types";
 import HeaderControl from "./HeaderControl";
-import { NativeSelect, Stack, Typography } from "@mui/material";
+import { IconButton, NativeSelect, Stack, Typography } from "@mui/material";
 import { compileTemplate } from "../utils";
 import Alert from "./Alert";
+
+import Crystalize from "@mui/icons-material/Publish";
 
 interface Props {
   method: UrlOutputPreset["method"];
@@ -147,15 +149,27 @@ const RequestParameters: React.FC<Props> = ({
           )}
         </div>
         {allowUrlConfiguration && !debouncedCompiledUrlMatches && (
-          <pre
-            className="template-rendered-preview url"
-            title="Rendered URL preview (double-click to crystalize)"
-            onDoubleClick={() => {
-              onChangeUrl(compiledUrl);
-            }}
-          >
-            {compiledUrl}
-          </pre>
+          <Stack direction="row" className="preview-content url">
+            <div>
+              <IconButton
+                color="primary"
+                size="small"
+                onClick={() => {
+                  onChangeUrl(compiledUrl);
+                }}
+                title="Crystalize"
+              >
+                <Crystalize />
+              </IconButton>
+            </div>
+            <pre
+              className="template-rendered-preview url"
+              title="Rendered URL preview"
+              onDoubleClick={() => {}}
+            >
+              {compiledUrl}
+            </pre>
+          </Stack>
         )}
       </div>
       {compiledUrlError && (
@@ -184,15 +198,26 @@ const RequestParameters: React.FC<Props> = ({
           />
         </div>
         {!debouncedCompiledContentMatches && (
-          <pre
-            className="template-rendered-preview"
-            title="Rendered content preview (double-click to crystalize)"
-            onDoubleClick={() => {
-              onChangeContent(compiledContent);
-            }}
-          >
-            {compiledContent}
-          </pre>
+          <Stack direction="row" className="preview-content">
+            <div>
+              <IconButton
+                color="primary"
+                size="small"
+                onClick={() => {
+                  onChangeContent(compiledContent);
+                }}
+                title="Crystalize"
+              >
+                <Crystalize />
+              </IconButton>
+            </div>
+            <pre
+              className="template-rendered-preview"
+              title="Rendered content preview"
+            >
+              {compiledContent}
+            </pre>
+          </Stack>
         )}
       </div>
       {compiledContentError && (
