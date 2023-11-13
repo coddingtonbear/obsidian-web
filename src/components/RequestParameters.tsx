@@ -126,12 +126,14 @@ const RequestParameters: React.FC<Props> = ({
             </Typography>
           )}
         </div>
-        <pre
-          className="template-rendered-preview url"
-          title="Rendered URL preview"
-        >
-          {compiledUrl}
-        </pre>
+        {allowUrlConfiguration && (
+          <pre
+            className="template-rendered-preview url"
+            title="Rendered URL preview"
+          >
+            {compiledUrl}
+          </pre>
+        )}
       </div>
       {compiledUrlError && (
         <Alert
