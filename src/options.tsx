@@ -450,9 +450,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         if (
           !parsed ||
           !parsed.sync ||
-          (parsed.sync.version !== "0.1" && parsed.sync.version !== "0.2") ||
+          compareVersions(parsed.sync.version, "0.2") > 0 ||
           !parsed.local ||
-          (parsed.local.version !== "0.1" && parsed.sync.version !== "0.2")
+          compareVersions(parsed.local.version, "0.2") > 0
         ) {
           alert(
             "Could not parse configuration file!  See console for details."
