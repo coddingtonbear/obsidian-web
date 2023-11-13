@@ -57,7 +57,6 @@ div.popup {
   right: 25px;
   top: 25px;
   z-index: 9999999;
-  padding: 5px;
   font-family: Roboto, Helvetica, Arial, sans-serif;
   max-height: 95vh;
   overflow-y: auto;
@@ -246,4 +245,9 @@ p.request-params-no-url-notice {
   margin: 0px;
   overflow: auto;
   color: #7a61cb;
+}
+
+.drag-handle {
+  height: 10px;
+  background-color: gray;
 }
