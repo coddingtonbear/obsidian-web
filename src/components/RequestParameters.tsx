@@ -110,15 +110,12 @@ const RequestParameters: React.FC<Props> = ({
             <option value="patch">PATCH</option>
           </NativeSelect>
           {allowUrlConfiguration && (
-            <>
-              <TextField
-                label="API URL"
-                fullWidth={true}
-                value={url}
-                onChange={(event) => onChangeUrl(event.target.value)}
-              />
-              <pre className="template-rendered-preview">{compiledUrl}</pre>
-            </>
+            <TextField
+              label="API URL"
+              fullWidth={true}
+              value={url}
+              onChange={(event) => onChangeUrl(event.target.value)}
+            />
           )}
           {!allowUrlConfiguration && (
             <Typography
@@ -129,6 +126,7 @@ const RequestParameters: React.FC<Props> = ({
             </Typography>
           )}
         </div>
+        <pre className="template-rendered-preview url">{compiledUrl}</pre>
       </div>
       {compiledUrlError && (
         <Alert
