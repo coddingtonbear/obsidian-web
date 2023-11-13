@@ -637,6 +637,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                       onChangeIsValid={setContentIsValid}
                       onChangeRenderedContent={setCompiledContent}
                       onChangeRenderedUrl={setCompiledUrl}
+                      showCrystalizeOption={true}
                     />
                   </AccordionDetails>
                 </Accordion>

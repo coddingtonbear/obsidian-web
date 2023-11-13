@@ -13,6 +13,7 @@ import Crystalize from "@mui/icons-material/Publish";
 
 interface Props {
   method: UrlOutputPreset["method"];
+  showCrystalizeOption?: boolean;
   sandbox: HTMLIFrameElement;
   previewContext: Record<string, any>;
   allowUrlConfiguration?: boolean;
@@ -34,6 +35,7 @@ const RequestParameters: React.FC<Props> = ({
   method,
   sandbox,
   previewContext,
+  showCrystalizeOption = false,
   allowUrlConfiguration = true,
   url,
   headers,
@@ -150,18 +152,20 @@ const RequestParameters: React.FC<Props> = ({
         </div>
         {allowUrlConfiguration && !debouncedCompiledUrlMatches && (
           <Stack direction="row" className="preview-content url">
-            <div>
-              <IconButton
-                color="primary"
-                size="small"
-                onClick={() => {
-                  onChangeUrl(compiledUrl);
-                }}
-                title="Crystalize"
-              >
-                <Crystalize />
-              </IconButton>
-            </div>
+            {showCrystalizeOption && (
+              <div>
+                <IconButton
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    onChangeUrl(compiledUrl);
+                  }}
+                  title="Crystalize"
+                >
+                  <Crystalize />
+                </IconButton>
+              </div>
+            )}
             <pre
               className="template-rendered-preview url"
               title="Rendered URL preview"
@@ -199,18 +203,20 @@ const RequestParameters: React.FC<Props> = ({
         </div>
         {!debouncedCompiledContentMatches && (
           <Stack direction="row" className="preview-content">
-            <div>
-              <IconButton
-                color="primary"
-                size="small"
-                onClick={() => {
-                  onChangeContent(compiledContent);
-                }}
-                title="Crystalize"
-              >
-                <Crystalize />
-              </IconButton>
-            </div>
+            {showCrystalizeOption && (
+              <div>
+                <IconButton
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    onChangeContent(compiledContent);
+                  }}
+                  title="Crystalize"
+                >
+                  <Crystalize />
+                </IconButton>
+              </div>
+            )}
             <pre
               className="template-rendered-preview"
               title="Rendered content preview"
