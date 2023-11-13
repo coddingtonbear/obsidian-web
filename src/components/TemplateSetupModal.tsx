@@ -97,6 +97,18 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
           </a>{" "}
           template and what context variables and helpers are available.
         </Typography>
+        {isAdhocSelectedTemplate && (
+          <Typography paragraph={true}>
+            See{" "}
+            <a
+              href="https://coddingtonbear.github.io/obsidian-local-rest-api/"
+              target="_blank"
+            >
+              Obsidian Local REST API's live documentation
+            </a>{" "}
+            for insight into the options available for API URL.
+          </Typography>
+        )}
         <RequestParameters
           allowUrlConfiguration={isAdhocSelectedTemplate}
           method={method}
