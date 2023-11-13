@@ -19,6 +19,7 @@ import { CacheProvider } from "@emotion/react";
 import Draggable from "react-draggable";
 
 import SendIcon from "@mui/icons-material/SaveAlt";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 import styles from "./styles.css";
 
@@ -613,6 +614,15 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                     title="Send to Obsidian"
                   >
                     <SendIcon className="send-to-obsidian-icon" />
+                  </IconButton>
+                  <IconButton
+                    className="cancel-send"
+                    color="error"
+                    size="large"
+                    onClick={onFinished}
+                    title="Cancel"
+                  >
+                    <CancelIcon className="cancel-send-icon" />
                   </IconButton>
                 </div>
               </div>
