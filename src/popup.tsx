@@ -507,8 +507,19 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
             {displayState === "alert" && status && <Alert value={status} />}
             {displayState === "error" && (
               <MaterialAlert severity="error">
-                Could not connect to Obsidian! Make sure Obsidian is running and
-                that the Obsidian Local REST API plugin is enabled.
+                <p className="popup-text">
+                  Could not connect to Obsidian! Make sure Obsidian is running
+                  and that the Obsidian Local REST API plugin is enabled.
+                </p>
+                <div className="submit">
+                  <Button
+                    target="_blank"
+                    variant="outlined"
+                    href={`chrome-extension://${chrome.runtime.id}/options.html`}
+                  >
+                    Go to settings
+                  </Button>
+                </div>
               </MaterialAlert>
             )}
             {displayState === "loading" && (
