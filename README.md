@@ -24,7 +24,7 @@ Now you should be able to click on the icon in your toolbar to submit the page y
 
 Options can be accessed by right-clicking on the icon in your toolbar and pressing  "Options".
 
-![options](http://coddingtonbear-public.s3.amazonaws.com/github/obsidian-web/options.png)
+![options](http://coddingtonbear-public.s3.amazonaws.com/github/obsidian-web/options.3.png)
 
 ## Development
 
