@@ -81,10 +81,20 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
           <>
             {isAdhocSelectedTemplate ? (
               <>
-                You can use templating in your API URL and Content fields below.
+                You can use{" "}
+                <a href="https://handlebarsjs.com/guide/" target="_blank">
+                  Handlebars
+                </a>{" "}
+                templating in your API URL and Content fields below.
               </>
             ) : (
-              <>You can use templating in your Content field below.</>
+              <>
+                You can use{" "}
+                <a href="https://handlebarsjs.com/guide/" target="_blank">
+                  Handlebars
+                </a>{" "}
+                templating in your Content field below.
+              </>
             )}{" "}
             See{" "}
             <a
@@ -93,11 +103,8 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
             >
               Obsidian Web's template documentation
             </a>{" "}
-            to get an understanding of how to write your{" "}
-            <a href="https://handlebarsjs.com/guide/" target="_blank">
-              Handlebars
-            </a>{" "}
-            template and what context variables and helpers are available.
+            to get an understanding of how to write your template and what
+            context variables and helpers are available.
           </>
           {isAdhocSelectedTemplate && (
             <>
@@ -110,7 +117,8 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
               >
                 Obsidian Local REST API's live documentation
               </a>{" "}
-              for insight into the options available for API URL.
+              for insight into what URLs are provided for selecting the document
+              you would like to modify.
             </>
           )}
         </Alert>
