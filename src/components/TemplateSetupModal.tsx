@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { ConfiguredTemplate } from "../types";
 import { DefaultPreviewContext } from "../constants";
+import { Alert } from "@mui/material";
 
 export interface Props {
   open: boolean;
@@ -76,39 +77,43 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
             </div>
           </div>
         )}
-        <Typography paragraph={true}>
-          {isAdhocSelectedTemplate ? (
-            <>
-              You can use templating in your API URL and Content fields below.
-            </>
-          ) : (
-            <>You can use templating in your Content field below.</>
-          )}
-          See Obsidian Web's{" "}
-          <a
-            href="https://github.com/coddingtonbear/obsidian-web/wiki/Understanding-Templates"
-            target="_blank"
-          >
-            template documentation
-          </a>{" "}
-          to get an understanding of how to write your{" "}
-          <a href="https://handlebarsjs.com/guide/" target="_blank">
-            Handlebars
-          </a>{" "}
-          template and what context variables and helpers are available.
-        </Typography>
-        {isAdhocSelectedTemplate && (
-          <Typography paragraph={true}>
+        <Alert severity="info">
+          <>
+            {isAdhocSelectedTemplate ? (
+              <>
+                You can use templating in your API URL and Content fields below.
+              </>
+            ) : (
+              <>You can use templating in your Content field below.</>
+            )}{" "}
             See{" "}
             <a
-              href="https://coddingtonbear.github.io/obsidian-local-rest-api/"
+              href="https://github.com/coddingtonbear/obsidian-web/wiki/Understanding-Templates"
               target="_blank"
             >
-              Obsidian Local REST API's live documentation
+              Obsidian Web's template documentation
             </a>{" "}
-            for insight into the options available for API URL.
-          </Typography>
-        )}
+            to get an understanding of how to write your{" "}
+            <a href="https://handlebarsjs.com/guide/" target="_blank">
+              Handlebars
+            </a>{" "}
+            template and what context variables and helpers are available.
+          </>
+          {isAdhocSelectedTemplate && (
+            <>
+              <br />
+              <br />
+              If you're not sure about what to enter for API URL below, see{" "}
+              <a
+                href="https://coddingtonbear.github.io/obsidian-local-rest-api/"
+                target="_blank"
+              >
+                Obsidian Local REST API's live documentation
+              </a>{" "}
+              for insight into the options available for API URL.
+            </>
+          )}
+        </Alert>
         <RequestParameters
           allowUrlConfiguration={isAdhocSelectedTemplate}
           method={method}

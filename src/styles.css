@@ -259,3 +259,7 @@ p.request-params-no-url-notice {
   height: 10px;
   background-color: gray;
 }
+
+.MuiPaper-root {
+  margin-bottom: 10px;
+}
