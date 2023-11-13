@@ -359,17 +359,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
     return reader.parse();
   };
 
-  useEffect(() => {
-    function handleEscapeKey(event: KeyboardEvent) {
-      if (event.code === "Escape") {
-        onFinished();
-      }
-    }
-
-    document.addEventListener("keydown", handleEscapeKey);
-    return () => document.removeEventListener("keydown", handleEscapeKey);
-  }, []);
-
   const readabilityDataToMarkdown = (
     data: ReturnType<Readability["parse"]>
   ): string => {
@@ -649,8 +638,28 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   );
 };
 
+function handleEscapeKey(event: KeyboardEvent) {
+  if (event.code === "Escape") {
+    popupTeardown();
+  }
+}
+document.addEventListener("keydown", handleEscapeKey);
+
+function preventBrowserFromStealingKeypress(event: KeyboardEvent) {
+  if (event.code !== "Escape") {
+    event.stopPropagation();
+  }
+}
+document.addEventListener("keydown", preventBrowserFromStealingKeypress, true);
+
 function popupTeardown() {
   unregisterCompileTemplateCallback();
+  document.removeEventListener(
+    "keydown",
+    preventBrowserFromStealingKeypress,
+    true
+  );
+  document.removeEventListener("keydown", handleEscapeKey);
   setTimeout(() => {
     document.getElementById(ROOT_CONTAINER_ID)?.remove();
   }, 300);
