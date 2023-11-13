@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-import classnames from "classnames";
 import ReactDOM from "react-dom";
 import Turndown from "turndown";
 import { Readability } from "@mozilla/readability";
@@ -27,7 +26,6 @@ import { DarkPurpleTheme } from "./theme";
 import Alert from "./components/Alert";
 import {
   AlertStatus,
-  ContentCache,
   ExtensionLocalSettings,
   ExtensionSyncSettings,
   UrlOutputPreset,
@@ -40,12 +38,8 @@ import {
   getLocalSettings,
   getSyncSettings,
   obsidianRequest,
-  compileTemplate,
   getUrlMentions,
-  getContentCache,
   getPageMetadata,
-  setContentCache,
-  normalizeCacheUrl,
   checkHasHostPermission,
   requestHostPermission,
   getWindowSelectionAsHtml,
@@ -64,7 +58,6 @@ export interface Props {
 
 const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [status, setStatus] = useState<AlertStatus>();
-  const [displayed, setDisplayed] = useState<boolean>(false);
 
   const [sandboxReady, setSandboxReady] = useState<boolean>(false);
   const [obsidianUnavailable, setObsidianUnavailable] =
@@ -156,7 +149,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
         setSandboxReady(true);
       }
     });
-    setDisplayed(true);
   }, []);
 
   useEffect(() => {
@@ -464,7 +456,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   };
 
   const onFinished = () => {
-    setDisplayed(false);
     popupTeardown();
   };
 
