@@ -126,7 +126,12 @@ const RequestParameters: React.FC<Props> = ({
             </Typography>
           )}
         </div>
-        <pre className="template-rendered-preview url">{compiledUrl}</pre>
+        <pre
+          className="template-rendered-preview url"
+          title="Rendered URL preview"
+        >
+          {compiledUrl}
+        </pre>
       </div>
       {compiledUrlError && (
         <Alert
@@ -153,7 +158,12 @@ const RequestParameters: React.FC<Props> = ({
             onChange={(event) => onChangeContent(event.target.value)}
           />
         </div>
-        <pre className="template-rendered-preview">{compiledContent}</pre>
+        <pre
+          className="template-rendered-preview"
+          title="Rendered content preview"
+        >
+          {compiledContent}
+        </pre>
       </div>
       {compiledContentError && (
         <Alert
