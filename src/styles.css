@@ -59,6 +59,8 @@ div.popup {
   z-index: 9999999;
   padding: 5px;
   font-family: Roboto, Helvetica, Arial, sans-serif;
+  max-height: 95vh;
+  overflow-y: auto;
 }
 
 div.popup div.preset-selector {
@@ -242,4 +244,6 @@ p.request-params-no-url-notice {
   width: 100%;
   font-size: 16px;
   margin: 0px;
+  overflow: auto;
+  color: #7a61cb;
 }

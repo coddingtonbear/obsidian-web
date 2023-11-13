@@ -32,6 +32,7 @@ import {
   SearchJsonResponseItem,
   StatusResponse,
   OutputPreset,
+  PreviewContext,
 } from "./types";
 import {
   getLocalSettings,
@@ -66,9 +67,8 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [sandboxReady, setSandboxReady] = useState<boolean>(false);
   const [obsidianUnavailable, setObsidianUnavailable] =
     useState<boolean>(false);
-  const [ready, setReady] = useState<boolean>(false);
-  const [cacheData, setCacheData] = useState<ContentCache>({});
-  const [cacheAvailable, setCacheAvailable] = useState<boolean>(false);
+
+  const [previewContext, setPreviewContext] = useState<PreviewContext>();
 
   const [host, setHost] = useState<string | null>(null);
   const [hasHostPermission, setHasHostPermission] = useState<boolean | null>(
@@ -76,11 +76,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   );
   const [apiKey, setApiKey] = useState<string>("");
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
-
-  const [url, setUrl] = useState<string>("");
-  const [pageTitle, setPageTitle] = useState<string>("");
-  const [selection, setSelection] = useState<string>("");
-  const [pageContent, setPageContent] = useState<string>("");
 
   const [suggestionAccepted, setSuggestionAccepted] = useState<boolean>(false);
   const [mentions, setMentions] = useState<SearchJsonResponseItem[]>([]);
@@ -99,21 +94,19 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [searchMatchTemplate, setSearchMatchtemplate] =
     useState<UrlOutputPreset>();
 
-  const [method, setMethod] = useState<UrlOutputPreset["method"]>("post");
-  const [overrideUrl, setOverrideUrl] = useState<string>();
-  const [compiledUrl, setCompiledUrl] = useState<string>("");
-  const [headers, setHeaders] = useState<Record<string, string>>({});
-  const [compiledContent, setCompiledContent] = useState<string>("");
-
-  const [articleTitle, setArticleTitle] = useState<string>();
-  const [articleLength, setArticleLength] = useState<number>();
-  const [articleExcerpt, setArticleExcerpt] = useState<string>();
-  const [articleByline, setArticleByline] = useState<string>();
-  const [articleDir, setArticleDir] = useState<string>();
-  const [articleSiteName, setArticleSiteName] = useState<string>();
-
   const [presets, setPresets] = useState<UrlOutputPreset[]>();
-  const [selectedPreset, setSelectedPreset] = useState<number>(0);
+  const [selectedPresetIdx, setSelectedPresetIdx] = useState<number>(0);
+  const [selectedPreset, setSelectedPreset] = useState<UrlOutputPreset>();
+
+  const [formMethod, setFormMethod] =
+    useState<UrlOutputPreset["method"]>("post");
+  const [formUrl, setFormUrl] = useState<string>("");
+  const [formHeaders, setFormHeaders] = useState<Record<string, any>>({});
+  const [formContent, setFormContent] = useState<string>("");
+
+  const [compiledUrl, setCompiledUrl] = useState<string>("");
+  const [compiledContent, setCompiledContent] = useState<string>("");
+  const [contentIsValid, setContentIsValid] = useState<boolean>(false);
 
   const [displayState, setDisplayState] = useState<
     "welcome" | "form" | "error" | "loading" | "alert" | "permission"
@@ -122,10 +115,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const turndown = new Turndown(TurndownConfiguration);
 
   useEffect(() => {
-    if (!ready) {
-      setDisplayState("loading");
-      return;
-    }
     if (apiKey.length === 0) {
       setDisplayState("welcome");
       return;
@@ -143,7 +132,18 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       return;
     }
     setDisplayState("form");
-  }, [status, apiKey, obsidianUnavailable, ready, hasHostPermission]);
+  }, [status, apiKey, obsidianUnavailable, hasHostPermission]);
+
+  useEffect(() => {
+    if (!selectedPreset) {
+      return;
+    }
+
+    setFormMethod(selectedPreset.method);
+    setFormUrl(selectedPreset.urlTemplate);
+    setFormHeaders(selectedPreset.headers);
+    setFormContent(selectedPreset.contentTemplate);
+  }, [selectedPreset]);
 
   useEffect(() => {
     window.addEventListener("message", (message) => {
@@ -238,33 +238,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   }, [host]);
 
   useEffect(() => {
-    if (!url) {
-      return;
-    }
-
-    async function handle() {
-      const cache = await getContentCache(chrome.storage.local);
-      if (cache) {
-        setCacheData(cache);
-        try {
-          if (
-            cache.url &&
-            normalizeCacheUrl(cache.url) === normalizeCacheUrl(url)
-          ) {
-            setCacheAvailable(true);
-            setSelectedPreset(-1);
-          }
-        } catch (e) {
-          setCacheData({});
-          setCacheAvailable(false);
-        }
-      }
-    }
-
-    handle();
-  }, [url]);
-
-  useEffect(() => {
     async function handle() {
       let selectedText: string;
       try {
@@ -277,42 +250,38 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
         selectedText = "";
       }
 
-      let pageContent: string;
+      const previewContext: PreviewContext = {
+        page: {
+          url: window.document.location.href ?? "",
+          title: window.document.title ?? "",
+          selectedText: selectedText,
+          content: "",
+        },
+        article: {},
+      };
+
       try {
         const pageReadability = htmlToReadabilityData(
           window.document.body.innerHTML,
           window.document.location.href
         );
         if (pageReadability) {
-          setArticleTitle(pageReadability.title);
-          setArticleLength(pageReadability.length);
-          setArticleExcerpt(pageReadability.excerpt);
-          setArticleByline(pageReadability.byline);
-          setArticleDir(pageReadability.dir);
-          setArticleSiteName(pageReadability.siteName);
+          previewContext.article = {
+            title: pageReadability.title,
+            length: pageReadability.length,
+            excerpt: pageReadability.excerpt,
+            byline: pageReadability.byline,
+            dir: pageReadability.dir,
+            siteName: pageReadability.siteName,
+          };
         } else {
-          setArticleTitle(undefined);
-          setArticleLength(undefined);
-          setArticleExcerpt(undefined);
-          setArticleByline(undefined);
-          setArticleDir(undefined);
-          setArticleSiteName(undefined);
+          previewContext.article = {};
         }
-        pageContent = readabilityDataToMarkdown(pageReadability);
-      } catch (e) {
-        pageContent = "";
-        setArticleTitle(undefined);
-        setArticleLength(undefined);
-        setArticleExcerpt(undefined);
-        setArticleByline(undefined);
-        setArticleDir(undefined);
-        setArticleSiteName(undefined);
-      }
+        previewContext.page.content =
+          readabilityDataToMarkdown(pageReadability);
+      } catch (e) {}
 
-      setUrl(window.document.location.href ?? "");
-      setPageTitle(window.document.title ?? "");
-      setSelection(selectedText);
-      setPageContent(pageContent);
+      setPreviewContext(previewContext);
     }
     handle();
   }, []);
@@ -355,114 +324,33 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       if (!host) {
         return;
       }
-      const allMentions = await getUrlMentions(host, apiKey, insecureMode, url);
+      const allMentions = await getUrlMentions(
+        host,
+        apiKey,
+        insecureMode,
+        window.location.href
+      );
 
       setMentions(allMentions.mentions);
       setDirectReferences(allMentions.direct);
     }
 
     handle();
-  }, [url, searchEnabled]);
+  }, [window.location.href, searchEnabled]);
 
   useEffect(() => {
     if (!sandboxReady || presets === undefined) {
       return;
     }
-
-    async function handle(preset: UrlOutputPreset) {
-      const context = {
-        page: {
-          url: url,
-          title: pageTitle,
-          selectedText: selection,
-          content: pageContent,
-        },
-        article: {
-          title: articleTitle,
-          length: articleLength,
-          excerpt: articleExcerpt,
-          byline: articleByline,
-          dir: articleDir,
-          siteName: articleSiteName,
-        },
-      };
-
-      if (overrideUrl) {
-        setCompiledUrl(overrideUrl);
-        setOverrideUrl(undefined);
-      } else {
-        const compiledUrl = await compileTemplate(
-          sandbox,
-          preset.urlTemplate,
-          context
-        );
-        setCompiledUrl(compiledUrl);
-      }
-      const compiledContent = await compileTemplate(
-        sandbox,
-        preset.contentTemplate,
-        context
-      );
-
-      setMethod(preset.method as UrlOutputPreset["method"]);
-      setHeaders(preset.headers);
-      setCompiledContent(compiledContent);
-      setReady(true);
-    }
-
-    // -1 is our signal for loading the draft
-    if (selectedPreset === -1) {
-      if (cacheData.method) {
-        setMethod(cacheData.method);
-      }
-      if (cacheData.compiledUrl) {
-        setCompiledUrl(cacheData.compiledUrl);
-      }
-      if (cacheData.headers) {
-        setHeaders(cacheData.headers);
-      }
-      if (cacheData.compiledContent) {
-        setCompiledContent(cacheData.compiledContent);
-      }
-      setReady(true);
+    let preset: UrlOutputPreset;
+    if (selectedPresetIdx === -2 && searchMatchTemplate) {
+      preset = searchMatchTemplate;
     } else {
-      let preset: UrlOutputPreset;
-      if (selectedPreset === -2 && searchMatchTemplate) {
-        preset = searchMatchTemplate;
-      } else {
-        if (!presets) {
-          throw new Error(
-            "Unexpectedly had no presets when compiling template."
-          );
-        }
-
-        preset = presets[selectedPreset];
-      }
-      handle(preset);
-    }
-  }, [
-    sandboxReady,
-    selectedPreset,
-    presets,
-    url,
-    pageTitle,
-    selection,
-    pageContent,
-  ]);
-
-  useEffect(() => {
-    if (!url) {
-      return;
+      preset = presets[selectedPresetIdx];
     }
 
-    setContentCache(chrome.storage.local, {
-      url,
-      method,
-      compiledUrl,
-      headers,
-      compiledContent,
-    });
-  }, [url, method, compiledUrl, headers, compiledContent]);
+    setSelectedPreset(preset);
+  }, [sandboxReady, presets, selectedPresetIdx]);
 
   const htmlToReadabilityData = (
     html: string,
@@ -499,11 +387,11 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const sendToObsidian = async () => {
     const requestHeaders = {
-      ...headers,
+      ...formHeaders,
       "Content-Type": "text/markdown",
     };
     const request: RequestInit = {
-      method: method,
+      method: formMethod,
       body: compiledContent,
       headers: requestHeaders,
     };
@@ -568,7 +456,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       headers: template.headers,
       contentTemplate: template.contentTemplate,
     });
-    setSelectedPreset(-2);
+    setSelectedPresetIdx(-2);
 
     setSuggestionAccepted(true);
   };
@@ -696,21 +584,16 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                   <NativeSelect
                     autoFocus={true}
                     className="preset-selector"
-                    value={selectedPreset}
+                    value={selectedPresetIdx}
                     fullWidth={true}
                     onChange={(event) =>
-                      setSelectedPreset(
+                      setSelectedPresetIdx(
                         typeof event.target.value === "number"
                           ? event.target.value
                           : parseInt(event.target.value, 10)
                       )
                     }
                   >
-                    {cacheAvailable && (
-                      <option key={"___cached"} value={-1}>
-                        [Saved Draft]
-                      </option>
-                    )}
                     {suggestionAccepted && searchMatchTemplate && (
                       <option key={"___suggestion"} value={-2}>
                         [Suggested Template]
@@ -727,7 +610,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                     className="send-to-obsidian"
                     color="primary"
                     size="large"
-                    disabled={!ready}
+                    disabled={!contentIsValid}
                     onClick={sendToObsidian}
                     title="Send to Obsidian"
                   >
@@ -741,14 +624,19 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                 </AccordionSummary>
                 <AccordionDetails>
                   <RequestParameters
-                    method={method}
-                    url={compiledUrl}
-                    headers={headers}
-                    content={compiledContent}
-                    onChangeMethod={setMethod}
-                    onChangeUrl={setCompiledUrl}
-                    onChangeHeaders={setHeaders}
-                    onChangeContent={setCompiledContent}
+                    method={formMethod}
+                    url={formUrl}
+                    sandbox={sandbox}
+                    headers={formHeaders}
+                    previewContext={previewContext ?? {}}
+                    content={formContent}
+                    onChangeMethod={setFormMethod}
+                    onChangeUrl={setFormUrl}
+                    onChangeHeaders={setFormHeaders}
+                    onChangeContent={setFormContent}
+                    onChangeIsValid={setContentIsValid}
+                    onChangeRenderedContent={setCompiledContent}
+                    onChangeRenderedUrl={setCompiledUrl}
                   />
                 </AccordionDetails>
               </Accordion>

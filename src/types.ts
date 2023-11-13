@@ -156,11 +156,11 @@ export interface PreviewContext {
     content: string;
   };
   article: {
-    title: string;
-    length: number;
-    excerpt: string;
-    byline: string;
-    dir: string;
-    siteName: string;
+    title?: string;
+    length?: number;
+    excerpt?: string;
+    byline?: string;
+    dir?: string;
+    siteName?: string;
   };
 }

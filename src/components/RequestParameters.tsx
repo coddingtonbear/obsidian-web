@@ -22,6 +22,9 @@ interface Props {
   onChangeHeaders: (headers: Record<string, string>) => void;
   onChangeContent: (content: string) => void;
   onChangeIsValid: (valid: boolean) => void;
+
+  onChangeRenderedUrl?: (value: string) => void;
+  onChangeRenderedContent?: (value: string) => void;
 }
 
 const RequestParameters: React.FC<Props> = ({
@@ -36,6 +39,8 @@ const RequestParameters: React.FC<Props> = ({
   onChangeUrl,
   onChangeHeaders,
   onChangeContent,
+  onChangeRenderedUrl,
+  onChangeRenderedContent,
   onChangeIsValid,
 }) => {
   const [compiledUrl, setCompiledUrl] = React.useState<string>(url);
@@ -47,10 +52,16 @@ const RequestParameters: React.FC<Props> = ({
   React.useEffect(() => {
     async function handle() {
       try {
-        setCompiledContent(
-          await compileTemplate(sandbox, content, previewContext)
+        const renderedContent = await compileTemplate(
+          sandbox,
+          content,
+          previewContext
         );
+        setCompiledContent(renderedContent);
         setCompiledContentError(undefined);
+        if (onChangeRenderedContent) {
+          onChangeRenderedContent(renderedContent);
+        }
       } catch (e) {
         setCompiledContentError(e as string);
       }
@@ -62,8 +73,13 @@ const RequestParameters: React.FC<Props> = ({
   React.useEffect(() => {
     async function handle() {
       try {
-        setCompiledUrl(await compileTemplate(sandbox, url, previewContext));
+        const renderedUrl = await compileTemplate(sandbox, url, previewContext);
+
+        setCompiledUrl(renderedUrl);
         setCompiledUrlError(undefined);
+        if (onChangeRenderedUrl) {
+          onChangeRenderedUrl(renderedUrl);
+        }
       } catch (e) {
         setCompiledUrlError(e as string);
       }
@@ -130,18 +146,16 @@ const RequestParameters: React.FC<Props> = ({
       </div>
       <div className="option">
         <div className="option-value">
-          <Stack direction="row" className="template-input-stack">
-            <TextField
-              className="template-content"
-              label="Content"
-              fullWidth={true}
-              multiline={true}
-              value={content}
-              onChange={(event) => onChangeContent(event.target.value)}
-            />
-            <pre className="template-rendered-preview">{compiledContent}</pre>
-          </Stack>
+          <TextField
+            className="template-content"
+            label="Content"
+            fullWidth={true}
+            multiline={true}
+            value={content}
+            onChange={(event) => onChangeContent(event.target.value)}
+          />
         </div>
+        <pre className="template-rendered-preview">{compiledContent}</pre>
       </div>
       {compiledContentError && (
         <Alert
