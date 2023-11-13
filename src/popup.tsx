@@ -16,6 +16,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import MaterialAlert from "@mui/material/Alert";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
+import Draggable from "react-draggable";
 
 import SendIcon from "@mui/icons-material/SaveAlt";
 
@@ -468,10 +469,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   return (
     <ThemeProvider theme={DarkPurpleTheme}>
-      <div
-        className={classnames("background", { displayed })}
-        onClick={() => onFinished()}
-      >
+      <Draggable>
         <Paper
           className="popup"
           onClick={(evt) => {
@@ -643,7 +641,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
             </>
           )}
         </Paper>
-      </div>
+      </Draggable>
     </ThemeProvider>
   );
 };
