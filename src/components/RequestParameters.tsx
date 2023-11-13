@@ -126,10 +126,13 @@ const RequestParameters: React.FC<Props> = ({
             </Typography>
           )}
         </div>
-        {allowUrlConfiguration && (
+        {allowUrlConfiguration && url !== compiledUrl && (
           <pre
             className="template-rendered-preview url"
-            title="Rendered URL preview"
+            title="Rendered URL preview (double-click to crystalize)"
+            onDoubleClick={() => {
+              onChangeUrl(compiledUrl);
+            }}
           >
             {compiledUrl}
           </pre>
@@ -160,12 +163,17 @@ const RequestParameters: React.FC<Props> = ({
             onChange={(event) => onChangeContent(event.target.value)}
           />
         </div>
-        <pre
-          className="template-rendered-preview"
-          title="Rendered content preview"
-        >
-          {compiledContent}
-        </pre>
+        {content !== compiledContent && (
+          <pre
+            className="template-rendered-preview"
+            title="Rendered content preview (double-click to crystalize)"
+            onDoubleClick={() => {
+              onChangeContent(compiledContent);
+            }}
+          >
+            {compiledContent}
+          </pre>
+        )}
       </div>
       {compiledContentError && (
         <Alert
