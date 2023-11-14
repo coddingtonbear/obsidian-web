@@ -620,9 +620,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           <div className="option">
             <h2>Keyboard Shortcut</h2>
             <Typography paragraph={true}>
-              You can launch Obsidian Web by pressing &nbsp;
+              You can launch Obsidian Web by pressing{" "}
               <code>{keyboardShortcut}</code>. If you would like to select a
-              different shortcut, you can do so via&nbsp;
+              different shortcut, you can do so via{" "}
               <a
                 href="#"
                 onClick={(event) => {
