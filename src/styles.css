@@ -145,6 +145,10 @@ div.options-container {
   padding: 10px 50px;
 }
 
+div.options-container .MuiPaper-root {
+  margin-bottom: 10px;
+}
+
 div.loading {
   display: flex;
   flex-direction: column;
@@ -258,8 +262,4 @@ p.request-params-no-url-notice {
 .drag-handle {
   height: 10px;
   background-color: gray;
-}
-
-.MuiPaper-root {
-  margin-bottom: 10px;
 }
