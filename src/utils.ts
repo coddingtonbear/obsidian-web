@@ -159,15 +159,56 @@ export async function getUrlMentions(url: string): Promise<{
   direct: SearchJsonResponseItem[];
 }> {
   async function handleMentions() {
-    return await obsidianSearchRequest({
+    const result = await obsidianSearchRequest({
       regexp: [`${escapeStringRegexp(url)}(?=\\s|\\)|$)`, { var: "content" }],
     });
+    return result;
   }
 
   async function handleDirect() {
-    return await obsidianSearchRequest({
+    const result = await obsidianSearchRequest({
       glob: [{ var: "frontmatter.url" }, url],
     });
+    return result;
+  }
+
+  return {
+    mentions: await handleMentions(),
+    direct: await handleDirect(),
+  };
+}
+
+export async function _getUrlMentions(
+  hostname: string,
+  apiKey: string,
+  insecureMode: boolean,
+  url: string
+): Promise<{
+  mentions: SearchJsonResponseItem[];
+  direct: SearchJsonResponseItem[];
+}> {
+  async function handleMentions() {
+    const result = await _obsidianSearchRequest(
+      hostname,
+      apiKey,
+      insecureMode,
+      {
+        regexp: [`${escapeStringRegexp(url)}(?=\\s|\\)|$)`, { var: "content" }],
+      }
+    );
+    return result;
+  }
+
+  async function handleDirect() {
+    const result = await _obsidianSearchRequest(
+      hostname,
+      apiKey,
+      insecureMode,
+      {
+        glob: [{ var: "frontmatter.url" }, url],
+      }
+    );
+    return result;
   }
 
   return {
@@ -190,6 +231,29 @@ export async function obsidianSearchRequest(
   return result.data as SearchJsonResponseItem[];
 }
 
+export async function _obsidianSearchRequest(
+  hostname: string,
+  apiKey: string,
+  insecureMode: boolean,
+  query: Record<string, any>
+): Promise<SearchJsonResponseItem[]> {
+  const result = await _obsidianRequest(
+    hostname,
+    apiKey,
+    "/search/",
+    {
+      method: "post",
+      body: JSON.stringify(query),
+      headers: {
+        "Content-type": "application/vnd.olrapi.jsonlogic+json",
+      },
+    },
+    insecureMode
+  );
+
+  return (await result.json()) as SearchJsonResponseItem[];
+}
+
 export async function obsidianRequest(
   path: string,
   options: RequestInit
@@ -201,8 +265,6 @@ export async function obsidianRequest(
       options: options,
     },
   });
-
-  console.log("Obsidian request response received", result);
 
   return result;
 }

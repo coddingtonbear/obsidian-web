@@ -1,9 +1,4 @@
-import {
-  getUrlMentions,
-  getLocalSettings,
-  obsidianRequest,
-  _obsidianRequest,
-} from "./utils";
+import { _getUrlMentions, getLocalSettings, _obsidianRequest } from "./utils";
 import {
   BackgroundRequest,
   ExtensionLocalSettings,
@@ -11,15 +6,15 @@ import {
 } from "./types";
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  const localSettings: ExtensionLocalSettings = await getLocalSettings(
+  const settings: ExtensionLocalSettings = await getLocalSettings(
     chrome.storage.local
   );
   const url = tab.url;
 
   if (
-    !localSettings ||
-    !localSettings.host ||
-    !localSettings.apiKey ||
+    !settings ||
+    !settings.host ||
+    !settings.apiKey ||
     !url ||
     changeInfo.status !== "loading"
   ) {
@@ -27,7 +22,12 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 
   try {
-    const mentions = await getUrlMentions(url);
+    const mentions = await _getUrlMentions(
+      settings.host,
+      settings.apiKey,
+      Boolean(settings.insecureMode),
+      url
+    );
 
     if (mentions.direct.length > 0) {
       chrome.action.setBadgeBackgroundColor({
@@ -67,13 +67,19 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
 
     for (const mention of mentions.direct) {
-      const mentionData = await obsidianRequest(`/vault/${mention.filename}`, {
-        method: "get",
-        headers: {
-          Accept: "application/vnd.olrapi.note+json",
+      const mentionData = await _obsidianRequest(
+        settings.host,
+        settings.apiKey,
+        `/vault/${mention.filename}`,
+        {
+          method: "get",
+          headers: {
+            Accept: "application/vnd.olrapi.note+json",
+          },
         },
-      });
-      const result = mentionData.data ?? {};
+        Boolean(settings.insecureMode)
+      );
+      const result = (await mentionData.json()) ?? {};
 
       if (result.frontmatter["web-badge-color"]) {
         chrome.action.setBadgeBackgroundColor({
@@ -112,13 +118,13 @@ chrome.action.onClicked.addListener((tab) => {
       files: ["js/vendor.js", "js/popup.js"],
     });
   } else {
-    console.log("No tab ID");
+    console.error("No tab ID found when attempting to inject into tab", tab);
   }
 });
 
 chrome.runtime.onMessage.addListener(
   (message: BackgroundRequest, sender, sendResponse) => {
-    console.log("Received message", message, sender);
+    console.log("Received background request", message, sender);
     if (message.type === "check-has-host-permission") {
       chrome.permissions.contains(
         {
@@ -153,10 +159,6 @@ chrome.runtime.onMessage.addListener(
       });
     } else if (message.type === "obsidian-request") {
       getLocalSettings(chrome.storage.local).then((settings) => {
-        console.log(
-          "Processing obsidian-request message with settings",
-          settings
-        );
         _obsidianRequest(
           settings.host,
           settings.apiKey,
