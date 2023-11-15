@@ -9,7 +9,7 @@ import { IconButton, NativeSelect, Stack, Typography } from "@mui/material";
 import { compileTemplate } from "../utils";
 import Alert from "./Alert";
 
-import Crystalize from "@mui/icons-material/Publish";
+import Prerender from "@mui/icons-material/Publish";
 
 interface Props {
   method: UrlOutputPreset["method"];
@@ -160,19 +160,21 @@ const RequestParameters: React.FC<Props> = ({
                   onClick={() => {
                     onChangeUrl(compiledUrl);
                   }}
-                  title="Crystalize"
+                  title="Pre-render template (optional)"
                 >
-                  <Crystalize />
+                  <Prerender />
                 </IconButton>
               </div>
             )}
-            <pre
-              className="template-rendered-preview url"
-              title="Rendered URL preview"
-              onDoubleClick={() => {}}
-            >
-              {compiledUrl}
-            </pre>
+            <TextField
+              label="API URL (Rendered)"
+              fullWidth={true}
+              value={compiledUrl}
+              disabled={true}
+              title={
+                "This is the URL that will be used when interacting with the API. If you would like to modify this URL before the request, use the 'Pre-render' button."
+              }
+            />
           </Stack>
         )}
       </div>
@@ -194,11 +196,14 @@ const RequestParameters: React.FC<Props> = ({
         <div className="option-value">
           <TextField
             className="template-content"
-            label="Content"
+            label="Content (Template)"
             fullWidth={true}
             multiline={true}
             value={content}
             onChange={(event) => onChangeContent(event.target.value)}
+            title={
+              "This template will be used for generating the content to send to Obsidian.  You can see the actual data that will be sent by looking below at 'Content (Rendered)'."
+            }
           />
         </div>
         {!debouncedCompiledContentMatches && (
@@ -211,18 +216,22 @@ const RequestParameters: React.FC<Props> = ({
                   onClick={() => {
                     onChangeContent(compiledContent);
                   }}
-                  title="Crystalize"
+                  title="Pre-render template (optional)"
                 >
-                  <Crystalize />
+                  <Prerender />
                 </IconButton>
               </div>
             )}
-            <pre
-              className="template-rendered-preview"
-              title="Rendered content preview"
-            >
-              {compiledContent}
-            </pre>
+            <TextField
+              label="Content (Rendered)"
+              fullWidth={true}
+              value={compiledContent}
+              disabled={true}
+              multiline={true}
+              title={
+                "This is the content that will be sent to Obsidian when interacting with the API. If you would like to modify this content before the request, use the 'Pre-render' button."
+              }
+            />
           </Stack>
         )}
       </div>
