@@ -172,7 +172,10 @@ const RequestParameters: React.FC<Props> = ({
               value={compiledUrl}
               disabled={true}
               title={
-                "This is the URL that will be used when interacting with the API. If you would like to modify this URL before the request, use the 'Pre-render' button."
+                "This is the URL that will be used when interacting with the API." +
+                (showCrystalizeOption
+                  ? "If you would like to modify this URL before the request, use the 'Pre-render' button."
+                  : "")
               }
             />
           </Stack>
@@ -229,7 +232,10 @@ const RequestParameters: React.FC<Props> = ({
               disabled={true}
               multiline={true}
               title={
-                "This is the content that will be sent to Obsidian when interacting with the API. If you would like to modify this content before the request, use the 'Pre-render' button."
+                "This is the content that will be sent to Obsidian when interacting with the API. " +
+                (showCrystalizeOption
+                  ? "If you would like to modify this content before the request, use the 'Pre-render' button."
+                  : "")
               }
             />
           </Stack>
