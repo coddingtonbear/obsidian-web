@@ -619,23 +619,42 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           </div>
           <div className="option">
             <h2>Keyboard Shortcut</h2>
-            <Typography paragraph={true}>
-              You can launch Obsidian Web by pressing{" "}
-              <code>{keyboardShortcut}</code>. If you would like to select a
-              different shortcut, you can do so via{" "}
-              <a
-                href="#"
-                onClick={(event) => {
-                  chrome.tabs.create({
-                    url: "chrome://extensions/shortcuts",
-                  });
-                  event.preventDefault();
-                }}
-              >
-                Chrome's shortcut settings
-              </a>
-              .
-            </Typography>
+            {keyboardShortcut ? (
+              <Typography paragraph={true}>
+                You can launch Obsidian Web by pressing{" "}
+                <code>{keyboardShortcut}</code>. If you would like to select a
+                different shortcut, you can do so via{" "}
+                <a
+                  href="#"
+                  onClick={(event) => {
+                    chrome.tabs.create({
+                      url: "chrome://extensions/shortcuts",
+                    });
+                    event.preventDefault();
+                  }}
+                >
+                  Chrome's shortcut settings
+                </a>
+                .
+              </Typography>
+            ) : (
+              <Typography paragraph={true}>
+                No keyboard shortcut is currently configured. If you would like
+                to select a shortcut, you can do so via{" "}
+                <a
+                  href="#"
+                  onClick={(event) => {
+                    chrome.tabs.create({
+                      url: "chrome://extensions/shortcuts",
+                    });
+                    event.preventDefault();
+                  }}
+                >
+                  Chrome's shortcut settings
+                </a>
+                .
+              </Typography>
+            )}
           </div>
           <div className="option">
             <h2>Note Recall</h2>
