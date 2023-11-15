@@ -162,13 +162,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
           throw new Error("No hostname configured");
         }
 
-        const request = await obsidianRequest(
-          host,
-          apiKey,
-          "/",
-          { method: "get" },
-          insecureMode
-        );
+        const request = await obsidianRequest("/", { method: "get" });
         const result: StatusResponse = await request.json();
         if (
           result.status === "OK" &&
@@ -291,12 +285,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       }
 
       for (const ref of directReferences) {
-        const meta = await getPageMetadata(
-          host,
-          apiKey,
-          insecureMode,
-          ref.filename
-        );
+        const meta = await getPageMetadata(ref.filename);
 
         if (typeof meta.frontmatter["web-badge-message"] === "string") {
           messages.push(meta.frontmatter["web-badge-message"]);
@@ -318,12 +307,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       if (!host) {
         return;
       }
-      const allMentions = await getUrlMentions(
-        host,
-        apiKey,
-        insecureMode,
-        window.location.href
-      );
+      const allMentions = await getUrlMentions(window.location.href);
 
       setMentions(allMentions.mentions);
       setDirectReferences(allMentions.direct);
@@ -386,13 +370,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
     }
 
     try {
-      result = await obsidianRequest(
-        host,
-        apiKey,
-        compiledUrl,
-        request,
-        insecureMode
-      );
+      result = await obsidianRequest(compiledUrl, request);
     } catch (e) {
       setStatus({
         severity: "error",
@@ -538,9 +516,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                           <MentionNotice
                             key={ref.filename}
                             type="direct"
-                            host={host}
-                            apiKey={apiKey}
-                            insecureMode={insecureMode}
                             templateSuggestion={searchMatchDirectTemplate}
                             mention={ref}
                             acceptSuggestion={acceptSuggestion}
@@ -558,9 +533,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
                             <MentionNotice
                               key={ref.filename}
                               type="mention"
-                              host={host}
-                              apiKey={apiKey}
-                              insecureMode={insecureMode}
                               templateSuggestion={searchMatchMentionTemplate}
                               mention={ref}
                               acceptSuggestion={acceptSuggestion}

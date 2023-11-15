@@ -1,4 +1,9 @@
-import { getUrlMentions, getLocalSettings, obsidianRequest } from "./utils";
+import {
+  getUrlMentions,
+  getLocalSettings,
+  obsidianRequest,
+  _obsidianRequest,
+} from "./utils";
 import { BackgroundRequest, ExtensionLocalSettings } from "./types";
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -18,12 +23,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 
   try {
-    const mentions = await getUrlMentions(
-      localSettings.host,
-      localSettings.apiKey,
-      localSettings.insecureMode || false,
-      url
-    );
+    const mentions = await getUrlMentions(url);
 
     if (mentions.direct.length > 0) {
       chrome.action.setBadgeBackgroundColor({
@@ -63,18 +63,12 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
 
     for (const mention of mentions.direct) {
-      const mentionData = await obsidianRequest(
-        localSettings.host,
-        localSettings.apiKey,
-        `/vault/${mention.filename}`,
-        {
-          method: "get",
-          headers: {
-            Accept: "application/vnd.olrapi.note+json",
-          },
+      const mentionData = await obsidianRequest(`/vault/${mention.filename}`, {
+        method: "get",
+        headers: {
+          Accept: "application/vnd.olrapi.note+json",
         },
-        localSettings.insecureMode || false
-      );
+      });
       const result = await mentionData.json();
 
       if (result.frontmatter["web-badge-color"]) {
@@ -151,6 +145,18 @@ chrome.runtime.onMessage.addListener(
             sendResponse(command.shortcut);
           }
         }
+      });
+    } else if (message.type === "obsidian-request") {
+      getLocalSettings(chrome.storage.local).then((settings) => {
+        _obsidianRequest(
+          settings.host,
+          settings.apiKey,
+          message.request.path,
+          message.request.options,
+          Boolean(settings.insecureMode)
+        ).then((response) => {
+          sendResponse(response);
+        });
       });
     }
 

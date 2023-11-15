@@ -5,17 +5,10 @@ import IconButton from "@mui/material/IconButton";
 
 import UseSuggestionIcon from "@mui/icons-material/ArrowCircleDown";
 
-import {
-  UrlOutputPreset,
-  SearchJsonResponseItem,
-  OutputPreset,
-} from "../types";
+import { SearchJsonResponseItem, OutputPreset } from "../types";
 import { openFileInObsidian } from "../utils";
 
 export interface Props {
-  host: string;
-  apiKey: string;
-  insecureMode: boolean;
   type: "mention" | "direct";
   templateSuggestion: OutputPreset | undefined;
   mention: SearchJsonResponseItem;
@@ -26,9 +19,6 @@ export interface Props {
 const MentionNotice: React.FC<Props> = ({
   type,
   templateSuggestion,
-  host,
-  apiKey,
-  insecureMode,
   mention,
   acceptSuggestion,
   directReferenceMessages,
@@ -53,9 +43,7 @@ const MentionNotice: React.FC<Props> = ({
       {type === "mention" && <>This URL is mentioned in an existing note: </>}
       <Link
         title="Open in Obsidian"
-        onClick={() =>
-          openFileInObsidian(host, apiKey, insecureMode, mention.filename)
-        }
+        onClick={() => openFileInObsidian(mention.filename)}
       >
         {mention.filename}
       </Link>

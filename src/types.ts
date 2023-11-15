@@ -143,10 +143,19 @@ export interface CheckKeyboardShortcutRequest extends BaseBackgroundRequest {
   type: "check-keyboard-shortcut";
 }
 
+export interface ObsidianRequest extends BaseBackgroundRequest {
+  type: "obsidian-request";
+  request: {
+    path: string;
+    options: RequestInit;
+  };
+}
+
 export type BackgroundRequest =
   | RequestHostPermissionRequest
   | CheckHasHostPermissionRequest
-  | CheckKeyboardShortcutRequest;
+  | CheckKeyboardShortcutRequest
+  | ObsidianRequest;
 
 export interface PreviewContext {
   page: {

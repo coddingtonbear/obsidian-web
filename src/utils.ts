@@ -15,6 +15,7 @@ import {
   CheckHasHostPermissionRequest,
   RequestHostPermissionRequest,
   CheckKeyboardShortcutRequest,
+  ObsidianRequest,
 } from "./types";
 import {
   DefaultSyncSettings,
@@ -105,6 +106,9 @@ export async function sendBackgroundRequest(
   message: CheckKeyboardShortcutRequest
 ): Promise<string>;
 export async function sendBackgroundRequest(
+  message: ObsidianRequest
+): Promise<ReturnType<typeof fetch>>;
+export async function sendBackgroundRequest(
   message: BackgroundRequest
 ): Promise<unknown> {
   return await chrome.runtime.sendMessage(message);
@@ -131,59 +135,36 @@ export async function checkKeyboardShortcut(): Promise<string> {
 }
 
 export async function openFileInObsidian(
-  host: string,
-  apiKey: string,
-  insecureMode: boolean,
   filename: string
 ): ReturnType<typeof obsidianRequest> {
-  return obsidianRequest(
-    host,
-    apiKey,
-    `/open/${filename}`,
-    { method: "post" },
-    insecureMode
-  );
+  return obsidianRequest(`/open/${filename}`, { method: "post" });
 }
 
 export async function getPageMetadata(
-  host: string,
-  apiKey: string,
-  insecureMode: boolean,
   filename: string
 ): Promise<FileMetadataObject> {
-  const result = await obsidianRequest(
-    host,
-    apiKey,
-    `/vault/${filename}`,
-    {
-      method: "get",
-      headers: {
-        Accept: "application/vnd.olrapi.note+json",
-      },
+  const result = await obsidianRequest(`/vault/${filename}`, {
+    method: "get",
+    headers: {
+      Accept: "application/vnd.olrapi.note+json",
     },
-    insecureMode
-  );
+  });
 
   return await result.json();
 }
 
-export async function getUrlMentions(
-  host: string,
-  apiKey: string,
-  insecureMode: boolean,
-  url: string
-): Promise<{
+export async function getUrlMentions(url: string): Promise<{
   mentions: SearchJsonResponseItem[];
   direct: SearchJsonResponseItem[];
 }> {
   async function handleMentions() {
-    return await obsidianSearchRequest(host, apiKey, insecureMode, {
+    return await obsidianSearchRequest({
       regexp: [`${escapeStringRegexp(url)}(?=\\s|\\)|$)`, { var: "content" }],
     });
   }
 
   async function handleDirect() {
-    return await obsidianSearchRequest(host, apiKey, insecureMode, {
+    return await obsidianSearchRequest({
       glob: [{ var: "frontmatter.url" }, url],
     });
   }
@@ -195,29 +176,33 @@ export async function getUrlMentions(
 }
 
 export async function obsidianSearchRequest(
-  host: string,
-  apiKey: string,
-  insecureMode: boolean,
   query: Record<string, any>
 ): Promise<SearchJsonResponseItem[]> {
-  const result = await obsidianRequest(
-    host,
-    apiKey,
-    "/search/",
-    {
-      method: "post",
-      body: JSON.stringify(query),
-      headers: {
-        "Content-type": "application/vnd.olrapi.jsonlogic+json",
-      },
+  const result = await obsidianRequest("/search/", {
+    method: "post",
+    body: JSON.stringify(query),
+    headers: {
+      "Content-type": "application/vnd.olrapi.jsonlogic+json",
     },
-    insecureMode
-  );
+  });
 
   return await result.json();
 }
 
 export async function obsidianRequest(
+  path: string,
+  options: RequestInit
+): ReturnType<typeof fetch> {
+  return await sendBackgroundRequest({
+    type: "obsidian-request",
+    request: {
+      path: path,
+      options: options,
+    },
+  });
+}
+
+export async function _obsidianRequest(
   hostname: string,
   apiKey: string,
   path: string,

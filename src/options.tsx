@@ -57,7 +57,7 @@ import {
 import {
   getLocalSettings,
   getSyncSettings,
-  obsidianRequest,
+  _obsidianRequest,
   checkHasHostPermission,
   requestHostPermission,
   checkKeyboardShortcut,
@@ -136,7 +136,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       } else {
         let result: Response;
         try {
-          result = await obsidianRequest(
+          result = await _obsidianRequest(
             host,
             apiKey,
             "/",
@@ -145,7 +145,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           );
         } catch (e) {
           try {
-            result = await obsidianRequest(
+            result = await _obsidianRequest(
               host,
               apiKey,
               "/",
