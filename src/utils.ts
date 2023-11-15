@@ -16,6 +16,7 @@ import {
   RequestHostPermissionRequest,
   CheckKeyboardShortcutRequest,
   ObsidianRequest,
+  ObsidianResponse,
 } from "./types";
 import {
   DefaultSyncSettings,
@@ -107,7 +108,7 @@ export async function sendBackgroundRequest(
 ): Promise<string>;
 export async function sendBackgroundRequest(
   message: ObsidianRequest
-): Promise<ReturnType<typeof fetch>>;
+): Promise<ObsidianResponse>;
 export async function sendBackgroundRequest(
   message: BackgroundRequest
 ): Promise<unknown> {
@@ -136,7 +137,7 @@ export async function checkKeyboardShortcut(): Promise<string> {
 
 export async function openFileInObsidian(
   filename: string
-): ReturnType<typeof obsidianRequest> {
+): Promise<ObsidianResponse> {
   return obsidianRequest(`/open/${filename}`, { method: "post" });
 }
 
@@ -150,7 +151,7 @@ export async function getPageMetadata(
     },
   });
 
-  return await result.json();
+  return result.data as FileMetadataObject;
 }
 
 export async function getUrlMentions(url: string): Promise<{
@@ -186,20 +187,24 @@ export async function obsidianSearchRequest(
     },
   });
 
-  return await result.json();
+  return result.data as SearchJsonResponseItem[];
 }
 
 export async function obsidianRequest(
   path: string,
   options: RequestInit
-): ReturnType<typeof fetch> {
-  return await sendBackgroundRequest({
+): Promise<ObsidianResponse> {
+  const result = await sendBackgroundRequest({
     type: "obsidian-request",
     request: {
       path: path,
       options: options,
     },
   });
+
+  console.log("Obsidian request response received", result);
+
+  return result;
 }
 
 export async function _obsidianRequest(

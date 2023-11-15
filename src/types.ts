@@ -157,6 +157,12 @@ export type BackgroundRequest =
   | CheckKeyboardShortcutRequest
   | ObsidianRequest;
 
+export interface ObsidianResponse {
+  data?: Record<string, any>;
+  status: number;
+  headers: Record<string, string>;
+}
+
 export interface PreviewContext {
   page: {
     url: string;

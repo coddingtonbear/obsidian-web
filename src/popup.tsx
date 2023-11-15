@@ -31,6 +31,7 @@ import {
   UrlOutputPreset,
   SearchJsonResponseItem,
   StatusResponse,
+  ObsidianResponse,
   OutputPreset,
   PreviewContext,
 } from "./types";
@@ -163,7 +164,12 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
         }
 
         const request = await obsidianRequest("/", { method: "get" });
-        const result: StatusResponse = await request.json();
+        const jsonData = request.data;
+        if (!jsonData) {
+          return;
+        }
+
+        const result = jsonData as StatusResponse;
         if (
           result.status === "OK" &&
           result.service.includes("Obsidian Local REST API")
@@ -362,7 +368,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       body: compiledContent,
       headers: requestHeaders,
     };
-    let result: Response;
+    let result: ObsidianResponse;
 
     if (host === null) {
       console.error("Cannot send to Obsidian; no hostname set.");
@@ -379,7 +385,6 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       });
       return;
     }
-    const text = await result.text();
 
     if (result.status < 300) {
       setStatus({
@@ -390,7 +395,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       setTimeout(() => onFinished(), 1500);
     } else {
       try {
-        const body = JSON.parse(text);
+        const body = result.data ?? {};
         setStatus({
           severity: "error",
           title: "Error",
@@ -400,7 +405,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
         setStatus({
           severity: "error",
           title: "Error",
-          message: `Could not send content to Obsidian!: (Status Code ${result.status}) ${text}`,
+          message: `Could not send content to Obsidian!: (Status Code ${result.status}) ${result.data}`,
         });
       }
     }
