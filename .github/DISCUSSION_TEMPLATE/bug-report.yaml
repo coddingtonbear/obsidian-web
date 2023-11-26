@@ -1,0 +1,46 @@
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: Please provide a clear and consice description of what the bug is
+    validations:
+      required: true
+  - type: textarea
+    id: repreoduction_steps
+    attributes:
+      label: To Reproduce
+      description: What steps can be taken to reproduce the behavior
+      value: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen
+  - type: input
+    id: operating_system
+    attributes:
+      label: Operating System
+      description: What operating system is your browser running on (windows, ubuntu, etc.)
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: What browser are you running (chrome, chromium, brave, edge, etc.)
+    validations:
+      required: true
+  - type: input
+    id: browser_version
+    attributes:
+      label: Browser Version
+      description: What version of your browser are you running?
+    validations:
+      required: true
