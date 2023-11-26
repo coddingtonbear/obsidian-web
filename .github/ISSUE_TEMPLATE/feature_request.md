@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Do not use use this template -- [start a discussion](https://github.com/coddingtonbear/obsidian-web/discussions/new?category=ideas) instead.
 title: ''
 labels: ''
 assignees: ''
