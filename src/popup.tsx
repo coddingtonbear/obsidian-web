@@ -69,7 +69,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [hasHostPermission, setHasHostPermission] = useState<boolean | null>(
     null
   );
-  const [apiKey, setApiKey] = useState<string>("");
+  const [apiKey, setApiKey] = useState<string>();
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
 
   const [suggestionAccepted, setSuggestionAccepted] = useState<boolean>(false);
@@ -110,7 +110,15 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const turndown = new Turndown(TurndownConfiguration);
 
   useEffect(() => {
-    if (apiKey.length === 0) {
+    if (
+      apiKey === undefined ||
+      hasHostPermission === null ||
+      obsidianUnavailable === undefined
+    ) {
+      setDisplayState("loading");
+      return;
+    }
+    if (apiKey && apiKey.length === 0) {
       setDisplayState("welcome");
       return;
     }
