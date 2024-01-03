@@ -3,6 +3,7 @@ import {
   BackgroundRequest,
   ExtensionLocalSettings,
   ObsidianResponse,
+  ObsidianResponseError,
 } from "./types";
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -181,15 +182,22 @@ chrome.runtime.onMessage.addListener(
             response
               .json()
               .then((data) => {
+                result.ok = true;
                 result.data = data;
                 sendResponse(result as ObsidianResponse);
               })
               .catch((error) => {
-                sendResponse(result as ObsidianResponse);
+                sendResponse({
+                  ok: false,
+                  error: error.toString(),
+                } as ObsidianResponseError);
               });
           })
           .catch((e) => {
-            console.error("Obsidian request failed", e);
+            sendResponse({
+              ok: false,
+              error: e.toString(),
+            } as ObsidianResponseError);
           });
       });
     }

@@ -17,6 +17,7 @@ import {
   CheckKeyboardShortcutRequest,
   ObsidianRequest,
   ObsidianResponse,
+  ObsidianResponseError,
 } from "./types";
 import {
   DefaultSyncSettings,
@@ -108,7 +109,7 @@ export async function sendBackgroundRequest(
 ): Promise<string>;
 export async function sendBackgroundRequest(
   message: ObsidianRequest
-): Promise<ObsidianResponse>;
+): Promise<ObsidianResponse | ObsidianResponseError>;
 export async function sendBackgroundRequest(
   message: BackgroundRequest
 ): Promise<unknown> {
@@ -265,6 +266,10 @@ export async function obsidianRequest(
       options: options,
     },
   });
+
+  if (!result.ok) {
+    throw new Error(result.error);
+  }
 
   return result;
 }

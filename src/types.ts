@@ -158,9 +158,15 @@ export type BackgroundRequest =
   | ObsidianRequest;
 
 export interface ObsidianResponse {
+  ok: true;
   data?: Record<string, any>;
   status: number;
   headers: Record<string, string>;
+}
+
+export interface ObsidianResponseError {
+  ok: false;
+  error: string;
 }
 
 export interface PreviewContext {
