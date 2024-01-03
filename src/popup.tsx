@@ -61,8 +61,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [status, setStatus] = useState<AlertStatus>();
 
   const [sandboxReady, setSandboxReady] = useState<boolean>(false);
-  const [obsidianUnavailable, setObsidianUnavailable] =
-    useState<boolean>(false);
+  const [obsidianUnavailable, setObsidianUnavailable] = useState<boolean>(true);
 
   const [previewContext, setPreviewContext] = useState<PreviewContext>();
 
