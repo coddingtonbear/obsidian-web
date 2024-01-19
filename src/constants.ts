@@ -16,7 +16,7 @@ export const DefaultHeaders = {};
 export const DefaultMethod = "put";
 
 export const DefaultLocalSettings: ExtensionLocalSettings = {
-  version: "0.2",
+  version: "2.0",
   host: "127.0.0.1",
   insecureMode: false,
   apiKey: "",
@@ -57,7 +57,7 @@ export const DefaultSearchMatchTemplate: OutputPreset = {
 };
 
 export const DefaultSyncSettings: ExtensionSyncSettings = {
-  version: "0.2",
+  version: "2.0",
   presets: [
     {
       name: "Append to current daily note",

@@ -11,6 +11,16 @@ export async function migrateLocalSettings(
   local: chrome.storage.LocalStorageArea,
   settings: Record<string, any>
 ): Promise<ExtensionLocalSettings> {
+  if (settings.version == "0.2") {
+    // In ac0b804b634fded00363f38e996068dcd42ec68e and before, we
+    // were erroneously setting the sync version to 2.0 in options.tsx;
+    // and having two different version numbers for sync/local that
+    // were 0.2 and 2.0 was going to be confusing -- let's just bump
+    // them both together to 2.0.
+    settings.version = "2.0";
+    await local.clear();
+    await local.set(settings);
+  }
   return settings as ExtensionLocalSettings;
 }
 
@@ -57,6 +67,14 @@ export async function migrateSyncSettings(
     await sync.clear();
     await sync.set(newSettings);
     settings = newSettings;
+  }
+  if (settings.version == "0.2") {
+    // In ac0b804b634fded00363f38e996068dcd42ec68e and before, we
+    // were erroneously setting the sync version to 2.0 in options.tsx;
+    // so we need to just bump the version number up.
+    settings.version = "2.0";
+    await sync.clear();
+    await sync.set(settings);
   }
   return settings as ExtensionSyncSettings;
 }
