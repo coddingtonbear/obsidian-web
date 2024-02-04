@@ -114,3 +114,5 @@ export const TurndownConfiguration: TurndownService.Options = {
   codeBlockStyle: "fenced",
   emDelimiter: "*",
 };
+
+export const MaximumErrorLogLength = 250;

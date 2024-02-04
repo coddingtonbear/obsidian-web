@@ -18,6 +18,8 @@ import {
   ObsidianRequest,
   ObsidianResponse,
   ObsidianResponseError,
+  BackgroundErrorLog,
+  LogEntry,
 } from "./types";
 import {
   DefaultSyncSettings,
@@ -111,6 +113,9 @@ export async function sendBackgroundRequest(
   message: ObsidianRequest
 ): Promise<ObsidianResponse | ObsidianResponseError>;
 export async function sendBackgroundRequest(
+  message: BackgroundErrorLog
+): Promise<LogEntry[]>;
+export async function sendBackgroundRequest(
   message: BackgroundRequest
 ): Promise<unknown> {
   return await chrome.runtime.sendMessage(message);
@@ -133,6 +138,12 @@ export async function requestHostPermission(host: string): Promise<boolean> {
 export async function checkKeyboardShortcut(): Promise<string> {
   return await sendBackgroundRequest({
     type: "check-keyboard-shortcut",
+  });
+}
+
+export async function getBackgroundErrorLog(): Promise<LogEntry[]> {
+  return await sendBackgroundRequest({
+    type: "background-error-log",
   });
 }
 

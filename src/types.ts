@@ -151,11 +151,16 @@ export interface ObsidianRequest extends BaseBackgroundRequest {
   };
 }
 
+export interface BackgroundErrorLog extends BaseBackgroundRequest {
+  type: "background-error-log";
+}
+
 export type BackgroundRequest =
   | RequestHostPermissionRequest
   | CheckHasHostPermissionRequest
   | CheckKeyboardShortcutRequest
-  | ObsidianRequest;
+  | ObsidianRequest
+  | BackgroundErrorLog;
 
 export interface ObsidianResponse {
   ok: true;
@@ -167,6 +172,14 @@ export interface ObsidianResponse {
 export interface ObsidianResponseError {
   ok: false;
   error: string;
+}
+
+export interface LogEntry {
+  date: string;
+  level: "error" | "log";
+  message: string;
+  data: any;
+  stack: string | null;
 }
 
 export interface PreviewContext {

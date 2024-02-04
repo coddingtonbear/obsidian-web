@@ -35,6 +35,7 @@ import CreateIcon from "@mui/icons-material/AddCircle";
 import RestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import ImportSettings from "@mui/icons-material/FileUpload";
 import ExportSettings from "@mui/icons-material/FileDownload";
+import BugReport from "@mui/icons-material/BugReport";
 
 import {
   DefaultContentTemplate,
@@ -53,6 +54,7 @@ import {
   StatusResponse,
   OutputPreset,
   ConfiguredTemplate,
+  LogEntry,
 } from "./types";
 import {
   getLocalSettings,
@@ -61,6 +63,7 @@ import {
   checkHasHostPermission,
   requestHostPermission,
   checkKeyboardShortcut,
+  getBackgroundErrorLog,
 } from "./utils";
 import Alert from "./components/Alert";
 import { PurpleTheme } from "./theme";
@@ -115,6 +118,13 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     useState<string>();
 
   const [presets, setPresets] = useState<UrlOutputPreset[]>([]);
+
+  const [errorLog, setErrorLog] = useState<LogEntry[]>([]);
+  const [showBugReportExportModal, setShowBugReportExportModal] =
+    useState<boolean>(false);
+  const [bugReportExportLogs, setBugReportExportLogs] = useState<boolean>(true);
+  const [bugReportExportConfig, setBugReportExportConfig] =
+    useState<boolean>(true);
 
   useEffect(() => {
     if (loaded) {
@@ -290,6 +300,12 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     });
   }, [host]);
 
+  useEffect(() => {
+    getBackgroundErrorLog().then((result) => {
+      setErrorLog(result);
+    });
+  }, []);
+
   const openEditingModal = async (
     idx: number | null,
     template?: number | undefined
@@ -405,6 +421,79 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     }
   };
 
+  const onExportBugReportData = async ({
+    logs = true,
+    configuration = true,
+  }) => {
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          {
+            meta: {
+              date: new Date().toISOString(),
+              export: {
+                logs,
+                configuration,
+              },
+              version: chrome.runtime.getManifest().version,
+              userAgent: window.navigator.userAgent,
+            },
+            logEntries: logs
+              ? errorLog.filter((entry) => {
+                  // Filter out entries that occurred more than 5mins ago
+                  const minDate = new Date();
+                  minDate.setMinutes(-5);
+                  const date = new Date(entry.date);
+                  if (date > minDate) {
+                    console.log("Including entry", entry);
+                    return true;
+                  }
+                  console.log("Dropping entry", entry);
+                  return false;
+                })
+              : undefined,
+            configuration: configuration
+              ? {
+                  host: {
+                    apiKeyOk: apiKeyOk,
+                    apiKeyError: apiKeyError,
+                    hasHostPermission: hasHostPermission,
+                    host: host,
+                    insecureMode: insecureMode,
+                  },
+                  search: {
+                    enabled: searchEnabled,
+                    background: searchBackgroundEnabled,
+                    mention: {
+                      enabled: searchMatchMentionEnabled,
+                      template: searchMatchMentionTemplate,
+                    },
+                    direct: {
+                      enabled: searchMatchDirectEnabled,
+                      template: searchMatchDirectTemplate,
+                    },
+                  },
+                  presets: presets,
+                }
+              : undefined,
+          },
+          null,
+          2
+        ),
+      ],
+      {
+        type: "application/json",
+      }
+    );
+
+    const elem = window.document.createElement("a");
+    elem.href = window.URL.createObjectURL(blob);
+    elem.download = "obsidian-local-rest-api.bug_report.json";
+    document.body.appendChild(elem);
+    elem.click();
+    document.body.removeChild(elem);
+  };
+
   const onExportSettings = async () => {
     const sync = await getSyncSettings(chrome.storage.sync);
     const local = await getLocalSettings(chrome.storage.local);
@@ -502,6 +591,13 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 onClick={onExportSettings}
               >
                 <ExportSettings fontSize="small" />
+              </IconButton>
+              <IconButton
+                title="Export Bug Report Data"
+                aria-label="export bug report data"
+                onClick={() => setShowBugReportExportModal(true)}
+              >
+                <BugReport fontSize="small" />
               </IconButton>
             </div>
           </div>
@@ -898,6 +994,86 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           </Snackbar>
         </div>
       </Paper>
+      <Modal
+        open={showBugReportExportModal}
+        onClose={() => setShowBugReportExportModal(false)}
+      >
+        <Paper elevation={3} className="modal">
+          <div className="modal-content">
+            <Typography paragraph={true}>
+              You may be asked to provide this file as part of a bug report
+              submission. This file will include basic information about the
+              environment in which you are running this extension and optionally
+              may include logs or information about the template presets you
+              have configured.
+            </Typography>
+          </div>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  onChange={(evt) => {
+                    setBugReportExportLogs(evt.target.checked);
+                  }}
+                  checked={bugReportExportLogs}
+                />
+              }
+              label={
+                <>
+                  <b>Include log entries from the previous five minutes?</b>
+                  &nbsp;This information is needed when troubleshooting problems
+                  that are occurring in background scripts. If you select this
+                  option, the exported file may reveal private information like
+                  what pages you have visited recently in any tab!
+                </>
+              }
+            />
+          </FormGroup>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  onChange={(evt) => {
+                    setBugReportExportConfig(evt.target.checked);
+                  }}
+                  checked={bugReportExportConfig}
+                />
+              }
+              label={
+                <>
+                  <b>Include a snapshot of your plugin configuration?</b>
+                  &nbsp;This information is needed when troubleshooting
+                  configuration or template-related problems. If you select this
+                  option, the exported file may reveal detailed information
+                  about the template presets you have created, the address of
+                  the host you have configured this extension to communicate
+                  with, the permissions you've granted to the plugin, and the
+                  options you have enabled within the plugin.
+                </>
+              }
+            />
+          </FormGroup>
+          <div className="submit">
+            <Button
+              variant="outlined"
+              onClick={() => setShowBugReportExportModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() =>
+                onExportBugReportData({
+                  logs: bugReportExportLogs,
+                  configuration: bugReportExportConfig,
+                })
+              }
+            >
+              Export
+            </Button>
+          </div>
+        </Paper>
+      </Modal>
       <Modal
         open={requestingHostPermissionFor !== undefined}
         onClose={() => {

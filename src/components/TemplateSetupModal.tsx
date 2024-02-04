@@ -4,7 +4,6 @@ import RequestParameters from "./RequestParameters";
 import Modal from "@mui/material/Modal";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { ConfiguredTemplate } from "../types";
 import { DefaultPreviewContext } from "../constants";

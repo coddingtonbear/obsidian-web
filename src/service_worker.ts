@@ -1,10 +1,35 @@
 import { _getUrlMentions, getLocalSettings, _obsidianRequest } from "./utils";
 import {
   BackgroundRequest,
+  LogEntry,
   ExtensionLocalSettings,
   ObsidianResponse,
   ObsidianResponseError,
 } from "./types";
+import { MaximumErrorLogLength } from "./constants";
+
+const logEntries: LogEntry[] = [];
+
+function log(errorLogItem: Partial<LogEntry>): number {
+  console[errorLogItem.level ?? "log"](
+    errorLogItem.message ?? "",
+    errorLogItem.data
+  );
+
+  if (
+    logEntries.push({
+      date: new Date().toISOString(),
+      level: errorLogItem.level ?? "log",
+      message: errorLogItem.message ?? "",
+      data: errorLogItem.data ?? null,
+      stack: errorLogItem.stack ?? null,
+    }) > MaximumErrorLogLength
+  ) {
+    logEntries.shift();
+  }
+
+  return logEntries.length;
+}
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   const settings: ExtensionLocalSettings = await getLocalSettings(
@@ -108,6 +133,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       text: "ERR",
       tabId,
     });
+    chrome.action.setTitle({
+      title: `ERR: ${e}`,
+      tabId,
+    });
+    log(e as Error);
     console.error(e);
   }
 });
@@ -125,81 +155,115 @@ chrome.action.onClicked.addListener((tab) => {
 
 chrome.runtime.onMessage.addListener(
   (message: BackgroundRequest, sender, sendResponse) => {
-    console.log("Received background request", message, sender);
-    if (message.type === "check-has-host-permission") {
-      chrome.permissions.contains(
-        {
-          origins: [
-            `http://${message.host}:27123/*`,
-            `https://${message.host}:27124/*`,
-          ],
-        },
-        (result) => {
-          sendResponse(result);
-        }
-      );
-    } else if (message.type === "request-host-permission") {
-      chrome.permissions.request(
-        {
-          origins: [
-            `http://${message.host}:27123/*`,
-            `https://${message.host}:27124/*`,
-          ],
-        },
-        (result) => {
-          sendResponse(result);
-        }
-      );
-    } else if (message.type === "check-keyboard-shortcut") {
-      chrome.commands.getAll((commands) => {
-        for (const command of commands) {
-          if (command.name === "_execute_action") {
-            sendResponse(command.shortcut);
+    log({
+      message: `Incoming ${message.type} background request`,
+      data: {
+        sender,
+        message,
+      },
+    });
+    switch (message.type) {
+      case "check-has-host-permission":
+        chrome.permissions.contains(
+          {
+            origins: [
+              `http://${message.host}:27123/*`,
+              `https://${message.host}:27124/*`,
+            ],
+          },
+          (result) => {
+            log({ message: "check-has-host-permission result", data: result });
+            sendResponse(result);
           }
-        }
-      });
-    } else if (message.type === "obsidian-request") {
-      getLocalSettings(chrome.storage.local).then((settings) => {
-        _obsidianRequest(
-          settings.host,
-          settings.apiKey,
-          message.request.path,
-          message.request.options,
-          Boolean(settings.insecureMode)
-        )
-          .then((response) => {
-            console.log("Response received", response);
-
-            const result: Partial<ObsidianResponse> = {
-              status: response.status,
-            };
-
-            result.headers = {};
-            for (const [name, value] of response.headers.entries()) {
-              result.headers[name] = value;
-            }
-
-            response
-              .json()
-              .then((data) => {
-                result.ok = true;
-                result.data = data;
-                sendResponse(result as ObsidianResponse);
-              })
-              .catch((error) => {
-                sendResponse({
-                  ok: false,
-                  error: error.toString(),
-                } as ObsidianResponseError);
+        );
+        break;
+      case "request-host-permission":
+        chrome.permissions.request(
+          {
+            origins: [
+              `http://${message.host}:27123/*`,
+              `https://${message.host}:27124/*`,
+            ],
+          },
+          (result) => {
+            log({
+              message: "request-host-permission result",
+              data: result,
+            });
+            sendResponse(result);
+          }
+        );
+        break;
+      case "check-keyboard-shortcut":
+        chrome.commands.getAll((commands) => {
+          for (const command of commands) {
+            if (command.name === "_execute_action") {
+              sendResponse(command.shortcut);
+              log({
+                message: "check-keyboard-shortcut result",
+                data: command.shortcut,
               });
-          })
-          .catch((e) => {
-            sendResponse({
-              ok: false,
-              error: e.toString(),
-            } as ObsidianResponseError);
-          });
-      });
+            }
+          }
+        });
+        break;
+      case "obsidian-request":
+        getLocalSettings(chrome.storage.local).then((settings) => {
+          _obsidianRequest(
+            settings.host,
+            settings.apiKey,
+            message.request.path,
+            message.request.options,
+            Boolean(settings.insecureMode)
+          )
+            .then((response) => {
+              log({
+                message: "obsidian-request response received",
+                data: response,
+              });
+
+              const result: Partial<ObsidianResponse> = {
+                status: response.status,
+              };
+
+              result.headers = {};
+              for (const [name, value] of response.headers.entries()) {
+                result.headers[name] = value;
+              }
+
+              response
+                .json()
+                .then((data) => {
+                  result.ok = true;
+                  result.data = data;
+                  sendResponse(result as ObsidianResponse);
+                })
+                .catch((error) => {
+                  log({
+                    message: "obsidian-request request failed to parse",
+                    data: error,
+                  });
+                  sendResponse({
+                    ok: false,
+                    error: error.toString(),
+                  } as ObsidianResponseError);
+                });
+            })
+            .catch((e) => {
+              log({
+                message: "obsidian-request request failed",
+                data: e,
+              });
+              sendResponse({
+                ok: false,
+                error: e.toString(),
+              } as ObsidianResponseError);
+            });
+        });
+        break;
+      case "background-error-log":
+        sendResponse(logEntries);
+        break;
     }
 
     return true;

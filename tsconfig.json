@@ -9,6 +9,7 @@
         "outDir": "dist/js",
         "noEmitOnError": true,
         "jsx": "react",
+        "noImplicitReturns": true,
         "typeRoots": [ "node_modules/@types" ]
     },
     "exclude": ["node_modules/**"]
