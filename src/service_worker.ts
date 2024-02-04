@@ -217,11 +217,6 @@ chrome.runtime.onMessage.addListener(
             Boolean(settings.insecureMode)
           )
             .then((response) => {
-              log({
-                message: "obsidian-request response received",
-                data: response,
-              });
-
               const result: Partial<ObsidianResponse> = {
                 status: response.status,
               };
@@ -232,16 +227,45 @@ chrome.runtime.onMessage.addListener(
               }
 
               response
-                .json()
-                .then((data) => {
+                .text()
+                .then((text) => {
+                  let jsonData;
                   result.ok = true;
-                  result.data = data;
+                  try {
+                    jsonData = JSON.parse(text);
+                    result.data = jsonData;
+                  } catch (e) {}
                   sendResponse(result as ObsidianResponse);
+
+                  log({
+                    message: "obsidian-request response parsed",
+                    data: {
+                      request: {
+                        path: message.request.path,
+                        options: message.request.options,
+                      },
+                      response: {
+                        status: response.status,
+                        json: jsonData,
+                        text,
+                      },
+                    },
+                  });
                 })
                 .catch((error) => {
                   log({
                     message: "obsidian-request request failed to parse",
-                    data: error,
+                    data: {
+                      request: {
+                        path: message.request.path,
+                        options: message.request.options,
+                      },
+                      response: {
+                        status: response.status,
+                        text: response.text,
+                      },
+                      error,
+                    },
                   });
                   sendResponse({
                     ok: false,
@@ -252,7 +276,13 @@ chrome.runtime.onMessage.addListener(
             .catch((e) => {
               log({
                 message: "obsidian-request request failed",
-                data: e,
+                data: {
+                  request: {
+                    path: message.request.path,
+                    options: message.request.options,
+                  },
+                  error: e,
+                },
               });
               sendResponse({
                 ok: false,
