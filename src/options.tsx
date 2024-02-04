@@ -1022,7 +1022,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   &nbsp;This information is needed when troubleshooting problems
                   that are occurring in background scripts. If you select this
                   option, the exported file may reveal private information like
-                  what websites you have visited recently in any tab.
+                  what websites you have recently visited in any tab.
                 </>
               }
             />

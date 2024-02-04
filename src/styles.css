@@ -263,3 +263,7 @@ p.request-params-no-url-notice {
   height: 10px;
   background-color: gray;
 }
+
+.MuiFormGroup-root {
+  margin: 10px;
+}
