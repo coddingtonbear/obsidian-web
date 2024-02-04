@@ -425,6 +425,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     logs = true,
     configuration = true,
   }) => {
+    const now = new Date();
+    const minDate = new Date(now.getTime() - 1000 * 60 * 15);
     const blob = new Blob(
       [
         JSON.stringify(
@@ -441,14 +443,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             logEntries: logs
               ? errorLog.filter((entry) => {
                   // Filter out entries that occurred more than 5mins ago
-                  const minDate = new Date();
-                  minDate.setMinutes(-5);
                   const date = new Date(entry.date);
                   if (date > minDate) {
-                    console.log("Including entry", entry);
                     return true;
                   }
-                  console.log("Dropping entry", entry);
                   return false;
                 })
               : undefined,
@@ -1020,7 +1018,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
               }
               label={
                 <>
-                  <b>Include log entries from the previous five minutes?</b>
+                  <b>Include log entries from the previous fifteen minutes?</b>
                   &nbsp;This information is needed when troubleshooting problems
                   that are occurring in background scripts. If you select this
                   option, the exported file may reveal private information like
