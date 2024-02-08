@@ -865,8 +865,12 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 }
                 label={
                   <>
-                    Show matching notes and messages found in them automatically
-                    once found?
+                    When a matching page is found, open the notetaking dialog
+                    automatically? This feature allows you to see when the page
+                    you are visiting has existing notes, and if one of those
+                    matching notes is dedicated to the URL you are visiting,
+                    will also display that note's <code>web-message</code>{" "}
+                    frontmatter field.
                     <Chip size="small" label="Requires extra permissions" />
                   </>
                 }
