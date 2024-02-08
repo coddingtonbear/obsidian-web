@@ -518,6 +518,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     },
                     direct: {
                       enabled: searchMatchDirectEnabled,
+                      messageEnabled: searchMatchDirectMessageEnabled,
                       template: searchMatchDirectTemplate,
                     },
                   },
