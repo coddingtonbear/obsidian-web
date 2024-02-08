@@ -52,6 +52,7 @@ export interface ExtensionSyncSettings {
     };
     direct: {
       suggestionEnabled: boolean;
+      messageEnabled?: boolean;
       template: OutputPreset;
     };
   };

@@ -111,6 +111,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     useState<boolean>(false);
   const [searchMatchDirectTemplate, setSearchMatchDirectTemplate] =
     useState<OutputPreset>(DefaultSearchMatchTemplate);
+  const [searchMatchDirectMessageEnabled, setSearchMatchDirectMessageEnabled] =
+    useState<boolean>(false);
 
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
 
@@ -226,6 +228,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           },
           direct: {
             suggestionEnabled: searchMatchDirectEnabled,
+            messageEnabled: searchMatchDirectMessageEnabled,
             template: searchMatchDirectTemplate,
           },
         },
@@ -240,6 +243,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     searchEnabled,
     searchBackgroundEnabled,
     searchMatchDirectEnabled,
+    searchMatchDirectMessageEnabled,
     searchMatchDirectTemplate,
     searchMatchMentionEnabled,
     searchMatchMentionTemplate,
@@ -258,6 +262,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       setPresets(syncSettings.presets);
       setSearchEnabled(syncSettings.searchMatch.enabled);
       setSearchBackgroundEnabled(syncSettings.searchMatch.backgroundEnabled);
+      setSearchMatchDirectMessageEnabled(
+        syncSettings.searchMatch.direct.messageEnabled ?? false
+      );
       setSearchMatchDirectEnabled(
         syncSettings.searchMatch.direct.suggestionEnabled
       );
@@ -278,6 +285,19 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         (result) => {
           if (!result) {
             setSearchBackgroundEnabled(false);
+          }
+        }
+      );
+
+      // If we do not have access to all origins, we do not have sufficient
+      // permissions for the messaging capabilities
+      chrome.permissions.contains(
+        {
+          origins: ["http://*/*"],
+        },
+        (result) => {
+          if (!result) {
+            setSearchMatchDirectMessageEnabled(false);
           }
         }
       );
@@ -415,6 +435,32 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         (removed) => {
           if (removed) {
             setSearchBackgroundEnabled(targetStateEnabled);
+          }
+        }
+      );
+    }
+  };
+
+  const onEnableSearchMatchDirectMessages = (targetStateEnabled: boolean) => {
+    if (targetStateEnabled) {
+      chrome.permissions.request(
+        {
+          origins: [`http://*/*`],
+        },
+        (granted) => {
+          if (granted) {
+            setSearchMatchDirectMessageEnabled(true);
+          }
+        }
+      );
+    } else {
+      chrome.permissions.remove(
+        {
+          origins: [`http://*/*`],
+        },
+        (removed) => {
+          if (removed) {
+            setSearchMatchDirectMessageEnabled(false);
           }
         }
       );
@@ -796,6 +842,26 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 label={
                   <>
                     Search for previous notes about this page in the background?
+                    <Chip size="small" label="Requires extra permissions" />
+                  </>
+                }
+              />
+            </FormGroup>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    onChange={(evt) =>
+                      onEnableSearchMatchDirectMessages(evt.target.checked)
+                    }
+                    disabled={!searchEnabled}
+                    checked={searchMatchDirectMessageEnabled}
+                  />
+                }
+                label={
+                  <>
+                    If a matching note is found and it has a message defined,
+                    show that message in your browser window?
                     <Chip size="small" label="Requires extra permissions" />
                   </>
                 }
