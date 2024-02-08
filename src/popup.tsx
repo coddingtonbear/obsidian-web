@@ -187,7 +187,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
         setDisplayState("loading");
         return;
       }
-      if (apiKey && apiKey.length === 0) {
+      if (apiKey !== undefined && apiKey.length === 0) {
         setDisplayState("welcome");
         return;
       }
@@ -248,7 +248,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     }, []);
 
     useEffect(() => {
-      if (!apiKey) {
+      if (apiKey === undefined) {
         return;
       }
 
