@@ -63,6 +63,11 @@ div.popup {
   overflow-x: hidden;
 }
 
+div.popup.message {
+  right: auto;
+  left: 25px;
+}
+
 div.popup div.preset-selector {
   padding-left: 10px;
 }

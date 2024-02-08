@@ -133,17 +133,15 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
             files: ["js/vendor.js", "js/popup.js"],
           })
           .then(() => {
-            console.log("Injected script");
+            const webMessage = result.frontmatter["web-message"];
             chrome.scripting.executeScript({
               target: {
                 tabId,
               },
-              func: () => {
-                console.log("Showing message from ...", result.frontmatter);
-                window.ObsidianWeb.showMessage(
-                  result.frontmatter["web-message"]
-                );
+              func: (webMessage): void => {
+                window.ObsidianWeb.showMessage(webMessage);
               },
+              args: [webMessage],
             });
           });
       }

@@ -172,6 +172,8 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
     const [popupDisplayed, setPopupDisplayed] = useState<boolean>(false);
 
+    const [webMessages, setWebMessages] = useState<string[]>([]);
+
     const [displayState, setDisplayState] = useState<
       "welcome" | "form" | "error" | "loading" | "alert" | "permission"
     >("loading");
@@ -236,7 +238,12 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       } else if (evt.detail.action === "destroy-popup") {
         popupTeardown();
       } else if (evt.detail.action === "show-message") {
-        console.log("Received message", evt.detail.data.message);
+        setWebMessages((values) => {
+          if (values.indexOf(evt.detail.data.message) === -1) {
+            values.push(evt.detail.data.message);
+          }
+          return values;
+        });
       } else {
         console.error("Obsidian Web received unexpected event!", evt);
       }
@@ -538,6 +545,22 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
     return (
       <ThemeProvider theme={DarkPurpleTheme}>
+        {webMessages.map((message) => {
+          return (
+            <Draggable handle=".drag-handle">
+              <div className="message popup">
+                <div className="drag-handle"></div>
+                <Paper
+                  onClick={(evt) => {
+                    evt.stopPropagation();
+                  }}
+                >
+                  <p className="popup-text">{message}</p>
+                </Paper>
+              </div>
+            </Draggable>
+          );
+        })}
         {popupDisplayed && (
           <Draggable handle=".drag-handle">
             <div className="popup">

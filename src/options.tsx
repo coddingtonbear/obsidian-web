@@ -290,10 +290,12 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       );
 
       // If we do not have access to all origins, we do not have sufficient
-      // permissions for the messaging capabilities
+      // permissions for the messaging capabilities since we need to
+      // inject the pop-up code into the page to show the message
       chrome.permissions.contains(
         {
-          origins: ["http://*/*"],
+          permissions: ["scripting"],
+          origins: ["http://*/*", "https://*/*"],
         },
         (result) => {
           if (!result) {
@@ -445,7 +447,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     if (targetStateEnabled) {
       chrome.permissions.request(
         {
-          origins: [`http://*/*`],
+          permissions: ["scripting"],
+          origins: [`http://*/*`, `https://*/*`],
         },
         (granted) => {
           if (granted) {
@@ -456,7 +459,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     } else {
       chrome.permissions.remove(
         {
-          origins: [`http://*/*`],
+          permissions: ["scripting"],
+          origins: [`http://*/*`, "https://*/*"],
         },
         (removed) => {
           if (removed) {
