@@ -49,14 +49,17 @@ div.background.displayed {
   transition: opacity 0.25s linear;
 }
 
-div.popup {
-  opacity: 0.95;
-  border-radius: 10px;
-  width: 600px;
+div.obsidian-web-popup {
   position: fixed;
   right: 25px;
   top: 25px;
   z-index: 9999999;
+}
+
+div.popup {
+  opacity: 0.95;
+  border-radius: 10px;
+  width: 600px;
   font-family: Roboto, Helvetica, Arial, sans-serif;
   max-height: 95vh;
   overflow-y: auto;
@@ -64,8 +67,6 @@ div.popup {
 }
 
 div.popup.message {
-  right: auto;
-  left: 25px;
 }
 
 div.popup div.preset-selector {

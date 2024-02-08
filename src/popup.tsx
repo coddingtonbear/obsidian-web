@@ -545,222 +545,226 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
     return (
       <ThemeProvider theme={DarkPurpleTheme}>
-        {webMessages.map((message) => {
-          return (
+        <div className="obsidian-web-popup">
+          {webMessages.map((message) => {
+            return (
+              <Draggable handle=".drag-handle">
+                <div className="message popup">
+                  <div className="drag-handle"></div>
+                  <Paper
+                    onClick={(evt) => {
+                      evt.stopPropagation();
+                    }}
+                  >
+                    <p className="popup-text">{message}</p>
+                  </Paper>
+                </div>
+              </Draggable>
+            );
+          })}
+          {popupDisplayed && (
             <Draggable handle=".drag-handle">
-              <div className="message popup">
+              <div className="popup">
                 <div className="drag-handle"></div>
                 <Paper
                   onClick={(evt) => {
                     evt.stopPropagation();
                   }}
                 >
-                  <p className="popup-text">{message}</p>
-                </Paper>
-              </div>
-            </Draggable>
-          );
-        })}
-        {popupDisplayed && (
-          <Draggable handle=".drag-handle">
-            <div className="popup">
-              <div className="drag-handle"></div>
-              <Paper
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                }}
-              >
-                {displayState === "welcome" && (
-                  <>
-                    <MaterialAlert severity="success">
+                  {displayState === "welcome" && (
+                    <>
+                      <MaterialAlert severity="success">
+                        <p className="popup-text">
+                          Thanks for installing Obsidian Web! Obsidian Web needs
+                          some information from you before it can connect to
+                          your Obsidian instance.
+                        </p>
+                        <div className="submit">
+                          <Button
+                            target="_blank"
+                            variant="contained"
+                            href={`chrome-extension://${chrome.runtime.id}/options.html`}
+                          >
+                            Go to settings
+                          </Button>
+                        </div>
+                      </MaterialAlert>
+                    </>
+                  )}
+                  {displayState === "permission" && host && (
+                    <MaterialAlert severity="warning" style={{ flexGrow: 1 }}>
                       <p className="popup-text">
-                        Thanks for installing Obsidian Web! Obsidian Web needs
-                        some information from you before it can connect to your
-                        Obsidian instance.
+                        Obsidian Web needs permission to access Obsidian on '
+                        {host}
+                        '.
                       </p>
                       <div className="submit">
                         <Button
                           target="_blank"
+                          variant="outlined"
+                          href={`chrome-extension://${chrome.runtime.id}/options.html`}
+                        >
+                          Go to settings
+                        </Button>
+                        <Button
                           variant="contained"
+                          onClick={() =>
+                            requestHostPermission(host).then((result) => {
+                              setHasHostPermission(result);
+                            })
+                          }
+                        >
+                          Grant
+                        </Button>
+                      </div>
+                    </MaterialAlert>
+                  )}
+                  {displayState === "alert" && status && (
+                    <Alert value={status} />
+                  )}
+                  {displayState === "error" && (
+                    <MaterialAlert severity="error">
+                      <p className="popup-text">
+                        Could not connect to Obsidian! Make sure Obsidian is
+                        running and that the Obsidian Local REST API plugin is
+                        enabled.
+                      </p>
+                      <div className="submit">
+                        <Button
+                          target="_blank"
+                          variant="outlined"
                           href={`chrome-extension://${chrome.runtime.id}/options.html`}
                         >
                           Go to settings
                         </Button>
                       </div>
                     </MaterialAlert>
-                  </>
-                )}
-                {displayState === "permission" && host && (
-                  <MaterialAlert severity="warning" style={{ flexGrow: 1 }}>
-                    <p className="popup-text">
-                      Obsidian Web needs permission to access Obsidian on '
-                      {host}
-                      '.
-                    </p>
-                    <div className="submit">
-                      <Button
-                        target="_blank"
-                        variant="outlined"
-                        href={`chrome-extension://${chrome.runtime.id}/options.html`}
-                      >
-                        Go to settings
-                      </Button>
-                      <Button
-                        variant="contained"
-                        onClick={() =>
-                          requestHostPermission(host).then((result) => {
-                            setHasHostPermission(result);
-                          })
-                        }
-                      >
-                        Grant
-                      </Button>
+                  )}
+                  {displayState === "loading" && (
+                    <div className="loading">
+                      {" "}
+                      <CircularProgress />
                     </div>
-                  </MaterialAlert>
-                )}
-                {displayState === "alert" && status && <Alert value={status} />}
-                {displayState === "error" && (
-                  <MaterialAlert severity="error">
-                    <p className="popup-text">
-                      Could not connect to Obsidian! Make sure Obsidian is
-                      running and that the Obsidian Local REST API plugin is
-                      enabled.
-                    </p>
-                    <div className="submit">
-                      <Button
-                        target="_blank"
-                        variant="outlined"
-                        href={`chrome-extension://${chrome.runtime.id}/options.html`}
-                      >
-                        Go to settings
-                      </Button>
-                    </div>
-                  </MaterialAlert>
-                )}
-                {displayState === "loading" && (
-                  <div className="loading">
-                    {" "}
-                    <CircularProgress />
-                  </div>
-                )}
-                {displayState === "form" && (
-                  <>
-                    {!suggestionAccepted && host && (
-                      <>
-                        {(mentions.length > 0 ||
-                          directReferences.length > 0) && (
-                          <div className="mentions">
-                            {directReferences.map((ref) => (
-                              <MentionNotice
-                                key={ref.filename}
-                                type="direct"
-                                templateSuggestion={searchMatchDirectTemplate}
-                                mention={ref}
-                                acceptSuggestion={acceptSuggestion}
-                                directReferenceMessages={
-                                  directReferenceMessages
-                                }
-                              />
-                            ))}
-                            {mentions
-                              .filter(
-                                (ref) =>
-                                  !directReferences.find(
-                                    (d) => d.filename === ref.filename
-                                  )
-                              )
-                              .map((ref) => (
+                  )}
+                  {displayState === "form" && (
+                    <>
+                      {!suggestionAccepted && host && (
+                        <>
+                          {(mentions.length > 0 ||
+                            directReferences.length > 0) && (
+                            <div className="mentions">
+                              {directReferences.map((ref) => (
                                 <MentionNotice
                                   key={ref.filename}
-                                  type="mention"
-                                  templateSuggestion={
-                                    searchMatchMentionTemplate
-                                  }
+                                  type="direct"
+                                  templateSuggestion={searchMatchDirectTemplate}
                                   mention={ref}
                                   acceptSuggestion={acceptSuggestion}
+                                  directReferenceMessages={
+                                    directReferenceMessages
+                                  }
                                 />
                               ))}
-                          </div>
-                        )}
-                      </>
-                    )}
-                    <div className="option">
-                      <div className="option-value">
-                        <NativeSelect
-                          autoFocus={true}
-                          className="preset-selector"
-                          value={selectedPresetIdx}
-                          fullWidth={true}
-                          onChange={(event) =>
-                            setSelectedPresetIdx(
-                              typeof event.target.value === "number"
-                                ? event.target.value
-                                : parseInt(event.target.value, 10)
-                            )
-                          }
-                        >
-                          {suggestionAccepted && searchMatchTemplate && (
-                            <option key={"___suggestion"} value={-2}>
-                              [Suggested Template]
-                            </option>
+                              {mentions
+                                .filter(
+                                  (ref) =>
+                                    !directReferences.find(
+                                      (d) => d.filename === ref.filename
+                                    )
+                                )
+                                .map((ref) => (
+                                  <MentionNotice
+                                    key={ref.filename}
+                                    type="mention"
+                                    templateSuggestion={
+                                      searchMatchMentionTemplate
+                                    }
+                                    mention={ref}
+                                    acceptSuggestion={acceptSuggestion}
+                                  />
+                                ))}
+                            </div>
                           )}
-                          {presets &&
-                            presets.map((preset, idx) => (
-                              <option key={preset.name} value={idx}>
-                                {preset.name}
+                        </>
+                      )}
+                      <div className="option">
+                        <div className="option-value">
+                          <NativeSelect
+                            autoFocus={true}
+                            className="preset-selector"
+                            value={selectedPresetIdx}
+                            fullWidth={true}
+                            onChange={(event) =>
+                              setSelectedPresetIdx(
+                                typeof event.target.value === "number"
+                                  ? event.target.value
+                                  : parseInt(event.target.value, 10)
+                              )
+                            }
+                          >
+                            {suggestionAccepted && searchMatchTemplate && (
+                              <option key={"___suggestion"} value={-2}>
+                                [Suggested Template]
                               </option>
-                            ))}
-                        </NativeSelect>
-                        <IconButton
-                          className="send-to-obsidian"
-                          color="primary"
-                          size="large"
-                          disabled={!contentIsValid}
-                          onClick={sendToObsidian}
-                          title="Send to Obsidian"
-                        >
-                          <SendIcon className="send-to-obsidian-icon" />
-                        </IconButton>
-                        <IconButton
-                          className="cancel-send"
-                          color="error"
-                          size="large"
-                          onClick={onFinished}
-                          title="Cancel"
-                        >
-                          <CancelIcon className="cancel-send-icon" />
-                        </IconButton>
+                            )}
+                            {presets &&
+                              presets.map((preset, idx) => (
+                                <option key={preset.name} value={idx}>
+                                  {preset.name}
+                                </option>
+                              ))}
+                          </NativeSelect>
+                          <IconButton
+                            className="send-to-obsidian"
+                            color="primary"
+                            size="large"
+                            disabled={!contentIsValid}
+                            onClick={sendToObsidian}
+                            title="Send to Obsidian"
+                          >
+                            <SendIcon className="send-to-obsidian-icon" />
+                          </IconButton>
+                          <IconButton
+                            className="cancel-send"
+                            color="error"
+                            size="large"
+                            onClick={onFinished}
+                            title="Cancel"
+                          >
+                            <CancelIcon className="cancel-send-icon" />
+                          </IconButton>
+                        </div>
                       </div>
-                    </div>
-                    <Accordion>
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <p>View Request Details</p>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <RequestParameters
-                          method={formMethod}
-                          url={formUrl}
-                          sandbox={sandbox}
-                          headers={formHeaders}
-                          previewContext={previewContext ?? {}}
-                          content={formContent}
-                          onChangeMethod={setFormMethod}
-                          onChangeUrl={setFormUrl}
-                          onChangeHeaders={setFormHeaders}
-                          onChangeContent={setFormContent}
-                          onChangeIsValid={setContentIsValid}
-                          onChangeRenderedContent={setCompiledContent}
-                          onChangeRenderedUrl={setCompiledUrl}
-                          showCrystalizeOption={true}
-                        />
-                      </AccordionDetails>
-                    </Accordion>
-                  </>
-                )}
-              </Paper>
-            </div>
-          </Draggable>
-        )}
+                      <Accordion>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <p>View Request Details</p>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <RequestParameters
+                            method={formMethod}
+                            url={formUrl}
+                            sandbox={sandbox}
+                            headers={formHeaders}
+                            previewContext={previewContext ?? {}}
+                            content={formContent}
+                            onChangeMethod={setFormMethod}
+                            onChangeUrl={setFormUrl}
+                            onChangeHeaders={setFormHeaders}
+                            onChangeContent={setFormContent}
+                            onChangeIsValid={setContentIsValid}
+                            onChangeRenderedContent={setCompiledContent}
+                            onChangeRenderedUrl={setCompiledUrl}
+                            showCrystalizeOption={true}
+                          />
+                        </AccordionDetails>
+                      </Accordion>
+                    </>
+                  )}
+                </Paper>
+              </div>
+            </Draggable>
+          )}
+        </div>
       </ThemeProvider>
     );
   };
