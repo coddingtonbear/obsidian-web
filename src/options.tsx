@@ -834,8 +834,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 label={
                   <>
                     <b>
-                      Search for previous notes about this page when you open
-                      the extension menu?
+                      Search for previous notes about this page when you
+                      activate the extension?
                     </b>{" "}
                     If you turn this feature on, pages dedicated to the URL you
                     are currently visiting, and pages on which you've mentioned
