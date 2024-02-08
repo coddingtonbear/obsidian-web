@@ -34,6 +34,7 @@ import {
   ObsidianResponse,
   OutputPreset,
   PreviewContext,
+  SearchJsonResponseItemWithMetadata,
 } from "./types";
 import {
   getLocalSettings,
@@ -142,10 +143,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       useState<boolean>(false);
     const [mentions, setMentions] = useState<SearchJsonResponseItem[]>([]);
     const [directReferences, setDirectReferences] = useState<
-      SearchJsonResponseItem[]
-    >([]);
-    const [directReferenceMessages, setDirectReferenceMessages] = useState<
-      string[]
+      SearchJsonResponseItemWithMetadata[]
     >([]);
 
     const [searchEnabled, setSearchEnabled] = useState<boolean>(false);
@@ -171,8 +169,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const [contentIsValid, setContentIsValid] = useState<boolean>(false);
 
     const [popupDisplayed, setPopupDisplayed] = useState<boolean>(false);
-
-    const [webMessages, setWebMessages] = useState<string[]>([]);
 
     const [displayState, setDisplayState] = useState<
       "welcome" | "form" | "error" | "loading" | "alert" | "permission"
@@ -238,12 +234,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       } else if (evt.detail.action === "destroy-popup") {
         popupTeardown();
       } else if (evt.detail.action === "show-message") {
-        setWebMessages((values) => {
-          if (values.indexOf(evt.detail.data.message) === -1) {
-            values.push(evt.detail.data.message);
-          }
-          return values;
-        });
+        setPopupDisplayed(true);
       } else {
         console.error("Obsidian Web received unexpected event!", evt);
       }
@@ -386,30 +377,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     }, []);
 
     useEffect(() => {
-      setDirectReferenceMessages([]);
-
-      async function handle() {
-        const messages: string[] = [];
-
-        if (!host) {
-          return;
-        }
-
-        for (const ref of directReferences) {
-          const meta = await getPageMetadata(ref.filename);
-
-          if (typeof meta.frontmatter["web-badge-message"] === "string") {
-            messages.push(meta.frontmatter["web-badge-message"]);
-          }
-        }
-
-        setDirectReferenceMessages(messages);
-      }
-
-      handle();
-    }, [directReferences]);
-
-    useEffect(() => {
       if (!searchEnabled) {
         return;
       }
@@ -546,22 +513,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     return (
       <ThemeProvider theme={DarkPurpleTheme}>
         <div className="obsidian-web-popup">
-          {webMessages.map((message) => {
-            return (
-              <Draggable handle=".drag-handle">
-                <div className="message popup">
-                  <div className="drag-handle"></div>
-                  <Paper
-                    onClick={(evt) => {
-                      evt.stopPropagation();
-                    }}
-                  >
-                    <p className="popup-text">{message}</p>
-                  </Paper>
-                </div>
-              </Draggable>
-            );
-          })}
           {popupDisplayed && (
             <Draggable handle=".drag-handle">
               <div className="popup">
@@ -660,9 +611,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                                   templateSuggestion={searchMatchDirectTemplate}
                                   mention={ref}
                                   acceptSuggestion={acceptSuggestion}
-                                  directReferenceMessages={
-                                    directReferenceMessages
-                                  }
                                 />
                               ))}
                               {mentions

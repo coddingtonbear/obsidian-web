@@ -5,23 +5,34 @@ import IconButton from "@mui/material/IconButton";
 
 import UseSuggestionIcon from "@mui/icons-material/ArrowCircleDown";
 
-import { SearchJsonResponseItem, OutputPreset } from "../types";
+import {
+  SearchJsonResponseItem,
+  OutputPreset,
+  SearchJsonResponseItemWithMetadata,
+} from "../types";
 import { openFileInObsidian } from "../utils";
 
-export interface Props {
-  type: "mention" | "direct";
+export interface DirectProps {
+  type: "direct";
+  templateSuggestion: OutputPreset | undefined;
+  mention: SearchJsonResponseItemWithMetadata;
+  acceptSuggestion: (filename: string, template: OutputPreset) => void;
+}
+
+export interface MentionProps {
+  type: "mention";
   templateSuggestion: OutputPreset | undefined;
   mention: SearchJsonResponseItem;
   acceptSuggestion: (filename: string, template: OutputPreset) => void;
-  directReferenceMessages?: string[];
 }
+
+export type Props = MentionProps | DirectProps;
 
 const MentionNotice: React.FC<Props> = ({
   type,
   templateSuggestion,
   mention,
   acceptSuggestion,
-  directReferenceMessages,
 }) => {
   return (
     <MaterialAlert
@@ -47,11 +58,12 @@ const MentionNotice: React.FC<Props> = ({
       >
         {mention.filename}
       </Link>
-      .
-      {directReferenceMessages &&
-        directReferenceMessages.map((mention) => {
-          return <blockquote>{mention}</blockquote>;
-        })}
+
+      {type === "direct" && mention.meta.frontmatter["web-message"] && (
+        <blockquote>
+          {String(mention.meta.frontmatter["web-message"])}
+        </blockquote>
+      )}
     </MaterialAlert>
   );
 };

@@ -20,6 +20,7 @@ import {
   ObsidianResponseError,
   BackgroundErrorLog,
   LogEntry,
+  SearchJsonResponseItemWithMetadata,
 } from "./types";
 import {
   DefaultSyncSettings,
@@ -168,7 +169,7 @@ export async function getPageMetadata(
 
 export async function getUrlMentions(url: string): Promise<{
   mentions: SearchJsonResponseItem[];
-  direct: SearchJsonResponseItem[];
+  direct: SearchJsonResponseItemWithMetadata[];
 }> {
   async function handleMentions() {
     const result = await obsidianSearchRequest({
@@ -177,11 +178,18 @@ export async function getUrlMentions(url: string): Promise<{
     return result;
   }
 
-  async function handleDirect() {
-    const result = await obsidianSearchRequest({
+  async function handleDirect(): Promise<SearchJsonResponseItemWithMetadata[]> {
+    const results = await obsidianSearchRequest({
       glob: [{ var: "frontmatter.url" }, url],
     });
-    return result;
+    const pageMetadata: SearchJsonResponseItemWithMetadata[] = [];
+    for (const result of results) {
+      pageMetadata.push({
+        ...result,
+        meta: await getPageMetadata(result.filename),
+      });
+    }
+    return pageMetadata;
   }
 
   return {
@@ -197,7 +205,7 @@ export async function _getUrlMentions(
   url: string
 ): Promise<{
   mentions: SearchJsonResponseItem[];
-  direct: SearchJsonResponseItem[];
+  direct: SearchJsonResponseItemWithMetadata[];
 }> {
   async function handleMentions() {
     const result = await _obsidianSearchRequest(
@@ -211,8 +219,8 @@ export async function _getUrlMentions(
     return result;
   }
 
-  async function handleDirect() {
-    const result = await _obsidianSearchRequest(
+  async function handleDirect(): Promise<SearchJsonResponseItemWithMetadata[]> {
+    const results = await _obsidianSearchRequest(
       hostname,
       apiKey,
       insecureMode,
@@ -220,7 +228,14 @@ export async function _getUrlMentions(
         glob: [{ var: "frontmatter.url" }, url],
       }
     );
-    return result;
+    const pageMetadata: SearchJsonResponseItemWithMetadata[] = [];
+    for (const result of results) {
+      pageMetadata.push({
+        ...result,
+        meta: await getPageMetadata(result.filename),
+      });
+    }
+    return pageMetadata;
   }
 
   return {

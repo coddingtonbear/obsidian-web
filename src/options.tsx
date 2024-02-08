@@ -865,8 +865,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 }
                 label={
                   <>
-                    If a matching note is found and it has a message defined,
-                    show that message in your browser window?
+                    Show matching notes and messages found in them automatically
+                    once found?
                     <Chip size="small" label="Requires extra permissions" />
                   </>
                 }

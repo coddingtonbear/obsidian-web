@@ -109,6 +109,11 @@ export interface SearchJsonResponseItem {
   result: unknown;
 }
 
+export interface SearchJsonResponseItemWithMetadata
+  extends SearchJsonResponseItem {
+  meta: FileMetadataObject;
+}
+
 export interface StatusResponse {
   status: string;
   versions: {
