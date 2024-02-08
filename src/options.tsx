@@ -917,6 +917,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     }
                     label={
                       <>
+                        <b>
+                          Suggest a template when a dedicated page for the
+                          current URL is found?
+                        </b>{" "}
                         When the URL of the page you are visiting has been found
                         to match the <code>url</code> field in the frontmatter
                         of an existing note in your vault, suggest a template
@@ -954,6 +958,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     }
                     label={
                       <>
+                        <b>
+                          Suggest a template when a note mentioning this URL is
+                          found?
+                        </b>{" "}
                         When the URL of the page you are visiting has been found
                         in the content of a note in your vault, suggest a
                         template for updating the existing note?
