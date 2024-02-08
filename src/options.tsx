@@ -263,7 +263,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       setSearchEnabled(syncSettings.searchMatch.enabled);
       setSearchBackgroundEnabled(syncSettings.searchMatch.backgroundEnabled);
       setSearchMatchDirectMessageEnabled(
-        syncSettings.searchMatch.direct.messageEnabled ?? false
+        (syncSettings.searchMatch.backgroundEnabled &&
+          syncSettings.searchMatch.direct.messageEnabled) ??
+          false
       );
       setSearchMatchDirectEnabled(
         syncSettings.searchMatch.direct.suggestionEnabled
@@ -275,20 +277,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       setSearchMatchMentionTemplate(syncSettings.searchMatch.mentions.template);
       setLoaded(true);
 
-      // If we do not have "tabs" permission; we can't really use
-      // background search; so let's un-toggle that so they can re-toggle
-      // it to re-probe for permissions
-      chrome.permissions.contains(
-        {
-          permissions: ["tabs"],
-        },
-        (result) => {
-          if (!result) {
-            setSearchBackgroundEnabled(false);
-          }
-        }
-      );
-
       // If we do not have access to all origins, we do not have sufficient
       // permissions for the messaging capabilities since we need to
       // inject the pop-up code into the page to show the message
@@ -299,6 +287,25 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         },
         (result) => {
           if (!result) {
+            setSearchMatchDirectMessageEnabled(false);
+          }
+        }
+      );
+
+      // If we do not have "tabs" permission; we can't really use
+      // background search; so let's un-toggle that so they can re-toggle
+      // it to re-probe for permissions
+      chrome.permissions.contains(
+        {
+          permissions: ["tabs"],
+        },
+        (result) => {
+          if (!result) {
+            setSearchBackgroundEnabled(false);
+
+            // And since direct messages require background search
+            // to function, let's disable that, too, if background
+            // searches are disabled.
             setSearchMatchDirectMessageEnabled(false);
           }
         }
@@ -827,8 +834,14 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 }
                 label={
                   <>
-                    Search for previous notes about this page when you open the
-                    extension menu?
+                    <b>
+                      Search for previous notes about this page when you open
+                      the extension menu?
+                    </b>{" "}
+                    If you turn this feature on, pages dedicated to the URL you
+                    are currently visiting, and pages on which you've mentioned
+                    the URL you are visiting will be shown to you in the dialog
+                    when you activate the extension.
                   </>
                 }
               />
@@ -846,7 +859,15 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 }
                 label={
                   <>
-                    Search for previous notes about this page in the background?
+                    <b>
+                      Search for previous notes about this page in the
+                      background?
+                    </b>{" "}
+                    If you turn this feature on, pages dedicated to the URL you
+                    are currently visiting, and pages on which you've mentioned
+                    the URL you are visiting will be searched for as you browse
+                    the internet. If a match is found, a badge will be shown on
+                    the extension icon.
                     <Chip size="small" label="Requires extra permissions" />
                   </>
                 }
@@ -859,18 +880,24 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     onChange={(evt) =>
                       onEnableSearchMatchDirectMessages(evt.target.checked)
                     }
-                    disabled={!searchEnabled}
-                    checked={searchMatchDirectMessageEnabled}
+                    disabled={!searchEnabled || !searchBackgroundEnabled}
+                    checked={
+                      searchBackgroundEnabled && searchMatchDirectMessageEnabled
+                    }
                   />
                 }
                 label={
                   <>
-                    When a matching page is found, open the notetaking dialog
-                    automatically? This feature allows you to see when the page
-                    you are visiting has existing notes, and if one of those
-                    matching notes is dedicated to the URL you are visiting,
-                    will also display that note's <code>web-message</code>{" "}
-                    frontmatter field.
+                    <b>
+                      When a matching page is found, open the dialog
+                      automatically?
+                    </b>{" "}
+                    If you turn this feature on, the dialog will automatically
+                    be opened when the page you are visiting has existing notes.
+                    Additionally, if one of those matching notes is dedicated to
+                    the URL you are visiting, that note's{" "}
+                    <code>web-message</code> frontmatter field will be displayed
+                    if set.
                     <Chip size="small" label="Requires extra permissions" />
                   </>
                 }
