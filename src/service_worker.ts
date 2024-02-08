@@ -102,7 +102,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
 
     if (
-      syncSettings.searchMatch.direct.messageEnabled &&
+      syncSettings.searchMatch.autoOpen &&
       (mentions.mentions.length > 0 || mentions.direct.length > 0)
     ) {
       chrome.scripting

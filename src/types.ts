@@ -46,13 +46,13 @@ export interface ExtensionSyncSettings {
   searchMatch: {
     enabled: boolean;
     backgroundEnabled: boolean;
+    autoOpen?: boolean;
     mentions: {
       suggestionEnabled: boolean;
       template: OutputPreset;
     };
     direct: {
       suggestionEnabled: boolean;
-      messageEnabled?: boolean;
       template: OutputPreset;
     };
   };

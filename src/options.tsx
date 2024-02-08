@@ -111,8 +111,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     useState<boolean>(false);
   const [searchMatchDirectTemplate, setSearchMatchDirectTemplate] =
     useState<OutputPreset>(DefaultSearchMatchTemplate);
-  const [searchMatchDirectMessageEnabled, setSearchMatchDirectMessageEnabled] =
-    useState<boolean>(false);
+  const [autoOpen, setAutoOpen] = useState<boolean>(false);
 
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
 
@@ -222,13 +221,13 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         searchMatch: {
           enabled: searchEnabled,
           backgroundEnabled: searchBackgroundEnabled,
+          autoOpen: autoOpen,
           mentions: {
             suggestionEnabled: searchMatchMentionEnabled,
             template: searchMatchMentionTemplate,
           },
           direct: {
             suggestionEnabled: searchMatchDirectEnabled,
-            messageEnabled: searchMatchDirectMessageEnabled,
             template: searchMatchDirectTemplate,
           },
         },
@@ -243,7 +242,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     searchEnabled,
     searchBackgroundEnabled,
     searchMatchDirectEnabled,
-    searchMatchDirectMessageEnabled,
+    autoOpen,
     searchMatchDirectTemplate,
     searchMatchMentionEnabled,
     searchMatchMentionTemplate,
@@ -262,9 +261,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       setPresets(syncSettings.presets);
       setSearchEnabled(syncSettings.searchMatch.enabled);
       setSearchBackgroundEnabled(syncSettings.searchMatch.backgroundEnabled);
-      setSearchMatchDirectMessageEnabled(
+      setAutoOpen(
         (syncSettings.searchMatch.backgroundEnabled &&
-          syncSettings.searchMatch.direct.messageEnabled) ??
+          syncSettings.searchMatch.autoOpen) ??
           false
       );
       setSearchMatchDirectEnabled(
@@ -287,7 +286,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         },
         (result) => {
           if (!result) {
-            setSearchMatchDirectMessageEnabled(false);
+            setAutoOpen(false);
           }
         }
       );
@@ -306,7 +305,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             // And since direct messages require background search
             // to function, let's disable that, too, if background
             // searches are disabled.
-            setSearchMatchDirectMessageEnabled(false);
+            setAutoOpen(false);
           }
         }
       );
@@ -459,7 +458,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         },
         (granted) => {
           if (granted) {
-            setSearchMatchDirectMessageEnabled(true);
+            setAutoOpen(true);
           }
         }
       );
@@ -471,7 +470,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         },
         (removed) => {
           if (removed) {
-            setSearchMatchDirectMessageEnabled(false);
+            setAutoOpen(false);
           }
         }
       );
@@ -525,7 +524,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     },
                     direct: {
                       enabled: searchMatchDirectEnabled,
-                      messageEnabled: searchMatchDirectMessageEnabled,
+                      messageEnabled: autoOpen,
                       template: searchMatchDirectTemplate,
                     },
                   },
@@ -881,9 +880,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                       onEnableSearchMatchDirectMessages(evt.target.checked)
                     }
                     disabled={!searchEnabled || !searchBackgroundEnabled}
-                    checked={
-                      searchBackgroundEnabled && searchMatchDirectMessageEnabled
-                    }
+                    checked={searchBackgroundEnabled && autoOpen}
                   />
                 }
                 label={
