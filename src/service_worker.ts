@@ -1,10 +1,16 @@
-import { _getUrlMentions, getLocalSettings, _obsidianRequest } from "./utils";
+import {
+  _getUrlMentions,
+  getLocalSettings,
+  _obsidianRequest,
+  getSyncSettings,
+} from "./utils";
 import {
   BackgroundRequest,
   LogEntry,
   ExtensionLocalSettings,
   ObsidianResponse,
   ObsidianResponseError,
+  ExtensionSyncSettings,
 } from "./types";
 import { MaximumErrorLogLength } from "./constants";
 
@@ -34,6 +40,9 @@ function log(errorLogItem: Partial<LogEntry>): number {
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   const settings: ExtensionLocalSettings = await getLocalSettings(
     chrome.storage.local
+  );
+  const syncSettings: ExtensionSyncSettings = await getSyncSettings(
+    chrome.storage.sync
   );
   const url = tab.url;
 
@@ -92,6 +101,27 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       });
     }
 
+    if (
+      syncSettings.searchMatch.direct.messageEnabled &&
+      (mentions.mentions.length > 0 || mentions.direct.length > 0)
+    ) {
+      chrome.scripting
+        .executeScript({
+          target: { tabId },
+          files: ["js/vendor.js", "js/popup.js"],
+        })
+        .then(() => {
+          chrome.scripting.executeScript({
+            target: {
+              tabId,
+            },
+            func: (): void => {
+              window.ObsidianWeb.showPopUp();
+            },
+          });
+        });
+    }
+
     console.log("Processing pageview");
     for (const mention of mentions.direct) {
       console.log("Looking at direct mentions");
@@ -124,26 +154,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
           title: result.frontmatter["web-badge-message"],
           tabId,
         });
-      }
-      if (result.frontmatter["web-message"]) {
-        console.log("Found web-message");
-        chrome.scripting
-          .executeScript({
-            target: { tabId },
-            files: ["js/vendor.js", "js/popup.js"],
-          })
-          .then(() => {
-            const webMessage = result.frontmatter["web-message"];
-            chrome.scripting.executeScript({
-              target: {
-                tabId,
-              },
-              func: (webMessage): void => {
-                window.ObsidianWeb.showMessage(webMessage);
-              },
-              args: [webMessage],
-            });
-          });
       }
     }
   } catch (e) {
