@@ -118,7 +118,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
       setDisplayState("loading");
       return;
     }
-    if (apiKey && apiKey.length === 0) {
+    if (apiKey !== undefined && apiKey.length === 0) {
       setDisplayState("welcome");
       return;
     }
@@ -160,7 +160,7 @@ const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
   }, []);
 
   useEffect(() => {
-    if (!apiKey) {
+    if (apiKey === undefined) {
       return;
     }
 
