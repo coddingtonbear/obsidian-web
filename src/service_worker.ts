@@ -92,7 +92,9 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       });
     }
 
+    console.log("Processing pageview");
     for (const mention of mentions.direct) {
+      console.log("Looking at direct mentions");
       const mentionData = await _obsidianRequest(
         settings.host,
         settings.apiKey,
@@ -123,6 +125,28 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
           tabId,
         });
       }
+      if (result.frontmatter["web-message"]) {
+        console.log("Found web-message");
+        chrome.scripting
+          .executeScript({
+            target: { tabId },
+            files: ["js/vendor.js", "js/popup.js"],
+          })
+          .then(() => {
+            console.log("Injected script");
+            chrome.scripting.executeScript({
+              target: {
+                tabId,
+              },
+              func: () => {
+                console.log("Showing message from ...", result.frontmatter);
+                window.ObsidianWeb.showMessage(
+                  result.frontmatter["web-message"]
+                );
+              },
+            });
+          });
+      }
     }
   } catch (e) {
     chrome.action.setBadgeBackgroundColor({
@@ -144,10 +168,21 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id) {
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["js/vendor.js", "js/popup.js"],
-    });
+    chrome.scripting
+      .executeScript({
+        target: { tabId: tab.id },
+        files: ["js/vendor.js", "js/popup.js"],
+      })
+      .then(() => {
+        if (tab.id) {
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+              window.ObsidianWeb.togglePopUp();
+            },
+          });
+        }
+      });
   } else {
     console.error("No tab ID found when attempting to inject into tab", tab);
   }
