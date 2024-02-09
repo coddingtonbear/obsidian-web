@@ -925,161 +925,162 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 }
               />
             </FormGroup>
-            {searchEnabled && (
-              <Paper className="paper-option-panel">
-                <h3>Page Notes</h3>
-                <Typography paragraph={true}>
-                  If you have a note having a frontmatter field or property
-                  named <code>url</code> that matches the URL of the page you
-                  are currently visiting, we consider that note to be dedicated
-                  to that URL. If we find such a note, we can show you a message
-                  when such a note was found and can even suggest using a
-                  particular template for updating that note.
-                </Typography>
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        onChange={(evt) =>
-                          onEnableSearchMatchDirectMessages(evt.target.checked)
-                        }
-                        disabled={!searchEnabled || !searchBackgroundEnabled}
-                        checked={
-                          searchBackgroundEnabled && searchMatchDirectAutoOpen
-                        }
-                      />
-                    }
-                    label={
-                      <>
-                        <b>
-                          Open the dialog automatically when a dedicated page
-                          for the current URL is found?
-                        </b>{" "}
-                        If you turn this feature on, the dialog will
-                        automatically be opened when the page you are visiting
-                        has a dedicated page. Additionally, if that note's{" "}
-                        <code>web-message</code> frontmatter field is set, that
-                        message will be displayed.
-                        <Chip size="small" label="Requires extra permissions" />
-                      </>
-                    }
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        onChange={(evt) =>
-                          setSearchMatchDirectEnabled(evt.target.checked)
-                        }
-                        disabled={!searchEnabled}
-                        checked={searchMatchDirectEnabled}
-                      />
-                    }
-                    label={
-                      <>
-                        <b>
-                          Suggest a template when a dedicated page for the
-                          current URL is found?
-                        </b>{" "}
-                        When the URL of the page you are visiting has been found
-                        to match the <code>url</code> field in the frontmatter
-                        of an existing note in your vault, suggest a template
-                        for updating the existing note?
-                      </>
-                    }
-                  />
-                  <Button
-                    disabled={!searchMatchDirectEnabled}
-                    onClick={() => {
-                      showPresetEditor(
-                        searchMatchDirectTemplate,
-                        false,
-                        (preset: ConfiguredTemplate) => {
-                          setSearchMatchDirectTemplate(preset);
-                        }
-                      );
-                    }}
-                    variant="outlined"
-                  >
-                    Configure Template to use for Page Notes
-                  </Button>
-                </FormGroup>
-                <h3>Mentions</h3>
-                <Typography paragraph={true}>
-                  If the URL you are currently visiting has been mentioned on
-                  one of your notes, we can help you become aware of that and
-                  can even suggest using a particular template to modify that
-                  note.
-                </Typography>
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        onChange={(evt) =>
-                          onEnableSearchMatchMentionMessages(evt.target.checked)
-                        }
-                        disabled={!searchEnabled || !searchBackgroundEnabled}
-                        checked={
-                          searchBackgroundEnabled && searchMatchMentionAutoOpen
-                        }
-                      />
-                    }
-                    label={
-                      <>
-                        <b>
-                          Open the dialog automatically when a note mentioning
-                          this URL is found?
-                        </b>{" "}
-                        If you turn this feature on, the dialog will
-                        automatically be opened when the URL you are visiting
-                        has been mentioned in your notes.{" "}
-                        <Chip size="small" label="Requires extra permissions" />
-                      </>
-                    }
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        onChange={(evt) =>
-                          setSearchMatchMentionEnabled(evt.target.checked)
-                        }
-                        disabled={!searchEnabled}
-                        checked={searchMatchMentionEnabled}
-                      />
-                    }
-                    label={
-                      <>
-                        <b>
-                          Suggest a template when a note mentioning this URL is
-                          found?
-                        </b>{" "}
-                        When the URL of the page you are visiting has been found
-                        in the content of a note in your vault, suggest a
-                        template for updating the existing note?
-                      </>
-                    }
-                  />
-                  <Button
-                    disabled={!searchMatchMentionEnabled}
-                    onClick={() => {
-                      showPresetEditor(
-                        searchMatchMentionTemplate,
-                        false,
-                        (preset: ConfiguredTemplate) => {
-                          setSearchMatchMentionTemplate(preset);
-                        }
-                      );
-                    }}
-                    variant="outlined"
-                  >
-                    Configure Template to use for Mentions
-                  </Button>
-                </FormGroup>
-              </Paper>
-            )}
+            <Paper className="paper-option-panel">
+              <h3>Page Notes</h3>
+              <Typography paragraph={true}>
+                If you have a note having a frontmatter field or property named{" "}
+                <code>url</code> that matches the URL of the page you are
+                currently visiting, we consider that note to be dedicated to
+                that URL. If we find such a note, we can show you a message when
+                such a note was found and can even suggest using a particular
+                template for updating that note.
+              </Typography>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      onChange={(evt) =>
+                        onEnableSearchMatchDirectMessages(evt.target.checked)
+                      }
+                      disabled={!searchEnabled || !searchBackgroundEnabled}
+                      checked={
+                        searchBackgroundEnabled && searchMatchDirectAutoOpen
+                      }
+                    />
+                  }
+                  label={
+                    <>
+                      <b>
+                        Open the dialog automatically when a dedicated page for
+                        the current URL is found?
+                      </b>{" "}
+                      If you turn this feature on, the dialog will automatically
+                      be opened when the page you are visiting has a dedicated
+                      page. Additionally, if that note's{" "}
+                      <code>web-message</code> frontmatter field is set, that
+                      message will be displayed. This feature requires that you
+                      have enabled background searches.
+                      <Chip size="small" label="Requires extra permissions" />
+                    </>
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      onChange={(evt) =>
+                        setSearchMatchDirectEnabled(evt.target.checked)
+                      }
+                      disabled={!searchEnabled}
+                      checked={searchMatchDirectEnabled}
+                    />
+                  }
+                  label={
+                    <>
+                      <b>
+                        Suggest a template when a dedicated page for the current
+                        URL is found?
+                      </b>{" "}
+                      When the URL of the page you are visiting has been found
+                      to match the <code>url</code> field in the frontmatter of
+                      an existing note in your vault, suggest a template for
+                      updating the existing note? This feature requires that you
+                      have enabled search features.
+                    </>
+                  }
+                />
+                <Button
+                  disabled={!searchMatchDirectEnabled}
+                  onClick={() => {
+                    showPresetEditor(
+                      searchMatchDirectTemplate,
+                      false,
+                      (preset: ConfiguredTemplate) => {
+                        setSearchMatchDirectTemplate(preset);
+                      }
+                    );
+                  }}
+                  variant="outlined"
+                >
+                  Configure Template to use for Page Notes
+                </Button>
+              </FormGroup>
+              <h3>Mentions</h3>
+              <Typography paragraph={true}>
+                If the URL you are currently visiting has been mentioned on one
+                of your notes, we can help you become aware of that and can even
+                suggest using a particular template to modify that note.
+              </Typography>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      onChange={(evt) =>
+                        onEnableSearchMatchMentionMessages(evt.target.checked)
+                      }
+                      disabled={!searchEnabled || !searchBackgroundEnabled}
+                      checked={
+                        searchBackgroundEnabled && searchMatchMentionAutoOpen
+                      }
+                    />
+                  }
+                  label={
+                    <>
+                      <b>
+                        Open the dialog automatically when a note mentioning
+                        this URL is found?
+                      </b>{" "}
+                      If you turn this feature on, the dialog will automatically
+                      be opened when the URL you are visiting has been mentioned
+                      in your notes. This feature requires that you have enabled
+                      background searches.{" "}
+                      <Chip size="small" label="Requires extra permissions" />
+                    </>
+                  }
+                />
+              </FormGroup>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      onChange={(evt) =>
+                        setSearchMatchMentionEnabled(evt.target.checked)
+                      }
+                      disabled={!searchEnabled}
+                      checked={searchMatchMentionEnabled}
+                    />
+                  }
+                  label={
+                    <>
+                      <b>
+                        Suggest a template when a note mentioning this URL is
+                        found?
+                      </b>{" "}
+                      When the URL of the page you are visiting has been found
+                      in the content of a note in your vault, suggest a template
+                      for updating the existing note? This feature requires that
+                      you enable search features.
+                    </>
+                  }
+                />
+                <Button
+                  disabled={!searchMatchMentionEnabled}
+                  onClick={() => {
+                    showPresetEditor(
+                      searchMatchMentionTemplate,
+                      false,
+                      (preset: ConfiguredTemplate) => {
+                        setSearchMatchMentionTemplate(preset);
+                      }
+                    );
+                  }}
+                  variant="outlined"
+                >
+                  Configure Template to use for Mentions
+                </Button>
+              </FormGroup>
+            </Paper>
           </div>
           <div className="option">
             <h2>Templates</h2>
