@@ -58,10 +58,10 @@ declare global {
   interface Window {
     ObsidianWeb: {
       showPopUp: () => void;
+      showPopUpMessage: () => void;
       hidePopUp: () => void;
       togglePopUp: () => void;
       destroyPopUp: () => void;
-      showMessage: (msg: string) => void;
     };
   }
   interface WindowEventMap {
@@ -80,6 +80,9 @@ window.ObsidianWeb = {
   showPopUp: () => {
     dispatchObsidianWebMessage("show-popup");
   },
+  showPopUpMessage: () => {
+    dispatchObsidianWebMessage("show-popup-message");
+  },
   hidePopUp: () => {
     dispatchObsidianWebMessage("hide-popup");
   },
@@ -88,9 +91,6 @@ window.ObsidianWeb = {
   },
   destroyPopUp: () => {
     dispatchObsidianWebMessage("destroy-popup");
-  },
-  showMessage: (message: string) => {
-    dispatchObsidianWebMessage("show-message", { message });
   },
 };
 
@@ -169,6 +169,8 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const [contentIsValid, setContentIsValid] = useState<boolean>(false);
 
     const [popupDisplayed, setPopupDisplayed] = useState<boolean>(false);
+    const [popupFormDisplayed, setPopupFormDisplayed] =
+      useState<boolean>(false);
 
     const [displayState, setDisplayState] = useState<
       "welcome" | "form" | "error" | "loading" | "alert" | "permission"
@@ -227,10 +229,16 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const onObsidianWebMessage = (evt: CustomEvent<any>) => {
       if (evt.detail.action === "show-popup") {
         setPopupDisplayed(true);
+        setPopupFormDisplayed(true);
+      } else if (evt.detail.action === "show-popup-message") {
+        setPopupDisplayed(true);
       } else if (evt.detail.action === "hide-popup") {
         setPopupDisplayed(false);
       } else if (evt.detail.action === "toggle-popup") {
-        setPopupDisplayed((value) => !value);
+        setPopupFormDisplayed((value) => {
+          setPopupDisplayed(!value);
+          return !value;
+        });
       } else if (evt.detail.action === "destroy-popup") {
         popupTeardown();
       } else if (evt.detail.action === "show-message") {
@@ -492,6 +500,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           "Unexpectedly had no presets when accepting suggestion"
         );
       }
+      setPopupFormDisplayed(true);
       setSearchMatchtemplate({
         name: "",
         urlTemplate: `/vault/${filename}`,
@@ -599,7 +608,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                   )}
                   {displayState === "form" && (
                     <>
-                      {!suggestionAccepted && host && (
+                      {host && (
                         <>
                           {(mentions.length > 0 ||
                             directReferences.length > 0) && (
@@ -635,77 +644,81 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                           )}
                         </>
                       )}
-                      <div className="option">
-                        <div className="option-value">
-                          <NativeSelect
-                            autoFocus={true}
-                            className="preset-selector"
-                            value={selectedPresetIdx}
-                            fullWidth={true}
-                            onChange={(event) =>
-                              setSelectedPresetIdx(
-                                typeof event.target.value === "number"
-                                  ? event.target.value
-                                  : parseInt(event.target.value, 10)
-                              )
-                            }
-                          >
-                            {suggestionAccepted && searchMatchTemplate && (
-                              <option key={"___suggestion"} value={-2}>
-                                [Suggested Template]
-                              </option>
-                            )}
-                            {presets &&
-                              presets.map((preset, idx) => (
-                                <option key={preset.name} value={idx}>
-                                  {preset.name}
-                                </option>
-                              ))}
-                          </NativeSelect>
-                          <IconButton
-                            className="send-to-obsidian"
-                            color="primary"
-                            size="large"
-                            disabled={!contentIsValid}
-                            onClick={sendToObsidian}
-                            title="Send to Obsidian"
-                          >
-                            <SendIcon className="send-to-obsidian-icon" />
-                          </IconButton>
-                          <IconButton
-                            className="cancel-send"
-                            color="error"
-                            size="large"
-                            onClick={onFinished}
-                            title="Cancel"
-                          >
-                            <CancelIcon className="cancel-send-icon" />
-                          </IconButton>
-                        </div>
-                      </div>
-                      <Accordion>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <p>View Request Details</p>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <RequestParameters
-                            method={formMethod}
-                            url={formUrl}
-                            sandbox={sandbox}
-                            headers={formHeaders}
-                            previewContext={previewContext ?? {}}
-                            content={formContent}
-                            onChangeMethod={setFormMethod}
-                            onChangeUrl={setFormUrl}
-                            onChangeHeaders={setFormHeaders}
-                            onChangeContent={setFormContent}
-                            onChangeIsValid={setContentIsValid}
-                            onChangeRenderedContent={setCompiledContent}
-                            onChangeRenderedUrl={setCompiledUrl}
-                            showCrystalizeOption={true}
-                          />
-                        </AccordionDetails>
-                      </Accordion>
+                      {popupFormDisplayed && (
+                        <>
+                          <div className="option">
+                            <div className="option-value">
+                              <NativeSelect
+                                autoFocus={true}
+                                className="preset-selector"
+                                value={selectedPresetIdx}
+                                fullWidth={true}
+                                onChange={(event) =>
+                                  setSelectedPresetIdx(
+                                    typeof event.target.value === "number"
+                                      ? event.target.value
+                                      : parseInt(event.target.value, 10)
+                                  )
+                                }
+                              >
+                                {suggestionAccepted && searchMatchTemplate && (
+                                  <option key={"___suggestion"} value={-2}>
+                                    [Suggested Template]
+                                  </option>
+                                )}
+                                {presets &&
+                                  presets.map((preset, idx) => (
+                                    <option key={preset.name} value={idx}>
+                                      {preset.name}
+                                    </option>
+                                  ))}
+                              </NativeSelect>
+                              <IconButton
+                                className="send-to-obsidian"
+                                color="primary"
+                                size="large"
+                                disabled={!contentIsValid}
+                                onClick={sendToObsidian}
+                                title="Send to Obsidian"
+                              >
+                                <SendIcon className="send-to-obsidian-icon" />
+                              </IconButton>
+                              <IconButton
+                                className="cancel-send"
+                                color="error"
+                                size="large"
+                                onClick={onFinished}
+                                title="Cancel"
+                              >
+                                <CancelIcon className="cancel-send-icon" />
+                              </IconButton>
+                            </div>
+                          </div>
+                          <Accordion>
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                              <p>View Request Details</p>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                              <RequestParameters
+                                method={formMethod}
+                                url={formUrl}
+                                sandbox={sandbox}
+                                headers={formHeaders}
+                                previewContext={previewContext ?? {}}
+                                content={formContent}
+                                onChangeMethod={setFormMethod}
+                                onChangeUrl={setFormUrl}
+                                onChangeHeaders={setFormHeaders}
+                                onChangeContent={setFormContent}
+                                onChangeIsValid={setContentIsValid}
+                                onChangeRenderedContent={setCompiledContent}
+                                onChangeRenderedUrl={setCompiledUrl}
+                                showCrystalizeOption={true}
+                              />
+                            </AccordionDetails>
+                          </Accordion>
+                        </>
+                      )}
                     </>
                   )}
                 </Paper>

@@ -154,6 +154,28 @@ export async function openFileInObsidian(
   return obsidianRequest(`/open/${filename}`, { method: "post" });
 }
 
+export async function _getPageMetadata(
+  hostname: string,
+  apiKey: string,
+  insecureMode: boolean,
+  filename: string
+): Promise<FileMetadataObject> {
+  const result = await _obsidianRequest(
+    hostname,
+    apiKey,
+    `/vault/${filename}`,
+    {
+      method: "get",
+      headers: {
+        Accept: "application/vnd.olrapi.note+json",
+      },
+    },
+    insecureMode
+  );
+
+  return (await result.json()) as FileMetadataObject;
+}
+
 export async function getPageMetadata(
   filename: string
 ): Promise<FileMetadataObject> {
@@ -230,9 +252,15 @@ export async function _getUrlMentions(
     );
     const pageMetadata: SearchJsonResponseItemWithMetadata[] = [];
     for (const result of results) {
+      const meta = await _getPageMetadata(
+        hostname,
+        apiKey,
+        insecureMode,
+        result.filename
+      );
       pageMetadata.push({
         ...result,
-        meta: await getPageMetadata(result.filename),
+        meta,
       });
     }
     return pageMetadata;

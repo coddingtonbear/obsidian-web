@@ -116,7 +116,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
               tabId,
             },
             func: (): void => {
-              window.ObsidianWeb.showPopUp();
+              window.ObsidianWeb.showPopUpMessage();
             },
           });
         });
@@ -137,7 +137,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
               tabId,
             },
             func: (): void => {
-              window.ObsidianWeb.showPopUp();
+              window.ObsidianWeb.showPopUpMessage();
             },
           });
         });
