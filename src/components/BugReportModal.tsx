@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+
+import { detect } from "detect-browser";
 
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
@@ -7,6 +9,7 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Typography from "@mui/material/Typography";
 import Switch from "@mui/material/Switch";
+import UnsupportedEnvironmentWarning from "./UnsupportedEnvironmentWarning";
 
 interface Props {
   open: boolean;
@@ -23,12 +26,17 @@ const BugReportModal: React.FC<Props> = ({
   const [bugReportExportConfig, setBugReportExportConfig] =
     useState<boolean>(true);
 
+  const browser = useMemo(detect, []);
+
   return (
     <Modal open={open} onClose={onClose}>
       <Paper elevation={3} className="modal">
         <div className="modal-content">
           <h1>Are you having trouble?</h1>
 
+          {browser && browser.name !== "chrome" && (
+            <UnsupportedEnvironmentWarning />
+          )}
           <Typography paragraph={true}>
             If you think you've found a bug or are looking for help with
             something else, you can find ongoing discussions on{" "}

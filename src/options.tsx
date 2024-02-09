@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom";
 
 import compareVersions from "compare-versions";
+import { detect } from "detect-browser";
 
 import ThemeProvider from "@mui/system/ThemeProvider";
 import Button from "@mui/material/Button";
@@ -69,6 +70,7 @@ import Alert from "./components/Alert";
 import { PurpleTheme } from "./theme";
 import TemplateSetupModal from "./components/TemplateSetupModal";
 import BugReportModal from "./components/BugReportModal";
+import UnsupportedEnvironmentWarning from "./components/UnsupportedEnvironmentWarning";
 
 export interface Props {
   sandbox: HTMLIFrameElement | null;
@@ -124,6 +126,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [errorLog, setErrorLog] = useState<LogEntry[]>([]);
   const [showBugReportExportModal, setShowBugReportExportModal] =
     useState<boolean>(false);
+
+  const browser = useMemo(detect, []);
 
   useEffect(() => {
     if (loaded) {
@@ -656,6 +660,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             </div>
           </div>
         </div>
+        {browser && browser.name !== "chrome" && (
+          <UnsupportedEnvironmentWarning />
+        )}
         <div className="option-panel">
           <Typography paragraph={true}>
             Obsidian Web integrates with Obsidian via the interface provided by
