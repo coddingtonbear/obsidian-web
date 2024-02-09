@@ -697,8 +697,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 <ExportSettings fontSize="small" />
               </IconButton>
               <IconButton
-                title="Are you having trouble? File a bug report."
-                aria-label="file a bug report"
+                title="Are you having trouble? Report a bug."
+                aria-label="report a bug"
                 color="error"
                 onClick={() => setShowBugReportModal(true)}
               >
@@ -932,8 +932,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   If you have a note having a frontmatter field or property
                   named <code>url</code> that matches the URL of the page you
                   are currently visiting, we consider that note to be dedicated
-                  to that URL. If we find a dedicated page, we can show you a
-                  message when such a note was found, and even suggest using a
+                  to that URL. If we find such a note, we can show you a message
+                  when such a note was found and can even suggest using a
                   particular template for updating that note.
                 </Typography>
                 <FormGroup>
