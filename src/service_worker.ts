@@ -102,8 +102,29 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
 
     if (
-      syncSettings.searchMatch.autoOpen &&
-      (mentions.mentions.length > 0 || mentions.direct.length > 0)
+      syncSettings.searchMatch.direct.autoOpen &&
+      mentions.direct.length > 0
+    ) {
+      chrome.scripting
+        .executeScript({
+          target: { tabId },
+          files: ["js/vendor.js", "js/popup.js"],
+        })
+        .then(() => {
+          chrome.scripting.executeScript({
+            target: {
+              tabId,
+            },
+            func: (): void => {
+              window.ObsidianWeb.showPopUp();
+            },
+          });
+        });
+    }
+
+    if (
+      syncSettings.searchMatch.mentions.autoOpen &&
+      mentions.mentions.length > 0
     ) {
       chrome.scripting
         .executeScript({

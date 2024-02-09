@@ -114,7 +114,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     useState<boolean>(false);
   const [searchMatchDirectTemplate, setSearchMatchDirectTemplate] =
     useState<OutputPreset>(DefaultSearchMatchTemplate);
-  const [autoOpen, setAutoOpen] = useState<boolean>(false);
+  const [searchMatchDirectAutoOpen, setSearchMatchDirectAutoOpen] =
+    useState<boolean>(false);
+  const [searchMatchMentionAutoOpen, setSearchMatchMentionAutoOpen] =
+    useState<boolean>(false);
 
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
 
@@ -223,12 +226,13 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         searchMatch: {
           enabled: searchEnabled,
           backgroundEnabled: searchBackgroundEnabled,
-          autoOpen: autoOpen,
           mentions: {
+            autoOpen: searchMatchMentionAutoOpen,
             suggestionEnabled: searchMatchMentionEnabled,
             template: searchMatchMentionTemplate,
           },
           direct: {
+            autoOpen: searchMatchDirectAutoOpen,
             suggestionEnabled: searchMatchDirectEnabled,
             template: searchMatchDirectTemplate,
           },
@@ -244,9 +248,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     searchEnabled,
     searchBackgroundEnabled,
     searchMatchDirectEnabled,
-    autoOpen,
+    searchMatchDirectAutoOpen,
     searchMatchDirectTemplate,
     searchMatchMentionEnabled,
+    searchMatchMentionAutoOpen,
     searchMatchMentionTemplate,
   ]);
 
@@ -263,9 +268,14 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       setPresets(syncSettings.presets);
       setSearchEnabled(syncSettings.searchMatch.enabled);
       setSearchBackgroundEnabled(syncSettings.searchMatch.backgroundEnabled);
-      setAutoOpen(
+      setSearchMatchDirectAutoOpen(
         (syncSettings.searchMatch.backgroundEnabled &&
-          syncSettings.searchMatch.autoOpen) ??
+          syncSettings.searchMatch.direct.autoOpen) ??
+          false
+      );
+      setSearchMatchMentionAutoOpen(
+        (syncSettings.searchMatch.backgroundEnabled &&
+          syncSettings.searchMatch.mentions.autoOpen) ??
           false
       );
       setSearchMatchDirectEnabled(
@@ -288,7 +298,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         },
         (result) => {
           if (!result) {
-            setAutoOpen(false);
+            setSearchMatchDirectAutoOpen(false);
+            setSearchMatchMentionAutoOpen(false);
           }
         }
       );
@@ -307,7 +318,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             // And since direct messages require background search
             // to function, let's disable that, too, if background
             // searches are disabled.
-            setAutoOpen(false);
+            setSearchMatchDirectAutoOpen(false);
+            setSearchMatchMentionAutoOpen(false);
           }
         }
       );
@@ -460,11 +472,11 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         },
         (granted) => {
           if (granted) {
-            setAutoOpen(true);
+            setSearchMatchDirectAutoOpen(true);
           }
         }
       );
-    } else {
+    } else if (!setSearchMatchMentionAutoOpen) {
       chrome.permissions.remove(
         {
           permissions: ["scripting"],
@@ -472,10 +484,46 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         },
         (removed) => {
           if (removed) {
-            setAutoOpen(false);
+            setSearchMatchDirectAutoOpen(false);
           }
         }
       );
+    } else {
+      // We can't remove the permission unless both this and searchMatchMentionAutoOpen
+      // are disabled
+      setSearchMatchDirectAutoOpen(false);
+    }
+  };
+
+  const onEnableSearchMatchMentionMessages = (targetStateEnabled: boolean) => {
+    if (targetStateEnabled) {
+      chrome.permissions.request(
+        {
+          permissions: ["scripting"],
+          origins: [`http://*/*`, `https://*/*`],
+        },
+        (granted) => {
+          if (granted) {
+            setSearchMatchMentionAutoOpen(true);
+          }
+        }
+      );
+    } else if (!setSearchMatchDirectAutoOpen) {
+      chrome.permissions.remove(
+        {
+          permissions: ["scripting"],
+          origins: [`http://*/*`, "https://*/*"],
+        },
+        (removed) => {
+          if (removed) {
+            setSearchMatchMentionAutoOpen(false);
+          }
+        }
+      );
+    } else {
+      // We can't remove the permission unless both this and searchMatchDirectAutoOpen
+      // are disabled
+      setSearchMatchMentionAutoOpen(false);
     }
   };
 
@@ -526,7 +574,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     },
                     direct: {
                       enabled: searchMatchDirectEnabled,
-                      messageEnabled: autoOpen,
+                      messageEnabled: searchMatchDirectAutoOpen,
                       template: searchMatchDirectTemplate,
                     },
                   },
@@ -878,38 +926,46 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 }
               />
             </FormGroup>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch
-                    onChange={(evt) =>
-                      onEnableSearchMatchDirectMessages(evt.target.checked)
-                    }
-                    disabled={!searchEnabled || !searchBackgroundEnabled}
-                    checked={searchBackgroundEnabled && autoOpen}
-                  />
-                }
-                label={
-                  <>
-                    <b>
-                      When a matching page is found, open the dialog
-                      automatically?
-                    </b>{" "}
-                    If you turn this feature on, the dialog will automatically
-                    be opened when the page you are visiting has existing notes.
-                    Additionally, if one of those matching notes is dedicated to
-                    the URL you are visiting, that note's{" "}
-                    <code>web-message</code> frontmatter field will be displayed
-                    if set.
-                    <Chip size="small" label="Requires extra permissions" />
-                  </>
-                }
-              />
-            </FormGroup>
             {searchEnabled && (
               <Paper className="paper-option-panel">
                 <h3>Page Notes</h3>
-                <Typography paragraph={true}></Typography>
+                <Typography paragraph={true}>
+                  If you have a note having a frontmatter field or property
+                  named <code>url</code> that matches the URL of the page you
+                  are currently visiting, we consider that note to be dedicated
+                  to that URL. If we find a dedicated page, we can show you a
+                  message when such a note was found, and even suggest using a
+                  particular template for updating that note.
+                </Typography>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(evt) =>
+                          onEnableSearchMatchDirectMessages(evt.target.checked)
+                        }
+                        disabled={!searchEnabled || !searchBackgroundEnabled}
+                        checked={
+                          searchBackgroundEnabled && searchMatchDirectAutoOpen
+                        }
+                      />
+                    }
+                    label={
+                      <>
+                        <b>
+                          Open the dialog automatically when a dedicated page
+                          for the current URL is found?
+                        </b>{" "}
+                        If you turn this feature on, the dialog will
+                        automatically be opened when the page you are visiting
+                        has a dedicated page. Additionally, if that note's{" "}
+                        <code>web-message</code> frontmatter field is set, that
+                        message will be displayed.
+                        <Chip size="small" label="Requires extra permissions" />
+                      </>
+                    }
+                  />
+                </FormGroup>
                 <FormGroup>
                   <FormControlLabel
                     control={
@@ -951,6 +1007,39 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   </Button>
                 </FormGroup>
                 <h3>Mentions</h3>
+                <Typography paragraph={true}>
+                  If the URL you are currently visiting has been mentioned on
+                  one of your notes, we can help you become aware of that and
+                  can even suggest using a particular template to modify that
+                  note.
+                </Typography>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(evt) =>
+                          onEnableSearchMatchMentionMessages(evt.target.checked)
+                        }
+                        disabled={!searchEnabled || !searchBackgroundEnabled}
+                        checked={
+                          searchBackgroundEnabled && searchMatchMentionAutoOpen
+                        }
+                      />
+                    }
+                    label={
+                      <>
+                        <b>
+                          Open the dialog automatically when a note mentioning
+                          this URL is found?
+                        </b>{" "}
+                        If you turn this feature on, the dialog will
+                        automatically be opened when the URL you are visiting
+                        has been mentioned in your notes.{" "}
+                        <Chip size="small" label="Requires extra permissions" />
+                      </>
+                    }
+                  />
+                </FormGroup>
                 <FormGroup>
                   <FormControlLabel
                     control={
