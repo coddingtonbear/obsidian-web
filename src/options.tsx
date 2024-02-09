@@ -127,8 +127,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [presets, setPresets] = useState<UrlOutputPreset[]>([]);
 
   const [errorLog, setErrorLog] = useState<LogEntry[]>([]);
-  const [showBugReportExportModal, setShowBugReportExportModal] =
-    useState<boolean>(false);
+  const [showBugReportModal, setShowBugReportModal] = useState<boolean>(false);
 
   const browser = useMemo(detect, []);
 
@@ -701,7 +700,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 title="Are you having trouble? File a bug report."
                 aria-label="file a bug report"
                 color="error"
-                onClick={() => setShowBugReportExportModal(true)}
+                onClick={() => setShowBugReportModal(true)}
               >
                 <BugReport fontSize="small" />
               </IconButton>
@@ -1195,8 +1194,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         </div>
       </Paper>
       <BugReportModal
-        open={showBugReportExportModal}
-        onClose={() => setShowBugReportExportModal(false)}
+        open={showBugReportModal}
+        onClose={() => setShowBugReportModal(false)}
         onExportBugReportData={onExportBugReportData}
       />
       <Modal
