@@ -646,8 +646,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 <ExportSettings fontSize="small" />
               </IconButton>
               <IconButton
-                title="Export Bug Report Data"
-                aria-label="export bug report data"
+                title="Are you having trouble? File a bug report."
+                aria-label="file a bug report"
+                color="error"
                 onClick={() => setShowBugReportExportModal(true)}
               >
                 <BugReport fontSize="small" />
