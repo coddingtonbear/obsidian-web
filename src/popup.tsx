@@ -524,9 +524,8 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     };
 
     const onFinished = () => {
-      window.removeEventListener("message", onSandboxMessage);
-      window.removeEventListener("obsidian-web", onObsidianWebMessage);
-      popupTeardown();
+      setPopupFormDisplayed(false);
+      setPopupDisplayed(false);
     };
 
     return (
