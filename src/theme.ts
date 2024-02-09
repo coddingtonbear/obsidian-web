@@ -11,7 +11,7 @@ const DefaultThemeOptions: ThemeOptions = {
   palette: {
     primary: {
       light: "#7a61cb",
-      main: "#483699",
+      main: "#7a61cb",
       dark: "#7a61cb",
       contrastText: "#ffffff",
     },
