@@ -17,6 +17,7 @@ import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import Draggable from "react-draggable";
 
+import ShowFormIcon from "@mui/icons-material/Menu";
 import SendIcon from "@mui/icons-material/SaveAlt";
 import CancelIcon from "@mui/icons-material/Cancel";
 
@@ -41,7 +42,6 @@ import {
   getSyncSettings,
   obsidianRequest,
   getUrlMentions,
-  getPageMetadata,
   checkHasHostPermission,
   requestHostPermission,
   getWindowSelectionAsHtml,
@@ -50,7 +50,7 @@ import {
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
 import MentionNotice from "./components/MentionNotice";
-import { NativeSelect, Paper } from "@mui/material";
+import { NativeSelect, Paper, Stack } from "@mui/material";
 
 const ROOT_CONTAINER_ID = "obsidian-web-container";
 
@@ -319,10 +319,20 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
         setInsecureMode(localSettings.insecureMode ?? false);
         setApiKey(localSettings.apiKey);
         setSearchEnabled(syncSettings.searchMatch.enabled);
-        setSearchMatchMentionTemplate(
-          syncSettings.searchMatch.mentions.template
-        );
-        setSearchMatchDirectTemplate(syncSettings.searchMatch.direct.template);
+        if (syncSettings.searchMatch.mentions.suggestionEnabled) {
+          setSearchMatchMentionTemplate(
+            syncSettings.searchMatch.mentions.template
+          );
+        } else {
+          setSearchMatchMentionTemplate(undefined);
+        }
+        if (syncSettings.searchMatch.direct.suggestionEnabled) {
+          setSearchMatchDirectTemplate(
+            syncSettings.searchMatch.direct.template
+          );
+        } else {
+          setSearchMatchDirectTemplate(undefined);
+        }
       }
       handle();
     }, []);
@@ -718,6 +728,16 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                             </AccordionDetails>
                           </Accordion>
                         </>
+                      )}
+                      {!popupFormDisplayed && (
+                        <IconButton
+                          onClick={() => setPopupFormDisplayed(true)}
+                          className="show-form-cta"
+                          aria-label="Show form"
+                          title="Show form"
+                        >
+                          <ShowFormIcon />
+                        </IconButton>
                       )}
                     </>
                   )}

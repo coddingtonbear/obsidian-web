@@ -57,6 +57,7 @@ div.obsidian-web-popup {
 }
 
 div.popup {
+  position: relative;
   opacity: 0.95;
   border-radius: 10px;
   width: 600px;
@@ -204,6 +205,12 @@ div.mentions blockquote::after {
 .mention-cta {
   padding: 0 !important;
   float: right;
+}
+
+.show-form-cta {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
 }
 
 div.protip {
