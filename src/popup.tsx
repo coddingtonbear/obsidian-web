@@ -96,13 +96,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     },
   };
 
-  function handleEscapeKey(event: KeyboardEvent) {
-    if (event.code === "Escape") {
-      popupTeardown();
-    }
-  }
-  document.addEventListener("keydown", handleEscapeKey);
-
   function preventBrowserFromStealingKeypress(event: KeyboardEvent) {
     if (event.code !== "Escape") {
       event.stopPropagation();
@@ -114,16 +107,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     true
   );
 
-  function popupTeardown() {
-    unregisterCompileTemplateCallback();
-    document.removeEventListener(
-      "keydown",
-      preventBrowserFromStealingKeypress,
-      true
-    );
-    document.removeEventListener("keydown", handleEscapeKey);
-    window.ObsidianWeb.hidePopUp();
-  }
   interface Props {
     sandbox: HTMLIFrameElement;
   }
@@ -247,6 +230,12 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       }
     };
 
+    function handleEscapeKey(event: KeyboardEvent) {
+      if (event.code === "Escape") {
+        onFinished();
+      }
+    }
+
     useEffect(() => {
       async function handler() {
         if (mouseOverTarget) {
@@ -259,9 +248,11 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
     useEffect(() => {
       document.body.addEventListener("mouseover", mouseOverHandler);
+      document.addEventListener("keydown", handleEscapeKey);
 
       return () => {
         document.body.removeEventListener("mouseover", mouseOverHandler);
+        document.removeEventListener("keydown", handleEscapeKey);
       };
     }, []);
 
@@ -287,8 +278,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           setPopupDisplayed(!value);
           return !value;
         });
-      } else if (evt.detail.action === "destroy-popup") {
-        popupTeardown();
       } else if (evt.detail.action === "show-message") {
         setPopupDisplayed(true);
       } else {
