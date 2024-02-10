@@ -18,7 +18,6 @@ import { CacheProvider } from "@emotion/react";
 import Draggable from "react-draggable";
 
 import SendIcon from "@mui/icons-material/SaveAlt";
-import Circle from "@mui/icons-material/Circle";
 
 import styles from "./styles.css";
 
