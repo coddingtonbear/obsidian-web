@@ -66,57 +66,60 @@ declare global {
   }
 }
 
-function dispatchObsidianWebMessage(action: string, data?: any): void {
-  const evt = new CustomEvent("obsidian-web", {
-    detail: { action, data },
-  });
-  window.dispatchEvent(evt);
-}
-
-window.ObsidianWeb = {
-  showPopUp: () => {
-    dispatchObsidianWebMessage("show-popup");
-  },
-  showPopUpMessage: () => {
-    dispatchObsidianWebMessage("show-popup-message");
-  },
-  hidePopUp: () => {
-    dispatchObsidianWebMessage("hide-popup");
-  },
-  togglePopUp: () => {
-    dispatchObsidianWebMessage("toggle-popup");
-  },
-  destroyPopUp: () => {
-    dispatchObsidianWebMessage("destroy-popup");
-  },
-};
-
-function handleEscapeKey(event: KeyboardEvent) {
-  if (event.code === "Escape") {
-    popupTeardown();
+if (!document.getElementById(ROOT_CONTAINER_ID)) {
+  function dispatchObsidianWebMessage(action: string, data?: any): void {
+    const evt = new CustomEvent("obsidian-web", {
+      detail: { action, data },
+    });
+    window.dispatchEvent(evt);
   }
-}
-document.addEventListener("keydown", handleEscapeKey);
 
-function preventBrowserFromStealingKeypress(event: KeyboardEvent) {
-  if (event.code !== "Escape") {
-    event.stopPropagation();
+  window.ObsidianWeb = {
+    showPopUp: () => {
+      dispatchObsidianWebMessage("show-popup");
+    },
+    showPopUpMessage: () => {
+      dispatchObsidianWebMessage("show-popup-message");
+    },
+    hidePopUp: () => {
+      dispatchObsidianWebMessage("hide-popup");
+    },
+    togglePopUp: () => {
+      dispatchObsidianWebMessage("toggle-popup");
+    },
+    destroyPopUp: () => {
+      dispatchObsidianWebMessage("destroy-popup");
+    },
+  };
+
+  function handleEscapeKey(event: KeyboardEvent) {
+    if (event.code === "Escape") {
+      popupTeardown();
+    }
   }
-}
-document.addEventListener("keydown", preventBrowserFromStealingKeypress, true);
+  document.addEventListener("keydown", handleEscapeKey);
 
-function popupTeardown() {
-  unregisterCompileTemplateCallback();
-  document.removeEventListener(
+  function preventBrowserFromStealingKeypress(event: KeyboardEvent) {
+    if (event.code !== "Escape") {
+      event.stopPropagation();
+    }
+  }
+  document.addEventListener(
     "keydown",
     preventBrowserFromStealingKeypress,
     true
   );
-  document.removeEventListener("keydown", handleEscapeKey);
-  window.ObsidianWeb.hidePopUp();
-}
 
-if (!document.getElementById(ROOT_CONTAINER_ID)) {
+  function popupTeardown() {
+    unregisterCompileTemplateCallback();
+    document.removeEventListener(
+      "keydown",
+      preventBrowserFromStealingKeypress,
+      true
+    );
+    document.removeEventListener("keydown", handleEscapeKey);
+    window.ObsidianWeb.hidePopUp();
+  }
   interface Props {
     sandbox: HTMLIFrameElement;
   }
