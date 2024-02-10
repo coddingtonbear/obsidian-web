@@ -114,22 +114,22 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
 
     if (
-      syncSettings.searchMatch.autoOpen === "direct" &&
+      syncSettings.searchMatch.autoOpen === "direct-message" &&
       mentions.direct.length > 0 &&
       mentions.direct.filter((match) => match.meta.frontmatter["web-message"])
         .length > 0
     ) {
-      injectScript(tabId, window.ObsidianWeb.showPopUpMessage);
+      injectScript(tabId, () => window.ObsidianWeb.showPopUpMessage());
     } else if (
       syncSettings.searchMatch.autoOpen === "direct" &&
       mentions.direct.length > 0
     ) {
-      injectScript(tabId, window.ObsidianWeb.showPopUpMessage);
+      injectScript(tabId, () => window.ObsidianWeb.showPopUpMessage());
     } else if (
       syncSettings.searchMatch.autoOpen === "mention" &&
       mentions.mentions.length > 0
     ) {
-      injectScript(tabId, window.ObsidianWeb.showPopUpMessage);
+      injectScript(tabId, () => window.ObsidianWeb.showPopUpMessage());
     }
 
     console.log("Processing pageview");
@@ -173,14 +173,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id) {
     injectScript(tab.id, () => {
-      if (tab.id) {
-        chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => {
-            window.ObsidianWeb.togglePopUp();
-          },
-        });
-      }
+      window.ObsidianWeb.togglePopUp();
     });
   } else {
     console.error("No tab ID found when attempting to inject into tab", tab);
