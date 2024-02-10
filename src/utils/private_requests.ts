@@ -3,6 +3,7 @@ import {
   FileMetadataObject,
   SearchJsonResponseItem,
   SearchJsonResponseItemWithMetadata,
+  UrlMentionContainer,
 } from "../types";
 
 export async function _getUrlMentions(
@@ -10,10 +11,7 @@ export async function _getUrlMentions(
   apiKey: string,
   insecureMode: boolean,
   url: string
-): Promise<{
-  mentions: SearchJsonResponseItem[];
-  direct: SearchJsonResponseItemWithMetadata[];
-}> {
+): Promise<UrlMentionContainer> {
   async function handleMentions() {
     const result = await _obsidianSearchRequest(
       hostname,

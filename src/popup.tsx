@@ -18,6 +18,7 @@ import { CacheProvider } from "@emotion/react";
 import Draggable from "react-draggable";
 
 import SendIcon from "@mui/icons-material/SaveAlt";
+import Circle from "@mui/icons-material/Circle";
 
 import styles from "./styles.css";
 
@@ -34,6 +35,7 @@ import {
   OutputPreset,
   PreviewContext,
   SearchJsonResponseItemWithMetadata,
+  UrlMentionContainer,
 } from "./types";
 import {
   getLocalSettings,
@@ -49,7 +51,8 @@ import { getUrlMentions, obsidianRequest } from "./utils/requests";
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
 import MentionNotice from "./components/MentionNotice";
-import { NativeSelect, Paper, Stack } from "@mui/material";
+import { Chip, NativeSelect, Paper } from "@mui/material";
+import MouseOverChip from "./components/MouseOverChip";
 
 const ROOT_CONTAINER_ID = "obsidian-web-container";
 
@@ -222,6 +225,46 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       setFormHeaders(selectedPreset.headers);
       setFormContent(selectedPreset.contentTemplate);
     }, [selectedPreset]);
+
+    const [mouseOverTarget, setMouseOverTarget] = useState<HTMLAnchorElement>();
+    const [mousePosition, setMousePosition] =
+      useState<{ x: number; y: number }>();
+    const [mouseOverMentions, setMouseOverMentions] =
+      useState<UrlMentionContainer>();
+
+    const mouseOverHandler = (event: MouseEvent) => {
+      if ((event.target as HTMLElement).tagName === "A") {
+        setMouseOverTarget(event.target as HTMLAnchorElement);
+        setMousePosition({
+          x: event.clientX,
+          y: event.clientY,
+        });
+        setMouseOverMentions(undefined);
+        (event.target as HTMLElement).addEventListener("mouseout", (event) => {
+          setMouseOverTarget(undefined);
+          setMousePosition(undefined);
+          setMouseOverMentions(undefined);
+        });
+      }
+    };
+
+    useEffect(() => {
+      async function handler() {
+        if (mouseOverTarget) {
+          setMouseOverMentions(await getUrlMentions(mouseOverTarget.href));
+        }
+      }
+
+      handler();
+    }, [mouseOverTarget]);
+
+    useEffect(() => {
+      document.body.addEventListener("mouseover", mouseOverHandler);
+
+      return () => {
+        document.body.removeEventListener("mouseover", mouseOverHandler);
+      };
+    }, []);
 
     const onSandboxMessage = (message: MessageEvent<any>) => {
       if (
@@ -536,6 +579,16 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
     return (
       <ThemeProvider theme={DarkPurpleTheme}>
+        {mouseOverTarget &&
+          mousePosition &&
+          mouseOverMentions &&
+          (mouseOverMentions.direct.length > 0 ||
+            mouseOverMentions.mentions.length > 0) && (
+            <MouseOverChip
+              mousePosition={mousePosition}
+              mentions={mouseOverMentions}
+            />
+          )}
         <div
           className="obsidian-web-popup"
           title="Double-click to dismiss"

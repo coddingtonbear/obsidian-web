@@ -5,6 +5,7 @@ import {
   ObsidianResponse,
   SearchJsonResponseItem,
   SearchJsonResponseItemWithMetadata,
+  UrlMentionContainer,
 } from "../types";
 import escapeStringRegexp from "escape-string-regexp";
 
@@ -39,10 +40,9 @@ export async function obsidianSearchRequest(
 
   return result.data as SearchJsonResponseItem[];
 }
-export async function getUrlMentions(url: string): Promise<{
-  mentions: SearchJsonResponseItem[];
-  direct: SearchJsonResponseItemWithMetadata[];
-}> {
+export async function getUrlMentions(
+  url: string
+): Promise<UrlMentionContainer> {
   async function handleMentions() {
     const result = await obsidianSearchRequest({
       regexp: [`${escapeStringRegexp(url)}(?=\\s|\\)|$)`, { var: "content" }],

@@ -133,6 +133,11 @@ export interface SearchJsonResponseItemWithMetadata
   meta: FileMetadataObject;
 }
 
+export interface UrlMentionContainer {
+  mentions: SearchJsonResponseItem[];
+  direct: SearchJsonResponseItemWithMetadata[];
+}
+
 export interface StatusResponse {
   status: string;
   versions: {
