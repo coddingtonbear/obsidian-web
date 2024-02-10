@@ -569,8 +569,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   },
                   search: {
                     enabled: searchEnabled,
-                    background: searchBackgroundEnabled,
+                    backgroundEnabled: searchBackgroundEnabled,
                     autoOpen: searchMatchAutoOpen,
+                    hoverEnabled: hoverEnabled,
                     mention: {
                       enabled: searchMatchMentionEnabled,
                       template: searchMatchMentionTemplate,
