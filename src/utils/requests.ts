@@ -56,7 +56,7 @@ export async function getUrlMentions(url: string): Promise<{
         { glob: [{ var: "frontmatter.url" }, url] },
         {
           some: [
-            { var: "frontmatter.url-patterns" },
+            { var: "frontmatter.url-aliases" },
             { glob: [{ var: "" }, url] },
           ],
         },

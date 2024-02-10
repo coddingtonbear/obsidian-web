@@ -36,7 +36,7 @@ export async function _getUrlMentions(
           { glob: [{ var: "frontmatter.url" }, url] },
           {
             some: [
-              { var: "frontmatter.url-patterns" },
+              { var: "frontmatter.url-aliases" },
               { glob: [{ var: "" }, url] },
             ],
           },
