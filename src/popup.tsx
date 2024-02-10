@@ -144,6 +144,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       useState<OutputPreset>();
     const [searchMatchTemplate, setSearchMatchtemplate] =
       useState<UrlOutputPreset>();
+    const [hoverEnabled, setHoverEnabled] = useState<boolean>(false);
 
     const [presets, setPresets] = useState<UrlOutputPreset[]>();
     const [selectedPresetIdx, setSelectedPresetIdx] = useState<number>(0);
@@ -247,12 +248,16 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     }, [mouseOverTarget]);
 
     useEffect(() => {
-      document.body.addEventListener("mouseover", mouseOverHandler);
-      document.addEventListener("keydown", handleEscapeKey);
+      if (hoverEnabled) {
+        document.body.addEventListener("mouseover", mouseOverHandler);
+        document.addEventListener("keydown", handleEscapeKey);
+      }
 
       return () => {
-        document.body.removeEventListener("mouseover", mouseOverHandler);
-        document.removeEventListener("keydown", handleEscapeKey);
+        if (hoverEnabled) {
+          document.body.removeEventListener("mouseover", mouseOverHandler);
+          document.removeEventListener("keydown", handleEscapeKey);
+        }
       };
     }, []);
 
@@ -369,6 +374,11 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           );
         } else {
           setSearchMatchDirectTemplate(undefined);
+        }
+        if (syncSettings.searchMatch.enabled) {
+          setHoverEnabled(syncSettings.searchMatch.hoverEnabled);
+        } else {
+          setHoverEnabled(false);
         }
       }
       handle();
