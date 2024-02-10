@@ -17,7 +17,6 @@ import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import Draggable from "react-draggable";
 
-import ShowFormIcon from "@mui/icons-material/DynamicForm";
 import SendIcon from "@mui/icons-material/SaveAlt";
 
 import styles from "./styles.css";
@@ -531,7 +530,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
         <div
           className="obsidian-web-popup"
           title="Double-click to dismiss"
-          onDoubleClick={() => setPopupDisplayed(false)}
+          onDoubleClick={() => onFinished()}
         >
           {popupDisplayed && (
             <Draggable handle=".drag-handle">
@@ -728,7 +727,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                           aria-label="Show form"
                           title="Show form"
                         >
-                          <ShowFormIcon />
+                          <SendIcon />
                         </IconButton>
                       )}
                     </>
