@@ -117,6 +117,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [searchEnabled, setSearchEnabled] = useState<boolean>(false);
   const [searchBackgroundEnabled, setSearchBackgroundEnabled] =
     useState<boolean>(false);
+  const [hoverEnabled, setHoverEnabled] = useState<boolean>(false);
   const [searchMatchMentionEnabled, setSearchMatchMentionEnabled] =
     useState<boolean>(false);
   const [searchMatchMentionTemplate, setSearchMatchMentionTemplate] =
@@ -235,6 +236,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           enabled: searchEnabled,
           backgroundEnabled: searchBackgroundEnabled,
           autoOpen: searchMatchAutoOpen,
+          hoverEnabled: hoverEnabled,
           mentions: {
             suggestionEnabled: searchMatchMentionEnabled,
             template: searchMatchMentionTemplate,
@@ -258,6 +260,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     searchMatchDirectTemplate,
     searchMatchMentionEnabled,
     searchMatchMentionTemplate,
+    hoverEnabled,
     searchMatchAutoOpen,
   ]);
 
@@ -283,6 +286,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         syncSettings.searchMatch.mentions.suggestionEnabled
       );
       setSearchMatchMentionTemplate(syncSettings.searchMatch.mentions.template);
+      setHoverEnabled(syncSettings.searchMatch.hoverEnabled);
       setLoaded(true);
 
       // If we do not have access to all origins, we do not have sufficient
@@ -458,9 +462,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     }
   };
 
-  const onChangeAutoOpen = (evt: SelectChangeEvent<AutoOpenOption>) => {
-    switch (evt.target.value) {
-      case "never":
+  const onChangeHoverEnabled = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    if (!evt.target.checked) {
+      if (searchMatchAutoOpen === "never") {
         chrome.permissions.remove(
           {
             permissions: ["scripting"],
@@ -468,10 +472,46 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           },
           (removed) => {
             if (removed) {
-              setSearchMatchAutoOpen("never");
+              setHoverEnabled(false);
             }
           }
         );
+      } else {
+        setHoverEnabled(false);
+      }
+    } else {
+      chrome.permissions.request(
+        {
+          permissions: ["scripting"],
+          origins: [`http://*/*`, `https://*/*`],
+        },
+        (granted) => {
+          if (granted) {
+            setHoverEnabled(true);
+          }
+        }
+      );
+    }
+  };
+
+  const onChangeAutoOpen = (evt: SelectChangeEvent<AutoOpenOption>) => {
+    switch (evt.target.value) {
+      case "never":
+        if (!hoverEnabled) {
+          chrome.permissions.remove(
+            {
+              permissions: ["scripting"],
+              origins: [`http://*/*`, "https://*/*"],
+            },
+            (removed) => {
+              if (removed) {
+                setSearchMatchAutoOpen("never");
+              }
+            }
+          );
+        } else {
+          setSearchMatchAutoOpen("never");
+        }
         break;
       default:
         chrome.permissions.request(
@@ -883,6 +923,31 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     the URL you are visiting will be searched for as you browse
                     the internet. If a match is found, a badge will be shown on
                     the extension icon.
+                    <Chip size="small" label="Requires extra permissions" />
+                  </>
+                }
+              />
+            </FormGroup>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    onChange={onChangeHoverEnabled}
+                    disabled={!searchEnabled}
+                    checked={hoverEnabled}
+                  />
+                }
+                label={
+                  <>
+                    <b>
+                      Search for previous notes about linked pages when you
+                      hover over links?
+                    </b>{" "}
+                    If you turn this feature on, a tooltip will be displayed
+                    when hovering over links targeting pages you have created
+                    notes for or have mentioned in a note. The displayed message
+                    can be customized using <code>web-message</code> and other
+                    frontmatter fields.
                     <Chip size="small" label="Requires extra permissions" />
                   </>
                 }

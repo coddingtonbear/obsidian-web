@@ -91,6 +91,7 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
     enabled: false,
     backgroundEnabled: false,
     autoOpen: "never",
+    hoverEnabled: false,
     mentions: {
       suggestionEnabled: false,
       template: DefaultSearchMatchTemplate,

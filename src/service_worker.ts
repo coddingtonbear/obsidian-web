@@ -130,6 +130,8 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       mentions.mentions.length > 0
     ) {
       injectScript(tabId, () => window.ObsidianWeb.showPopUpMessage());
+    } else if (syncSettings.searchMatch.hoverEnabled) {
+      injectScript(tabId, () => {});
     }
 
     console.log("Processing pageview");

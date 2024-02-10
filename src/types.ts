@@ -66,6 +66,7 @@ export interface ExtensionSyncSettings {
     enabled: boolean;
     backgroundEnabled: boolean;
     autoOpen: AutoOpenOption;
+    hoverEnabled: boolean;
     mentions: {
       suggestionEnabled: boolean;
       template: OutputPreset;
