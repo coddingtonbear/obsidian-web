@@ -187,13 +187,13 @@ export function getWindowSelectionAsHtml(): string {
   return node.innerHTML;
 }
 
-const compileTemplateCallbackController = new AbortController();
+export const compileTemplateCallbackController = new AbortController();
 
 export function unregisterCompileTemplateCallback(): void {
   compileTemplateCallbackController.abort();
 }
 
-function compileTemplateCallback(
+export function compileTemplateCallback(
   event: MessageEvent<
     SandboxRenderResponse | SandboxExceptionResponse | SandboxLoadedResponse
   >
@@ -220,10 +220,4 @@ function compileTemplateCallback(
   }
 
   delete HandlebarsCallbacks[eventData.request.id];
-}
-
-if (typeof window !== "undefined") {
-  window.addEventListener("message", compileTemplateCallback, {
-    signal: compileTemplateCallbackController.signal,
-  });
 }

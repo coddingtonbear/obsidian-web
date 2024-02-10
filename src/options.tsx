@@ -67,6 +67,8 @@ import {
   requestHostPermission,
   checkKeyboardShortcut,
   getBackgroundErrorLog,
+  compileTemplateCallback,
+  compileTemplateCallbackController,
 } from "./utils";
 import { _obsidianRequest } from "./utils/private_requests";
 import Alert from "./components/Alert";
@@ -1210,3 +1212,7 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById("root")
 );
+
+window.addEventListener("message", compileTemplateCallback, {
+  signal: compileTemplateCallbackController.signal,
+});

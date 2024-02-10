@@ -42,6 +42,8 @@ import {
   requestHostPermission,
   getWindowSelectionAsHtml,
   unregisterCompileTemplateCallback,
+  compileTemplateCallback,
+  compileTemplateCallbackController,
 } from "./utils";
 import { getUrlMentions, obsidianRequest } from "./utils/requests";
 import RequestParameters from "./components/RequestParameters";
@@ -123,6 +125,10 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
   interface Props {
     sandbox: HTMLIFrameElement;
   }
+
+  window.addEventListener("message", compileTemplateCallback, {
+    signal: compileTemplateCallbackController.signal,
+  });
 
   const Popup: React.FunctionComponent<Props> = ({ sandbox }) => {
     const [status, setStatus] = useState<AlertStatus>();
