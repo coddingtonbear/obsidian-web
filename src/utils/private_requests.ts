@@ -32,7 +32,15 @@ export async function _getUrlMentions(
       apiKey,
       insecureMode,
       {
-        glob: [{ var: "frontmatter.url" }, url],
+        or: [
+          { glob: [{ var: "frontmatter.url" }, url] },
+          {
+            some: [
+              { var: "frontmatter.url-patterns" },
+              { glob: [{ var: "" }, url] },
+            ],
+          },
+        ],
       }
     );
     const pageMetadata: SearchJsonResponseItemWithMetadata[] = [];

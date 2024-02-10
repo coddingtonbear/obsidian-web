@@ -52,7 +52,15 @@ export async function getUrlMentions(url: string): Promise<{
 
   async function handleDirect(): Promise<SearchJsonResponseItemWithMetadata[]> {
     const results = await obsidianSearchRequest({
-      glob: [{ var: "frontmatter.url" }, url],
+      or: [
+        { glob: [{ var: "frontmatter.url" }, url] },
+        {
+          some: [
+            { var: "frontmatter.url-patterns" },
+            { glob: [{ var: "" }, url] },
+          ],
+        },
+      ],
     });
     const pageMetadata: SearchJsonResponseItemWithMetadata[] = [];
     for (const result of results) {
