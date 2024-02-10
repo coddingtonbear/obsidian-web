@@ -807,6 +807,17 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 <MaterialAlert severity="error">{apiKeyError}</MaterialAlert>
               </div>
             )}
+            {!hasHostPermission && (
+              <div className="option-value">
+                <MaterialAlert severity="error">
+                  This browser extension does not have permission for the host{" "}
+                  <code>{tempHost}</code>.
+                  <Button onClick={() => setRequestingHostPermissionFor(host)}>
+                    Grant Permissions
+                  </Button>
+                </MaterialAlert>
+              </div>
+            )}
             {pluginVersion && compareVersions(pluginVersion, minVersion) < 0 && (
               <>
                 <div className="option-value">
