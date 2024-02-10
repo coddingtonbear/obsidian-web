@@ -45,7 +45,9 @@ import {
   DefaultSearchMatchTemplate,
   DefaultSyncSettings,
   DefaultUrlTemplate,
+  LocalSettingsVersion,
   MinVersion,
+  SyncSettingsVersion,
 } from "./constants";
 import {
   ExtensionSyncSettings,
@@ -56,6 +58,7 @@ import {
   OutputPreset,
   ConfiguredTemplate,
   LogEntry,
+  AutoOpenOption,
 } from "./types";
 import {
   getLocalSettings,
@@ -71,6 +74,12 @@ import { PurpleTheme } from "./theme";
 import TemplateSetupModal from "./components/TemplateSetupModal";
 import BugReportModal from "./components/BugReportModal";
 import UnsupportedEnvironmentWarning from "./components/UnsupportedEnvironmentWarning";
+import {
+  FormControl,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+} from "@mui/material";
 
 export interface Props {
   sandbox: HTMLIFrameElement | null;
@@ -114,10 +123,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     useState<boolean>(false);
   const [searchMatchDirectTemplate, setSearchMatchDirectTemplate] =
     useState<OutputPreset>(DefaultSearchMatchTemplate);
-  const [searchMatchDirectAutoOpen, setSearchMatchDirectAutoOpen] =
-    useState<boolean>(false);
-  const [searchMatchMentionAutoOpen, setSearchMatchMentionAutoOpen] =
-    useState<boolean>(false);
+  const [searchMatchAutoOpen, setSearchMatchAutoOpen] =
+    useState<AutoOpenOption>("never");
 
   const [insecureMode, setInsecureMode] = useState<boolean>(false);
 
@@ -220,18 +227,17 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     }
     async function handle() {
       const syncSettings: ExtensionSyncSettings = {
-        version: "2.0",
+        version: SyncSettingsVersion,
         presets,
         searchMatch: {
           enabled: searchEnabled,
           backgroundEnabled: searchBackgroundEnabled,
+          autoOpen: searchMatchAutoOpen,
           mentions: {
-            autoOpen: searchMatchMentionAutoOpen,
             suggestionEnabled: searchMatchMentionEnabled,
             template: searchMatchMentionTemplate,
           },
           direct: {
-            autoOpen: searchMatchDirectAutoOpen,
             suggestionEnabled: searchMatchDirectEnabled,
             template: searchMatchDirectTemplate,
           },
@@ -247,11 +253,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     searchEnabled,
     searchBackgroundEnabled,
     searchMatchDirectEnabled,
-    searchMatchDirectAutoOpen,
     searchMatchDirectTemplate,
     searchMatchMentionEnabled,
-    searchMatchMentionAutoOpen,
     searchMatchMentionTemplate,
+    searchMatchAutoOpen,
   ]);
 
   useEffect(() => {
@@ -267,16 +272,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       setPresets(syncSettings.presets);
       setSearchEnabled(syncSettings.searchMatch.enabled);
       setSearchBackgroundEnabled(syncSettings.searchMatch.backgroundEnabled);
-      setSearchMatchDirectAutoOpen(
-        (syncSettings.searchMatch.backgroundEnabled &&
-          syncSettings.searchMatch.direct.autoOpen) ??
-          false
-      );
-      setSearchMatchMentionAutoOpen(
-        (syncSettings.searchMatch.backgroundEnabled &&
-          syncSettings.searchMatch.mentions.autoOpen) ??
-          false
-      );
+      setSearchMatchAutoOpen(syncSettings.searchMatch.autoOpen);
       setSearchMatchDirectEnabled(
         syncSettings.searchMatch.direct.suggestionEnabled
       );
@@ -297,8 +293,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         },
         (result) => {
           if (!result) {
-            setSearchMatchDirectAutoOpen(false);
-            setSearchMatchMentionAutoOpen(false);
+            setSearchMatchAutoOpen("never");
           }
         }
       );
@@ -317,8 +312,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             // And since direct messages require background search
             // to function, let's disable that, too, if background
             // searches are disabled.
-            setSearchMatchDirectAutoOpen(false);
-            setSearchMatchMentionAutoOpen(false);
+            setSearchMatchAutoOpen("never");
           }
         }
       );
@@ -462,67 +456,34 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     }
   };
 
-  const onEnableSearchMatchDirectMessages = (targetStateEnabled: boolean) => {
-    if (targetStateEnabled) {
-      chrome.permissions.request(
-        {
-          permissions: ["scripting"],
-          origins: [`http://*/*`, `https://*/*`],
-        },
-        (granted) => {
-          if (granted) {
-            setSearchMatchDirectAutoOpen(true);
+  const onChangeAutoOpen = (evt: SelectChangeEvent<AutoOpenOption>) => {
+    switch (evt.target.value) {
+      case "never":
+        chrome.permissions.remove(
+          {
+            permissions: ["scripting"],
+            origins: [`http://*/*`, "https://*/*"],
+          },
+          (removed) => {
+            if (removed) {
+              setSearchMatchAutoOpen("never");
+            }
           }
-        }
-      );
-    } else if (!setSearchMatchMentionAutoOpen) {
-      chrome.permissions.remove(
-        {
-          permissions: ["scripting"],
-          origins: [`http://*/*`, "https://*/*"],
-        },
-        (removed) => {
-          if (removed) {
-            setSearchMatchDirectAutoOpen(false);
+        );
+        break;
+      default:
+        chrome.permissions.request(
+          {
+            permissions: ["scripting"],
+            origins: [`http://*/*`, `https://*/*`],
+          },
+          (granted) => {
+            if (granted) {
+              setSearchMatchAutoOpen(evt.target.value as AutoOpenOption);
+            }
           }
-        }
-      );
-    } else {
-      // We can't remove the permission unless both this and searchMatchMentionAutoOpen
-      // are disabled
-      setSearchMatchDirectAutoOpen(false);
-    }
-  };
-
-  const onEnableSearchMatchMentionMessages = (targetStateEnabled: boolean) => {
-    if (targetStateEnabled) {
-      chrome.permissions.request(
-        {
-          permissions: ["scripting"],
-          origins: [`http://*/*`, `https://*/*`],
-        },
-        (granted) => {
-          if (granted) {
-            setSearchMatchMentionAutoOpen(true);
-          }
-        }
-      );
-    } else if (!setSearchMatchDirectAutoOpen) {
-      chrome.permissions.remove(
-        {
-          permissions: ["scripting"],
-          origins: [`http://*/*`, "https://*/*"],
-        },
-        (removed) => {
-          if (removed) {
-            setSearchMatchMentionAutoOpen(false);
-          }
-        }
-      );
-    } else {
-      // We can't remove the permission unless both this and searchMatchDirectAutoOpen
-      // are disabled
-      setSearchMatchMentionAutoOpen(false);
+        );
+        break;
     }
   };
 
@@ -567,13 +528,13 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   search: {
                     enabled: searchEnabled,
                     background: searchBackgroundEnabled,
+                    autoOpen: searchMatchAutoOpen,
                     mention: {
                       enabled: searchMatchMentionEnabled,
                       template: searchMatchMentionTemplate,
                     },
                     direct: {
                       enabled: searchMatchDirectEnabled,
-                      messageEnabled: searchMatchDirectAutoOpen,
                       template: searchMatchDirectTemplate,
                     },
                   },
@@ -643,9 +604,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         if (
           !parsed ||
           !parsed.sync ||
-          compareVersions(parsed.sync.version, "2.0") > 0 ||
+          compareVersions(parsed.sync.version, SyncSettingsVersion) > 0 ||
           !parsed.local ||
-          compareVersions(parsed.local.version, "2.0") > 0
+          compareVersions(parsed.local.version, LocalSettingsVersion) > 0
         ) {
           alert(
             "Could not parse configuration file!  See console for details."
@@ -940,36 +901,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   control={
                     <Switch
                       onChange={(evt) =>
-                        onEnableSearchMatchDirectMessages(evt.target.checked)
-                      }
-                      disabled={!searchEnabled || !searchBackgroundEnabled}
-                      checked={
-                        searchBackgroundEnabled && searchMatchDirectAutoOpen
-                      }
-                    />
-                  }
-                  label={
-                    <>
-                      <b>
-                        Open the dialog automatically when a dedicated page for
-                        the current URL is found?
-                      </b>{" "}
-                      If you turn this feature on, the dialog will automatically
-                      be opened when the page you are visiting has a dedicated
-                      page. Additionally, if that note's{" "}
-                      <code>web-message</code> frontmatter field is set, that
-                      message will be displayed. This feature requires that you
-                      have enabled background searches.
-                      <Chip size="small" label="Requires extra permissions" />
-                    </>
-                  }
-                />
-              </FormGroup>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      onChange={(evt) =>
                         setSearchMatchDirectEnabled(evt.target.checked)
                       }
                       disabled={!searchEnabled}
@@ -1006,40 +937,14 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   Configure Template to use for Page Notes
                 </Button>
               </FormGroup>
+            </Paper>
+            <Paper className="paper-option-panel">
               <h3>Mentions</h3>
               <Typography paragraph={true}>
                 If the URL you are currently visiting has been mentioned on one
                 of your notes, we can help you become aware of that and can even
                 suggest using a particular template to modify that note.
               </Typography>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      onChange={(evt) =>
-                        onEnableSearchMatchMentionMessages(evt.target.checked)
-                      }
-                      disabled={!searchEnabled || !searchBackgroundEnabled}
-                      checked={
-                        searchBackgroundEnabled && searchMatchMentionAutoOpen
-                      }
-                    />
-                  }
-                  label={
-                    <>
-                      <b>
-                        Open the dialog automatically when a note mentioning
-                        this URL is found?
-                      </b>{" "}
-                      If you turn this feature on, the dialog will automatically
-                      be opened when the URL you are visiting has been mentioned
-                      in your notes. This feature requires that you have enabled
-                      background searches.{" "}
-                      <Chip size="small" label="Requires extra permissions" />
-                    </>
-                  }
-                />
-              </FormGroup>
               <FormGroup>
                 <FormControlLabel
                   control={
@@ -1080,6 +985,44 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   Configure Template to use for Mentions
                 </Button>
               </FormGroup>
+            </Paper>
+            <Paper className="paper-option-panel">
+              <h3>Automatic Display</h3>
+              <Typography paragraph={true}>
+                Do you want to be reminded when the URL you are visiting has a
+                note or has been mentioned in one of them? You can below
+                configure conditions in which the dialog will be opened
+                automatically to let you know when you have been to this URL
+                before. This feature requires that background searches be
+                enabled.
+                <Chip size="small" label="Requires extra permissions" />
+              </Typography>
+              <Typography paragraph={true}>
+                <FormControl fullWidth={true}>
+                  <Select
+                    onChange={onChangeAutoOpen}
+                    value={searchMatchAutoOpen}
+                    disabled={!searchBackgroundEnabled}
+                  >
+                    <MenuItem value="never">
+                      Never open the dialog automatically
+                    </MenuItem>
+                    <MenuItem value="direct-message">
+                      Open the dialog automatically when a page note was found
+                      for the current URL, and a web-message was set.
+                    </MenuItem>
+                    <MenuItem value="direct">
+                      Open the dialog automatically when a page note was found
+                      for the current URL.
+                    </MenuItem>
+                    <MenuItem value="mention">
+                      Open the dialog automatically when either a page note was
+                      found for the current URL or the current URL was mentioned
+                      in a note.
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Typography>
             </Paper>
           </div>
           <div className="option">

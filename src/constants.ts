@@ -15,8 +15,10 @@ export const DefaultUrlTemplate = "/vault/{{filename page.title}}.md";
 export const DefaultHeaders = {};
 export const DefaultMethod = "put";
 
+export const LocalSettingsVersion = "2.0";
+
 export const DefaultLocalSettings: ExtensionLocalSettings = {
-  version: "2.0",
+  version: LocalSettingsVersion,
   host: "127.0.0.1",
   insecureMode: false,
   apiKey: "",
@@ -56,8 +58,10 @@ export const DefaultSearchMatchTemplate: OutputPreset = {
   method: "post",
 };
 
+export const SyncSettingsVersion = "2.1";
+
 export const DefaultSyncSettings: ExtensionSyncSettings = {
-  version: "2.0",
+  version: SyncSettingsVersion,
   presets: [
     {
       name: "Append to current daily note",
@@ -86,6 +90,7 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
   searchMatch: {
     enabled: false,
     backgroundEnabled: false,
+    autoOpen: "never",
     mentions: {
       suggestionEnabled: false,
       template: DefaultSearchMatchTemplate,

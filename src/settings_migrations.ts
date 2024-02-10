@@ -3,6 +3,7 @@ import {
   ExtensionLocalSettings,
   ExtensionSyncSettings,
   ExtensionSyncSettings__0_1,
+  ExtensionSyncSettings__0_2,
 } from "./types";
 
 import cloneDeep from "clone-deep";
@@ -36,7 +37,7 @@ export async function migrateSyncSettings(
     const directTemplate = oldSettings.presets.find(
       (preset) => preset.name === oldSettings.searchMatchDirectTemplate
     );
-    const newSettings: ExtensionSyncSettings = {
+    const newSettings: ExtensionSyncSettings__0_2 = {
       version: "0.2",
       presets: oldSettings.presets,
       searchMatch: {
@@ -75,6 +76,10 @@ export async function migrateSyncSettings(
     settings.version = "2.0";
     await sync.clear();
     await sync.set(settings);
+  }
+  if (settings.version == "2.0") {
+    settings.searchMatch.autoOpen = "never";
+    settings.version = "2.1";
   }
   return settings as ExtensionSyncSettings;
 }

@@ -33,6 +33,22 @@ function log(errorLogItem: Partial<LogEntry>): number {
   return logEntries.length;
 }
 
+function injectScript(tabId: number, func: () => void) {
+  chrome.scripting
+    .executeScript({
+      target: { tabId },
+      files: ["js/vendor.js", "js/popup.js"],
+    })
+    .then(() => {
+      chrome.scripting.executeScript({
+        target: {
+          tabId,
+        },
+        func,
+      });
+    });
+}
+
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   const settings: ExtensionLocalSettings = await getLocalSettings(
     chrome.storage.local
@@ -98,77 +114,40 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
 
     if (
-      syncSettings.searchMatch.direct.autoOpen &&
+      syncSettings.searchMatch.autoOpen === "direct" &&
+      mentions.direct.length > 0 &&
+      mentions.direct.filter((match) => match.meta.frontmatter["web-message"])
+        .length > 0
+    ) {
+      injectScript(tabId, window.ObsidianWeb.showPopUpMessage);
+    } else if (
+      syncSettings.searchMatch.autoOpen === "direct" &&
       mentions.direct.length > 0
     ) {
-      chrome.scripting
-        .executeScript({
-          target: { tabId },
-          files: ["js/vendor.js", "js/popup.js"],
-        })
-        .then(() => {
-          chrome.scripting.executeScript({
-            target: {
-              tabId,
-            },
-            func: (): void => {
-              window.ObsidianWeb.showPopUpMessage();
-            },
-          });
-        });
-    }
-
-    if (
-      syncSettings.searchMatch.mentions.autoOpen &&
+      injectScript(tabId, window.ObsidianWeb.showPopUpMessage);
+    } else if (
+      syncSettings.searchMatch.autoOpen === "mention" &&
       mentions.mentions.length > 0
     ) {
-      chrome.scripting
-        .executeScript({
-          target: { tabId },
-          files: ["js/vendor.js", "js/popup.js"],
-        })
-        .then(() => {
-          chrome.scripting.executeScript({
-            target: {
-              tabId,
-            },
-            func: (): void => {
-              window.ObsidianWeb.showPopUpMessage();
-            },
-          });
-        });
+      injectScript(tabId, window.ObsidianWeb.showPopUpMessage);
     }
 
     console.log("Processing pageview");
     for (const mention of mentions.direct) {
       console.log("Looking at direct mentions");
-      const mentionData = await _obsidianRequest(
-        settings.host,
-        settings.apiKey,
-        `/vault/${mention.filename}`,
-        {
-          method: "get",
-          headers: {
-            Accept: "application/vnd.olrapi.note+json",
-          },
-        },
-        Boolean(settings.insecureMode)
-      );
-      const result = (await mentionData.json()) ?? {};
-
-      if (result.frontmatter["web-badge-color"]) {
+      if (typeof mention.meta.frontmatter["web-badge-color"] === "string") {
         chrome.action.setBadgeBackgroundColor({
-          color: result.frontmatter["web-badge-color"],
+          color: mention.meta.frontmatter["web-badge-color"],
           tabId,
         });
       }
-      if (result.frontmatter["web-badge-message"]) {
+      if (typeof mention.meta.frontmatter["web-badge-message"] === "string") {
         chrome.action.setBadgeText({
-          text: result.frontmatter["web-badge-message"],
+          text: mention.meta.frontmatter["web-badge-message"],
           tabId,
         });
         chrome.action.setTitle({
-          title: result.frontmatter["web-badge-message"],
+          title: mention.meta.frontmatter["web-badge-message"],
           tabId,
         });
       }
@@ -193,21 +172,16 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id) {
-    chrome.scripting
-      .executeScript({
-        target: { tabId: tab.id },
-        files: ["js/vendor.js", "js/popup.js"],
-      })
-      .then(() => {
-        if (tab.id) {
-          chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            func: () => {
-              window.ObsidianWeb.togglePopUp();
-            },
-          });
-        }
-      });
+    injectScript(tab.id, () => {
+      if (tab.id) {
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => {
+            window.ObsidianWeb.togglePopUp();
+          },
+        });
+      }
+    });
   } else {
     console.error("No tab ID found when attempting to inject into tab", tab);
   }

@@ -40,19 +40,37 @@ export interface ExtensionSyncSettings__0_1 {
   searchMatchDirectTemplate: string;
 }
 
-export interface ExtensionSyncSettings {
+export interface ExtensionSyncSettings__0_2 {
   version: string;
   presets: UrlOutputPreset[];
   searchMatch: {
     enabled: boolean;
     backgroundEnabled: boolean;
     mentions: {
-      autoOpen?: boolean;
       suggestionEnabled: boolean;
       template: OutputPreset;
     };
     direct: {
-      autoOpen?: boolean;
+      suggestionEnabled: boolean;
+      template: OutputPreset;
+    };
+  };
+}
+
+export type AutoOpenOption = "never" | "direct-message" | "direct" | "mention";
+
+export interface ExtensionSyncSettings {
+  version: string;
+  presets: UrlOutputPreset[];
+  searchMatch: {
+    enabled: boolean;
+    backgroundEnabled: boolean;
+    autoOpen: AutoOpenOption;
+    mentions: {
+      suggestionEnabled: boolean;
+      template: OutputPreset;
+    };
+    direct: {
       suggestionEnabled: boolean;
       template: OutputPreset;
     };
