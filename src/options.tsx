@@ -60,12 +60,12 @@ import {
 import {
   getLocalSettings,
   getSyncSettings,
-  _obsidianRequest,
   checkHasHostPermission,
   requestHostPermission,
   checkKeyboardShortcut,
   getBackgroundErrorLog,
 } from "./utils";
+import { _obsidianRequest } from "./utils/private_requests";
 import Alert from "./components/Alert";
 import { PurpleTheme } from "./theme";
 import TemplateSetupModal from "./components/TemplateSetupModal";

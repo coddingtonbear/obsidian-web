@@ -1,9 +1,5 @@
-import {
-  _getUrlMentions,
-  getLocalSettings,
-  _obsidianRequest,
-  getSyncSettings,
-} from "./utils";
+import { getLocalSettings, getSyncSettings } from "./utils";
+import { _obsidianRequest, _getUrlMentions } from "./utils/private_requests";
 import {
   BackgroundRequest,
   LogEntry,

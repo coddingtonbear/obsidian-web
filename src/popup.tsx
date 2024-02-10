@@ -40,13 +40,12 @@ import {
 import {
   getLocalSettings,
   getSyncSettings,
-  obsidianRequest,
-  getUrlMentions,
   checkHasHostPermission,
   requestHostPermission,
   getWindowSelectionAsHtml,
   unregisterCompileTemplateCallback,
 } from "./utils";
+import { getUrlMentions, obsidianRequest } from "./utils/requests";
 import RequestParameters from "./components/RequestParameters";
 import { TurndownConfiguration } from "./constants";
 import MentionNotice from "./components/MentionNotice";

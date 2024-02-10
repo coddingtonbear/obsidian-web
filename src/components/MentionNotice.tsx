@@ -10,7 +10,7 @@ import {
   OutputPreset,
   SearchJsonResponseItemWithMetadata,
 } from "../types";
-import { openFileInObsidian } from "../utils";
+import { openFileInObsidian } from "../utils/requests";
 
 export interface DirectProps {
   type: "direct";
