@@ -21,8 +21,7 @@ const MouseOverChip: React.FunctionComponent<Props> = ({
     );
 
     if (definedBadgeColor.length > 0) {
-      return ("#" +
-        definedBadgeColor[0].meta.frontmatter["web-badge-color"]) as string;
+      return definedBadgeColor[0].meta.frontmatter["web-badge-color"] as string;
     } else if (mentions?.direct.length ?? 0 > 0) {
       return "#A68B36";
     } else if (mentions?.mentions.length ?? 0 > 0) {

@@ -10,7 +10,7 @@ import {
 export const MinVersion = "1.3.1";
 
 export const DefaultContentTemplate =
-  '---\npage-title: {{json page.title}}\nurl: {{page.url}}\nweb-message:\nweb-badge-color:\nweb-badge-message:\ndate: "{{date}}"\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}';
+  '---\npage-title: {{json page.title}}\nurl: {{page.url}}\nweb-message:\nweb-badge-color: ""\nweb-badge-message:\ndate: "{{date}}"\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}';
 export const DefaultUrlTemplate = "/vault/{{filename page.title}}.md";
 export const DefaultHeaders = {};
 export const DefaultMethod = "put";
