@@ -529,7 +529,11 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
     return (
       <ThemeProvider theme={DarkPurpleTheme}>
-        <div className="obsidian-web-popup">
+        <div
+          className="obsidian-web-popup"
+          title="Double-click to dismiss"
+          onDoubleClick={() => setPopupDisplayed(false)}
+        >
           {popupDisplayed && (
             <Draggable handle=".drag-handle">
               <div className="popup">
@@ -690,15 +694,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                                 title="Send to Obsidian"
                               >
                                 <SendIcon className="send-to-obsidian-icon" />
-                              </IconButton>
-                              <IconButton
-                                className="cancel-send"
-                                color="error"
-                                size="large"
-                                onClick={onFinished}
-                                title="Cancel"
-                              >
-                                <CancelIcon className="cancel-send-icon" />
                               </IconButton>
                             </div>
                           </div>
