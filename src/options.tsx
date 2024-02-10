@@ -886,8 +886,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 }
               />
             </FormGroup>
-            <Paper className="paper-option-panel">
-              <h3>Page Notes</h3>
+            <div className="option">
+              <h2>Page Notes</h2>
               <Typography paragraph={true}>
                 If you have a note having a frontmatter field or property named{" "}
                 <code>url</code> that matches the URL of the page you are
@@ -937,9 +937,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   Configure Template to use for Page Notes
                 </Button>
               </FormGroup>
-            </Paper>
-            <Paper className="paper-option-panel">
-              <h3>Mentions</h3>
+            </div>
+            <div className="option">
+              <h2>Mentioned URL Detection</h2>
               <Typography paragraph={true}>
                 If the URL you are currently visiting has been mentioned on one
                 of your notes, we can help you become aware of that and can even
@@ -985,9 +985,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   Configure Template to use for Mentions
                 </Button>
               </FormGroup>
-            </Paper>
-            <Paper className="paper-option-panel">
-              <h3>Automatic Display</h3>
+            </div>
+            <div className="option">
+              <h2>Automatically Display Matches</h2>
               <Typography paragraph={true}>
                 Do you want to be reminded when the URL you are visiting has a
                 note or has been mentioned in one of them? You can below
@@ -1023,7 +1023,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   </Select>
                 </FormControl>
               </Typography>
-            </Paper>
+            </div>
           </div>
           <div className="option">
             <h2>Templates</h2>
