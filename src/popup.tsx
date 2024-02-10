@@ -17,9 +17,8 @@ import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import Draggable from "react-draggable";
 
-import ShowFormIcon from "@mui/icons-material/Menu";
+import ShowFormIcon from "@mui/icons-material/DynamicForm";
 import SendIcon from "@mui/icons-material/SaveAlt";
-import CancelIcon from "@mui/icons-material/Cancel";
 
 import styles from "./styles.css";
 
