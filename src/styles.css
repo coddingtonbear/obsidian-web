@@ -32,6 +32,10 @@ p.popup-text {
   margin-bottom: 20px;
 }
 
+.hover-popup {
+  background-color: rgb(100, 100, 100, 0.6);
+}
+
 div.background {
   position: fixed;
   left: 0px;

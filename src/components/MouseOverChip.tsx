@@ -63,6 +63,7 @@ const MouseOverChip: React.FunctionComponent<Props> = ({
   };
   return (
     <Chip
+      className="hover-popup"
       label={
         <>
           {getMouseOverBadgeMessage() && <b>{getMouseOverBadgeMessage()}</b>}
@@ -73,7 +74,6 @@ const MouseOverChip: React.FunctionComponent<Props> = ({
           </i>
         </>
       }
-      color="primary"
       icon={<Circle style={{ color: getMouseOverBadgeColor() }} />}
       style={{
         position: "absolute",
