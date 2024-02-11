@@ -8,6 +8,7 @@ import Button from "@mui/material/Button";
 import { ConfiguredTemplate } from "../types";
 import { DefaultPreviewContext } from "../constants";
 import { Alert } from "@mui/material";
+import WikiLink from "./WikiLink";
 
 export interface Props {
   open: boolean;
@@ -96,12 +97,9 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
               </>
             )}{" "}
             See{" "}
-            <a
-              href="https://github.com/coddingtonbear/obsidian-web/wiki/Understanding-Templates"
-              target="_blank"
-            >
+            <WikiLink target="Understanding Templates">
               Obsidian Web's template documentation
-            </a>{" "}
+            </WikiLink>{" "}
             to get an understanding of how to write your template and what
             context variables and helpers are available.
           </>

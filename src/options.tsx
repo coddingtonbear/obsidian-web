@@ -931,7 +931,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   <>
                     <b>
                       Search for previous notes about linked pages when you
-                      hover over links?
+                      hover over links?{" "}
+                      <WikiLink target="Hover Messages">(docs)</WikiLink>
                     </b>{" "}
                     If you turn this feature on, a tooltip will be displayed
                     when hovering over links targeting pages you have created
@@ -958,7 +959,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   <>
                     <b>
                       Search for previous notes about this page in the
-                      background?
+                      background?{" "}
+                      <WikiLink target="Extension Badge Messages">
+                        (docs)
+                      </WikiLink>
                     </b>{" "}
                     If you turn this feature on,{" "}
                     <WikiLink target="Page Notes">Page Notes</WikiLink> for the
@@ -972,7 +976,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
               />
             </FormGroup>
             <Paper className="paper-option-panel">
-              <h3>Automatically Display Matches</h3>
+              <h3>
+                Automatically Display Matches{" "}
+                <WikiLink target="Automatic Match Display">(docs)</WikiLink>
+              </h3>
               <Typography paragraph={true}>
                 Do you want to be shown a message when the URL you are visiting
                 has a <WikiLink target="Page Notes">Page Note</WikiLink> or has
@@ -1026,8 +1033,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     <>
                       <b>
                         Suggest a template when a{" "}
-                        <WikiLink target="Page Notes">Page Note</WikiLink>
-                        for the current URL is found?
+                        <WikiLink target="Page Notes">Page Note</WikiLink> for
+                        the current URL is found?
                       </b>{" "}
                       When the URL of the page you are visiting has been found
                       to have a{" "}
@@ -1096,7 +1103,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             </Paper>
           </div>
           <div className="option">
-            <h2>Templates</h2>
+            <h2>
+              Templates{" "}
+              <WikiLink target="Understanding Templates">(docs)</WikiLink>
+            </h2>
             <Typography paragraph={true}>
               You can configure multiple templates for use when inserting
               content into Obsidian. Each template describes how to convert
