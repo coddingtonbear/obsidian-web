@@ -96,11 +96,19 @@ export const OnboardingSteps: OnboardingStep[] = [
     target: "#api-key-settings-panel",
     content: (
       <>
-        <h1>Thanks for trying Obsidian Web!</h1>
+        <Typography paragraph={true}>
+          <b>Thanks for trying Obsidian Web!</b>
+        </Typography>
         <Typography paragraph={true}>
           To get started, you will need to give Obsidian Web some information
-          from your Obsidian Local REST API plugin's settings so it can connect
-          to your notes.
+          from{" "}
+          <a
+            target="_blank"
+            href="https://obsidian.md/plugins?id=obsidian-local-rest-api"
+          >
+            Obsidian Local REST API
+          </a>
+          's settings so it can connect to your notes.
         </Typography>
       </>
     ),
@@ -818,8 +826,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         <Joyride
           steps={filteredOnboardingSteps}
           continuous={true}
+          showProgress={true}
           showSkipButton={true}
-          run={true}
           scrollToFirstStep={true}
           callback={onOnboardingAdvance}
         />
