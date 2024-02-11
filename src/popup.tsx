@@ -53,7 +53,7 @@ import {
   TurndownConfiguration,
 } from "./constants";
 import MentionNotice from "./components/MentionNotice";
-import { Chip, NativeSelect, Paper } from "@mui/material";
+import { NativeSelect, Paper } from "@mui/material";
 import MouseOverChip from "./components/MouseOverChip";
 
 const ROOT_CONTAINER_ID = "obsidian-web-container";
