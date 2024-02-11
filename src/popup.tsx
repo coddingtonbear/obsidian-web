@@ -125,8 +125,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const [sandboxReady, setSandboxReady] = useState<boolean>(false);
     const [obsidianUnavailable, setObsidianUnavailable] = useState<boolean>();
 
-    const [previewContext, setPreviewContext] = useState<PreviewContext>();
-
     const [host, setHost] = useState<string | null>(null);
     const [hasHostPermission, setHasHostPermission] = useState<boolean | null>(
       null
@@ -405,54 +403,51 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       }
     }, [host]);
 
-    useEffect(() => {
-      async function handle() {
-        let selectedText: string;
-        try {
-          const selectionReadability = htmlToReadabilityData(
-            getWindowSelectionAsHtml(),
-            window.document.location.href
-          );
-          selectedText = readabilityDataToMarkdown(selectionReadability);
-        } catch (e) {
-          selectedText = "";
-        }
-
-        const previewContext: PreviewContext = {
-          page: {
-            url: window.document.location.href ?? "",
-            title: window.document.title ?? "",
-            selectedText: selectedText,
-            content: "",
-          },
-          article: {},
-        };
-
-        try {
-          const pageReadability = htmlToReadabilityData(
-            window.document.body.innerHTML,
-            window.document.location.href
-          );
-          if (pageReadability) {
-            previewContext.article = {
-              title: pageReadability.title,
-              length: pageReadability.length,
-              excerpt: pageReadability.excerpt,
-              byline: pageReadability.byline,
-              dir: pageReadability.dir,
-              siteName: pageReadability.siteName,
-            };
-          } else {
-            previewContext.article = {};
-          }
-          previewContext.page.content =
-            readabilityDataToMarkdown(pageReadability);
-        } catch (e) {}
-
-        setPreviewContext(previewContext);
+    async function getPreviewContext(): Promise<Record<string, any>> {
+      let selectedText: string;
+      try {
+        const selectionReadability = htmlToReadabilityData(
+          getWindowSelectionAsHtml(),
+          window.document.location.href
+        );
+        selectedText = readabilityDataToMarkdown(selectionReadability);
+      } catch (e) {
+        selectedText = "";
       }
-      handle();
-    }, []);
+
+      const previewContext: PreviewContext = {
+        page: {
+          url: window.document.location.href ?? "",
+          title: window.document.title ?? "",
+          selectedText: selectedText,
+          content: "",
+        },
+        article: {},
+      };
+
+      try {
+        const pageReadability = htmlToReadabilityData(
+          window.document.body.innerHTML,
+          window.document.location.href
+        );
+        if (pageReadability) {
+          previewContext.article = {
+            title: pageReadability.title,
+            length: pageReadability.length,
+            excerpt: pageReadability.excerpt,
+            byline: pageReadability.byline,
+            dir: pageReadability.dir,
+            siteName: pageReadability.siteName,
+          };
+        } else {
+          previewContext.article = {};
+        }
+        previewContext.page.content =
+          readabilityDataToMarkdown(pageReadability);
+      } catch (e) {}
+
+      return previewContext;
+    }
 
     useEffect(() => {
       if (!searchEnabled) {
@@ -799,7 +794,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                                 url={formUrl}
                                 sandbox={sandbox}
                                 headers={formHeaders}
-                                previewContext={previewContext ?? {}}
+                                getPreviewContext={getPreviewContext}
                                 content={formContent}
                                 onChangeMethod={setFormMethod}
                                 onChangeUrl={setFormUrl}

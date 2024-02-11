@@ -15,7 +15,7 @@ interface Props {
   method: UrlOutputPreset["method"];
   showCrystalizeOption?: boolean;
   sandbox: HTMLIFrameElement;
-  previewContext: Record<string, any>;
+  getPreviewContext: () => Promise<Record<string, any>>;
   allowUrlConfiguration?: boolean;
   url: string;
   headers: Record<string, string>;
@@ -34,7 +34,7 @@ interface Props {
 const RequestParameters: React.FC<Props> = ({
   method,
   sandbox,
-  previewContext,
+  getPreviewContext,
   showCrystalizeOption = false,
   allowUrlConfiguration = true,
   url,
@@ -79,7 +79,7 @@ const RequestParameters: React.FC<Props> = ({
         const renderedContent = await compileTemplate(
           sandbox,
           content,
-          previewContext
+          await getPreviewContext()
         );
         setCompiledContent(renderedContent);
         setCompiledContentError(undefined);
@@ -97,7 +97,11 @@ const RequestParameters: React.FC<Props> = ({
   React.useEffect(() => {
     async function handle() {
       try {
-        const renderedUrl = await compileTemplate(sandbox, url, previewContext);
+        const renderedUrl = await compileTemplate(
+          sandbox,
+          url,
+          await getPreviewContext()
+        );
 
         setCompiledUrl(renderedUrl);
         setCompiledUrlError(undefined);
