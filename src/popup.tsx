@@ -56,8 +56,7 @@ import MentionNotice from "./components/MentionNotice";
 import { NativeSelect, Paper } from "@mui/material";
 import MouseOverChip from "./components/MouseOverChip";
 
-const ROOT_CONTAINER_ID = "obsidian-web-container";
-
+declare const BUILD_ID: string;
 declare global {
   interface Window {
     ObsidianWeb: {
@@ -72,6 +71,8 @@ declare global {
     "obsidian-web": CustomEvent;
   }
 }
+
+const ROOT_CONTAINER_ID = `obsidian-web-container-${BUILD_ID}`;
 
 if (!document.getElementById(ROOT_CONTAINER_ID)) {
   function dispatchObsidianWebMessage(action: string, data?: any): void {
