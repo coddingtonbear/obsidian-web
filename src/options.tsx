@@ -1152,6 +1152,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     onChange={(evt) => onChangeAutoOpen(evt.target.value)}
                     value={searchMatchAutoOpen}
                     disabled={!searchBackgroundEnabled}
+                    label=""
                   >
                     <MenuItem value="never">
                       Never open the dialog automatically
