@@ -471,6 +471,11 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
         setMentions(allMentions.mentions);
         setDirectReferences(allMentions.direct);
+        if (allMentions.count === 0) {
+          if (popupDisplayed && !popupFormDisplayed) {
+            setPopupDisplayed(false);
+          }
+        }
       }
 
       handle();
