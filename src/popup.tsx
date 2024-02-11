@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import compareVersions from "compare-versions";
 import ReactDOM from "react-dom";
 import Turndown from "turndown";
 import { Readability } from "@mozilla/readability";
@@ -35,7 +36,6 @@ import {
   PreviewContext,
   SearchJsonResponseItemWithMetadata,
   UrlMentionContainer,
-  OnboardingExperience,
 } from "./types";
 import {
   getLocalSettings,
@@ -164,7 +164,8 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const [popupFormDisplayed, setPopupFormDisplayed] =
       useState<boolean>(false);
 
-    const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
+    const [showOnboardingFromVersion, setShowOnboardingFromVersion] =
+      useState<string>("");
 
     const [displayState, setDisplayState] = useState<
       "welcome" | "form" | "error" | "loading" | "alert" | "permission"
@@ -383,7 +384,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
         } else {
           setHoverEnabled(false);
         }
-        setShowOnboarding(syncSettings.showOnboarding);
+        setShowOnboardingFromVersion(syncSettings.showOnboardingFromVersion);
       }
       handle();
     }, []);
@@ -604,23 +605,24 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                     evt.stopPropagation();
                   }}
                 >
-                  {showOnboarding && (
-                    <MaterialAlert severity="success">
-                      <p className="popup-text">
-                        New features were added as part of version 3.2 that make
-                        Obsidian Web even more useful.
-                      </p>
-                      <div className="submit">
-                        <Button
-                          target="_blank"
-                          variant="contained"
-                          href={`chrome-extension://${chrome.runtime.id}/options.html`}
-                        >
-                          See what's new (opens new window)
-                        </Button>
-                      </div>
-                    </MaterialAlert>
-                  )}
+                  {showOnboardingFromVersion &&
+                    compareVersions(showOnboardingFromVersion, "0.0") > 0 && (
+                      <MaterialAlert severity="success">
+                        <p className="popup-text">
+                          New features were added as part of the latest version
+                          of Obsidian Web that make it even more useful!
+                        </p>
+                        <div className="submit">
+                          <Button
+                            target="_blank"
+                            variant="contained"
+                            href={`chrome-extension://${chrome.runtime.id}/options.html`}
+                          >
+                            See what's new (opens new window)
+                          </Button>
+                        </div>
+                      </MaterialAlert>
+                    )}
                   {displayState === "welcome" && (
                     <>
                       <MaterialAlert severity="success">

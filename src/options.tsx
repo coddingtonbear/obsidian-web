@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 
 import compareVersions from "compare-versions";
 import { detect } from "detect-browser";
+import Joyride from "react-joyride";
 
 import ThemeProvider from "@mui/system/ThemeProvider";
 import Button from "@mui/material/Button";
@@ -59,7 +60,7 @@ import {
   ConfiguredTemplate,
   LogEntry,
   AutoOpenOption,
-  OnboardingExperience,
+  OnboardingStep,
 } from "./types";
 import {
   getLocalSettings,
@@ -77,17 +78,98 @@ import { PurpleTheme } from "./theme";
 import TemplateSetupModal from "./components/TemplateSetupModal";
 import BugReportModal from "./components/BugReportModal";
 import UnsupportedEnvironmentWarning from "./components/UnsupportedEnvironmentWarning";
-import {
-  FormControl,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-} from "@mui/material";
+import { FormControl, MenuItem, Select } from "@mui/material";
 import WikiLink from "./components/WikiLink";
 
 export interface Props {
   sandbox: HTMLIFrameElement | null;
 }
+
+export const OnboardingSteps: OnboardingStep[] = [
+  {
+    disableBeacon: true,
+    onboardingVersion: "0.0",
+    target: "#api-key-settings-panel",
+    content: (
+      <>
+        <h1>Thanks for trying Obsidian Web!</h1>
+        <Typography paragraph={true}>
+          To get started, you will need to give Obsidian Web some information
+          from your Obsidian Local REST API plugin's settings so it can connect
+          to your notes.
+        </Typography>
+      </>
+    ),
+  },
+  {
+    disableBeacon: true,
+    onboardingVersion: "0.0",
+    target: "#templates-section",
+    content: (
+      <Typography paragraph={true}>
+        After that, you can set up as many "Templates" as you would like. These
+        templates are used for transforming the content shown on the page you
+        are currently visiting into the content you would like to add to your
+        notes.
+      </Typography>
+    ),
+  },
+  {
+    disableBeacon: true,
+    onboardingVersion: "0.0",
+    target: "#protip-section",
+    content: (
+      <Typography paragraph={true}>
+        If you're curious about otherideas around how Obsidian Web can be used
+        to improve your workflow, you might want to check out the wiki and
+        discussions linked at the bottom of the page.
+      </Typography>
+    ),
+  },
+  {
+    disableBeacon: true,
+    onboardingVersion: "3.2",
+    target: "#automatically-display-matches-section",
+    content: (
+      <Typography paragraph={true}>
+        <b>New in 3.2: </b>
+        You can now have a message shown when the URL you are currently visiting
+        has associated notes.
+      </Typography>
+    ),
+  },
+  {
+    disableBeacon: true,
+    onboardingVersion: "3.2",
+    target: "#hover-messages-toggle",
+    content: (
+      <Typography paragraph={true}>
+        <b>New in 3.2: </b>
+        You can now see when links you are hovering your mouse over have
+        associated notes, too.
+      </Typography>
+    ),
+  },
+  {
+    disableBeacon: true,
+    onboardingVersion: "3.2",
+    target: "#bug-report-button",
+    content: (
+      <>
+        <Typography paragraph={true}>
+          Have you found something that isn't working? Click on this button to
+          see how you can report a bug.
+        </Typography>
+        <Typography paragraph={true}>
+          Please keep in mind that the people working on this project are doing
+          so as volunteers, and that those volunteers could just as easily be
+          having a beer on a beach somewhere instead of making free tools like
+          this. Being thorough in your report and polite goes a long way!
+        </Typography>
+      </>
+    ),
+  },
+];
 
 const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const minVersion = MinVersion;
@@ -140,7 +222,11 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const [errorLog, setErrorLog] = useState<LogEntry[]>([]);
   const [showBugReportModal, setShowBugReportModal] = useState<boolean>(false);
-  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
+  const [showOnboardingFromVersion, setShowOnboardingFromVersion] =
+    useState<string>("");
+  const [filteredOnboardingSteps, setFilteredOnboardingSteps] = useState<
+    OnboardingStep[]
+  >([]);
 
   const browser = useMemo(detect, []);
 
@@ -249,8 +335,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             template: searchMatchDirectTemplate,
           },
         },
-        showOnboarding: showOnboarding,
+        showOnboardingFromVersion: showOnboardingFromVersion,
       };
+      console.log("Saving settings", syncSettings);
       await chrome.storage.sync.set(syncSettings);
       showSaveNotice();
     }
@@ -266,7 +353,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     searchMatchMentionTemplate,
     hoverEnabled,
     searchMatchAutoOpen,
-    showOnboarding,
+    showOnboardingFromVersion,
   ]);
 
   useEffect(() => {
@@ -292,7 +379,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       );
       setSearchMatchMentionTemplate(syncSettings.searchMatch.mentions.template);
       setHoverEnabled(syncSettings.searchMatch.hoverEnabled);
-      setShowOnboarding(syncSettings.showOnboarding);
+      setShowOnboardingFromVersion(syncSettings.showOnboardingFromVersion);
       setLoaded(true);
 
       // If we do not have access to all origins, we do not have sufficient
@@ -370,8 +457,19 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   }, [searchBackgroundEnabled]);
 
   useEffect(() => {
-    setShowOnboarding(false);
-  }, []);
+    if (showOnboardingFromVersion) {
+      setFilteredOnboardingSteps(
+        OnboardingSteps.filter(
+          (step) =>
+            compareVersions(
+              step.onboardingVersion,
+              showOnboardingFromVersion
+            ) >= 0
+        )
+      );
+      setShowOnboardingFromVersion("");
+    }
+  }, [showOnboardingFromVersion]);
 
   const openEditingModal = async (
     idx: number | null,
@@ -698,6 +796,15 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   return (
     <ThemeProvider theme={PurpleTheme}>
+      {filteredOnboardingSteps.length > 0 && (
+        <Joyride
+          steps={filteredOnboardingSteps}
+          continuous={true}
+          showSkipButton={true}
+          run={true}
+          scrollToFirstStep={true}
+        />
+      )}
       <Paper className="options-container">
         <div className="options-header">
           <div className="left">
@@ -721,6 +828,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 <ExportSettings fontSize="small" />
               </IconButton>
               <IconButton
+                id="bug-report-button"
                 title="Are you having trouble? Report a bug."
                 aria-label="report a bug"
                 color="error"
@@ -735,126 +843,130 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           <UnsupportedEnvironmentWarning />
         )}
         <div className="option-panel">
-          <Typography paragraph={true}>
-            Obsidian Web integrates with Obsidian via the interface provided by
-            the{" "}
-            <a
-              href="https://github.com/coddingtonbear/obsidian-local-rest-api"
-              target="_blank"
-            >
-              Local REST API
-            </a>{" "}
-            plugin. Before beginning to use this, you will want to install and
-            enable that plugin from within Obsidian.
-          </Typography>
-          <div className="option">
-            <div className="option-value host">
-              <TextField
-                label="Hostname"
-                className="auth-field"
-                onBlur={() => {
-                  setHost(tempHost);
-                  checkHasHostPermission(tempHost).then((result) => {
-                    setHasHostPermission(result);
-                    if (!result) {
-                      setRequestingHostPermissionFor(tempHost);
-                    }
-                  });
-                }}
-                onChange={(event) => setTempHost(event.target.value)}
-                value={tempHost}
-                helperText="Hostname on which Obsidian is running (usually 127.0.0.1)."
-              />
-              <div className="validation-icon">
-                {!hasHostPermission && (
-                  <Error
-                    className="action-icon"
-                    color="error"
-                    fontSize="large"
-                    titleAccess="Missing permissions.  Click to grant."
-                    onClick={() => setRequestingHostPermissionFor(host)}
-                  />
-                )}
+          <div id="api-key-settings-panel">
+            <Typography paragraph={true}>
+              Obsidian Web integrates with Obsidian via the interface provided
+              by the{" "}
+              <a
+                href="https://github.com/coddingtonbear/obsidian-local-rest-api"
+                target="_blank"
+              >
+                Local REST API
+              </a>{" "}
+              plugin. Before beginning to use this, you will want to install and
+              enable that plugin from within Obsidian.
+            </Typography>
+            <div className="option">
+              <div className="option-value host">
+                <TextField
+                  label="Hostname"
+                  className="auth-field"
+                  onBlur={() => {
+                    setHost(tempHost);
+                    checkHasHostPermission(tempHost).then((result) => {
+                      setHasHostPermission(result);
+                      if (!result) {
+                        setRequestingHostPermissionFor(tempHost);
+                      }
+                    });
+                  }}
+                  onChange={(event) => setTempHost(event.target.value)}
+                  value={tempHost}
+                  helperText="Hostname on which Obsidian is running (usually 127.0.0.1)."
+                />
+                <div className="validation-icon">
+                  {!hasHostPermission && (
+                    <Error
+                      className="action-icon"
+                      color="error"
+                      fontSize="large"
+                      titleAccess="Missing permissions.  Click to grant."
+                      onClick={() => setRequestingHostPermissionFor(host)}
+                    />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-          <div className="option">
-            <div className="option-value api-key">
-              <TextField
-                label="API Key"
-                className="auth-field"
-                value={apiKey}
-                helperText="You can find your API key in the 'Local REST API' section of your settings in Obsidian."
-                onChange={(event) => setApiKey(event.target.value)}
-              />
-              <div className="validation-icon">
-                {apiKeyOk && (
-                  <>
-                    {insecureMode && (
-                      <InsecureConnection
-                        color="warning"
-                        fontSize="large"
-                        titleAccess="Connected insecurely to the API via HTTP."
-                      />
-                    )}
-                    {!insecureMode && (
-                      <SecureConnection
-                        color="success"
-                        fontSize="large"
-                        titleAccess="Connected securely to the API via HTTPS."
-                      />
-                    )}
-                  </>
-                )}
-                {apiKeyError && (
-                  <Error
-                    color="error"
-                    fontSize="large"
-                    className="action-icon"
-                    onClick={() => {
-                      const tempApiKey = apiKey;
-                      setApiKey("");
-                      setTimeout(() => {
-                        setApiKey(tempApiKey);
-                      }, 1);
-                    }}
-                    titleAccess="Could not connect to the API. Click to retry."
-                  />
-                )}
+            <div className="option">
+              <div className="option-value api-key">
+                <TextField
+                  label="API Key"
+                  className="auth-field"
+                  value={apiKey}
+                  helperText="You can find your API key in the 'Local REST API' section of your settings in Obsidian."
+                  onChange={(event) => setApiKey(event.target.value)}
+                />
+                <div className="validation-icon">
+                  {apiKeyOk && (
+                    <>
+                      {insecureMode && (
+                        <InsecureConnection
+                          color="warning"
+                          fontSize="large"
+                          titleAccess="Connected insecurely to the API via HTTP."
+                        />
+                      )}
+                      {!insecureMode && (
+                        <SecureConnection
+                          color="success"
+                          fontSize="large"
+                          titleAccess="Connected securely to the API via HTTPS."
+                        />
+                      )}
+                    </>
+                  )}
+                  {apiKeyError && (
+                    <Error
+                      color="error"
+                      fontSize="large"
+                      className="action-icon"
+                      onClick={() => {
+                        const tempApiKey = apiKey;
+                        setApiKey("");
+                        setTimeout(() => {
+                          setApiKey(tempApiKey);
+                        }, 1);
+                      }}
+                      titleAccess="Could not connect to the API. Click to retry."
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-            {apiKeyError && (
-              <div className="option-value">
-                <MaterialAlert severity="error">{apiKeyError}</MaterialAlert>
-              </div>
-            )}
-            {!hasHostPermission && (
-              <div className="option-value">
-                <MaterialAlert severity="error">
-                  This browser extension does not have permission for the host{" "}
-                  <code>{tempHost}</code>.
-                  <Button onClick={() => setRequestingHostPermissionFor(host)}>
-                    Grant Permissions
-                  </Button>
-                </MaterialAlert>
-              </div>
-            )}
-            {pluginVersion && compareVersions(pluginVersion, minVersion) < 0 && (
-              <>
+              {apiKeyError && (
                 <div className="option-value">
-                  <MaterialAlert severity="warning">
-                    <strong>
-                      Your install of Obsidian Local REST API is out-of-date and
-                      missing some important capabilities.
-                    </strong>{" "}
-                    Some features may not work correctly as a result. Please go
-                    to the "Community Plugins" section of your settings in
-                    Obsidian to update the "Obsidian Local REST API" plugin to
-                    the latest version.
+                  <MaterialAlert severity="error">{apiKeyError}</MaterialAlert>
+                </div>
+              )}
+              {!hasHostPermission && (
+                <div className="option-value">
+                  <MaterialAlert severity="error">
+                    This browser extension does not have permission for the host{" "}
+                    <code>{tempHost}</code>.
+                    <Button
+                      onClick={() => setRequestingHostPermissionFor(host)}
+                    >
+                      Grant Permissions
+                    </Button>
                   </MaterialAlert>
                 </div>
-              </>
-            )}
+              )}
+              {pluginVersion && compareVersions(pluginVersion, minVersion) < 0 && (
+                <>
+                  <div className="option-value">
+                    <MaterialAlert severity="warning">
+                      <strong>
+                        Your install of Obsidian Local REST API is out-of-date
+                        and missing some important capabilities.
+                      </strong>{" "}
+                      Some features may not work correctly as a result. Please
+                      go to the "Community Plugins" section of your settings in
+                      Obsidian to update the "Obsidian Local REST API" plugin to
+                      the latest version.
+                    </MaterialAlert>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
           <div className="option">
             <h2>Keyboard Shortcut</h2>
@@ -929,6 +1041,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             </FormGroup>
             <FormGroup>
               <FormControlLabel
+                id="hover-messages-toggle"
                 control={
                   <Switch
                     onChange={(evt) => onChangeHoverEnabled(evt.target.checked)}
@@ -985,7 +1098,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 }
               />
             </FormGroup>
-            <Paper className="paper-option-panel">
+            <Paper
+              className="paper-option-panel"
+              id="automatically-display-matches-section"
+            >
               <h3>
                 Automatically Display Matches{" "}
                 <WikiLink target="Automatic Match Display">(docs)</WikiLink>
@@ -1112,7 +1228,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
               </FormGroup>
             </Paper>
           </div>
-          <div className="option">
+          <div className="option" id="templates-section">
             <h2>
               Templates{" "}
               <WikiLink target="Understanding Templates">(docs)</WikiLink>
@@ -1205,7 +1321,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
               </TableContainer>
             </div>
           </div>
-          <Paper className="protip">
+          <Paper className="protip" id="protip-section">
             <Typography paragraph={true}>
               <strong>Protip:</strong> Looking for ideas about how you can use
               this plugin to improve your workflow; have a look at the{" "}
@@ -1214,6 +1330,13 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 target="_blank"
               >
                 Wiki
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://github.com/coddingtonbear/obsidian-web/discussions"
+                target="_blank"
+              >
+                Discussions
               </a>{" "}
               for tips.
             </Typography>

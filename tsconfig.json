@@ -10,7 +10,8 @@
         "noEmitOnError": true,
         "jsx": "react",
         "noImplicitReturns": true,
-        "typeRoots": [ "node_modules/@types" ]
+        "typeRoots": [ "node_modules/@types" ],
+	"skipLibCheck": true
     },
     "exclude": ["node_modules/**"]
 }

@@ -68,21 +68,26 @@ export async function migrateSyncSettings(
     await sync.clear();
     await sync.set(newSettings);
     settings = newSettings;
-    settings.showOnboarding = true;
   }
   if (settings.version == "0.2") {
     // In ac0b804b634fded00363f38e996068dcd42ec68e and before, we
     // were erroneously setting the sync version to 2.0 in options.tsx;
     // so we need to just bump the version number up.
     settings.version = "2.0";
+    if (!settings.showOnboardingFromVersion) {
+      settings.showOnboardingFromVersion = "0.2";
+    }
     await sync.clear();
     await sync.set(settings);
-    settings.showOnboarding = true;
   }
   if (settings.version == "2.0") {
-    settings.showOnboarding = true;
+    if (!settings.showOnboardingFromVersion) {
+      settings.showOnboardingFromVersion = "2.0";
+    }
     settings.searchMatch.autoOpen = "never";
     settings.version = "2.1";
+    await sync.clear();
+    await sync.set(settings);
   }
   return settings as ExtensionSyncSettings;
 }

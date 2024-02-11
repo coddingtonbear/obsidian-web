@@ -101,7 +101,7 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
       template: DefaultSearchMatchTemplate,
     },
   },
-  showOnboarding: false,
+  showOnboardingFromVersion: "0.0",
 };
 
 export const KnownSyncSettingKeys = [
@@ -112,6 +112,7 @@ export const KnownSyncSettingKeys = [
   "searchBackgroundEnabled",
   "searchMatchMentionTemplate",
   "searchMatchDirectTemplate",
+  "showOnboardingFromVersion",
 ];
 
 export const TurndownConfiguration: TurndownService.Options = {

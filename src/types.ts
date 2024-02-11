@@ -1,4 +1,5 @@
 import { AlertProps } from "@mui/material/Alert";
+import { Step as JoyrideStep } from "react-joyride";
 
 export interface OutputPreset {
   contentTemplate: string;
@@ -59,8 +60,6 @@ export interface ExtensionSyncSettings__0_2 {
 
 export type AutoOpenOption = "never" | "direct-message" | "direct" | "mention";
 
-export type OnboardingExperience = "3.2";
-
 export interface ExtensionSyncSettings {
   version: string;
   presets: UrlOutputPreset[];
@@ -78,7 +77,7 @@ export interface ExtensionSyncSettings {
       template: OutputPreset;
     };
   };
-  showOnboarding: boolean;
+  showOnboardingFromVersion: string;
 }
 
 export interface AlertStatus {
@@ -232,4 +231,8 @@ export interface PreviewContext {
     dir?: string;
     siteName?: string;
   };
+}
+
+export interface OnboardingStep extends JoyrideStep {
+  onboardingVersion: string;
 }
