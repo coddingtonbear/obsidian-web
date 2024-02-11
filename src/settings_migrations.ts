@@ -68,6 +68,7 @@ export async function migrateSyncSettings(
     await sync.clear();
     await sync.set(newSettings);
     settings = newSettings;
+    settings.showOnboarding = true;
   }
   if (settings.version == "0.2") {
     // In ac0b804b634fded00363f38e996068dcd42ec68e and before, we
@@ -76,8 +77,10 @@ export async function migrateSyncSettings(
     settings.version = "2.0";
     await sync.clear();
     await sync.set(settings);
+    settings.showOnboarding = true;
   }
   if (settings.version == "2.0") {
+    settings.showOnboarding = true;
     settings.searchMatch.autoOpen = "never";
     settings.version = "2.1";
   }

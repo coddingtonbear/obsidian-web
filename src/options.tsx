@@ -59,6 +59,7 @@ import {
   ConfiguredTemplate,
   LogEntry,
   AutoOpenOption,
+  OnboardingExperience,
 } from "./types";
 import {
   getLocalSettings,
@@ -139,6 +140,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const [errorLog, setErrorLog] = useState<LogEntry[]>([]);
   const [showBugReportModal, setShowBugReportModal] = useState<boolean>(false);
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
 
   const browser = useMemo(detect, []);
 
@@ -247,6 +249,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             template: searchMatchDirectTemplate,
           },
         },
+        showOnboarding: showOnboarding,
       };
       await chrome.storage.sync.set(syncSettings);
       showSaveNotice();
@@ -263,6 +266,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     searchMatchMentionTemplate,
     hoverEnabled,
     searchMatchAutoOpen,
+    showOnboarding,
   ]);
 
   useEffect(() => {
@@ -288,6 +292,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       );
       setSearchMatchMentionTemplate(syncSettings.searchMatch.mentions.template);
       setHoverEnabled(syncSettings.searchMatch.hoverEnabled);
+      setShowOnboarding(syncSettings.showOnboarding);
       setLoaded(true);
 
       // If we do not have access to all origins, we do not have sufficient
@@ -363,6 +368,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       onChangeAutoOpen("never");
     }
   }, [searchBackgroundEnabled]);
+
+  useEffect(() => {
+    setShowOnboarding(false);
+  }, []);
 
   const openEditingModal = async (
     idx: number | null,

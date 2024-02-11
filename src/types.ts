@@ -59,6 +59,8 @@ export interface ExtensionSyncSettings__0_2 {
 
 export type AutoOpenOption = "never" | "direct-message" | "direct" | "mention";
 
+export type OnboardingExperience = "3.2";
+
 export interface ExtensionSyncSettings {
   version: string;
   presets: UrlOutputPreset[];
@@ -76,6 +78,7 @@ export interface ExtensionSyncSettings {
       template: OutputPreset;
     };
   };
+  showOnboarding: boolean;
 }
 
 export interface AlertStatus {

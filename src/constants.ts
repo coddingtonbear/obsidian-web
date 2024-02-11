@@ -101,6 +101,7 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
       template: DefaultSearchMatchTemplate,
     },
   },
+  showOnboarding: false,
 };
 
 export const KnownSyncSettingKeys = [

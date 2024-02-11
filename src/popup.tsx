@@ -35,6 +35,7 @@ import {
   PreviewContext,
   SearchJsonResponseItemWithMetadata,
   UrlMentionContainer,
+  OnboardingExperience,
 } from "./types";
 import {
   getLocalSettings,
@@ -42,7 +43,6 @@ import {
   checkHasHostPermission,
   requestHostPermission,
   getWindowSelectionAsHtml,
-  unregisterCompileTemplateCallback,
   compileTemplateCallback,
   compileTemplateCallbackController,
 } from "./utils";
@@ -163,6 +163,8 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const [popupDisplayed, setPopupDisplayed] = useState<boolean>(false);
     const [popupFormDisplayed, setPopupFormDisplayed] =
       useState<boolean>(false);
+
+    const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
 
     const [displayState, setDisplayState] = useState<
       "welcome" | "form" | "error" | "loading" | "alert" | "permission"
@@ -381,6 +383,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
         } else {
           setHoverEnabled(false);
         }
+        setShowOnboarding(syncSettings.showOnboarding);
       }
       handle();
     }, []);
@@ -601,6 +604,23 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                     evt.stopPropagation();
                   }}
                 >
+                  {showOnboarding && (
+                    <MaterialAlert severity="success">
+                      <p className="popup-text">
+                        New features were added as part of version 3.2 that make
+                        Obsidian Web even more useful.
+                      </p>
+                      <div className="submit">
+                        <Button
+                          target="_blank"
+                          variant="contained"
+                          href={`chrome-extension://${chrome.runtime.id}/options.html`}
+                        >
+                          See what's new (opens new window)
+                        </Button>
+                      </div>
+                    </MaterialAlert>
+                  )}
                   {displayState === "welcome" && (
                     <>
                       <MaterialAlert severity="success">
