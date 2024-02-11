@@ -460,14 +460,14 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   }, [searchBackgroundEnabled]);
 
   useEffect(() => {
-    if (loaded && !onboardedToVersion) {
+    if (loaded) {
       setFilteredOnboardingSteps(
         OnboardingSteps.filter(
           (step) =>
             compareVersions(
               step.onboardingVersion,
               onboardedToVersion || "0.0"
-            ) >= 0
+            ) > 0
         )
       );
     }
