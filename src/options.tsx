@@ -82,6 +82,7 @@ import {
   Select,
   SelectChangeEvent,
 } from "@mui/material";
+import WikiLink from "./components/WikiLink";
 
 export interface Props {
   sandbox: HTMLIFrameElement | null;
@@ -890,10 +891,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             <Typography paragraph={true}>
               Have you been to this page before? Maybe you already have notes
               about it. Enabling this feature will let this extension search
-              your notes when you click on the extension icon and, if you enable
-              background searches, show a badge on the extension icon while you
-              are browsing the web to let you know that you have notes about the
-              page you are currently visiting.
+              your notes for references to the URL you are visiting.
             </Typography>
             <FormGroup>
               <FormControlLabel
@@ -911,10 +909,11 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                       Search for previous notes about this page when you
                       activate the extension?
                     </b>{" "}
-                    If you turn this feature on, pages dedicated to the URL you
-                    are currently visiting, and pages on which you've mentioned
-                    the URL you are visiting will be shown to you in the dialog
-                    when you activate the extension.
+                    If you turn this feature on,{" "}
+                    <WikiLink target="Page Notes">Page Notes</WikiLink> for URL
+                    you are currently visiting, and pages on which you've
+                    mentioned the URL you are visiting will be shown to you in
+                    the dialog when you activate the extension.
                   </>
                 }
               />
@@ -961,11 +960,12 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                       Search for previous notes about this page in the
                       background?
                     </b>{" "}
-                    If you turn this feature on, pages dedicated to the URL you
-                    are currently visiting, and pages on which you've mentioned
-                    the URL you are visiting will be searched for as you browse
-                    the internet. If a match is found, a badge will be shown on
-                    the extension icon.
+                    If you turn this feature on,{" "}
+                    <WikiLink target="Page Notes">Page Notes</WikiLink> for the
+                    URL you are currently visiting, and pages on which you've
+                    mentioned the URL you are visiting will be searched for as
+                    you browse the internet. If a match is found, a badge will
+                    be shown on the extension icon.
                     <Chip size="small" label="Requires extra permissions" />
                   </>
                 }
@@ -975,11 +975,11 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
               <h3>Automatically Display Matches</h3>
               <Typography paragraph={true}>
                 Do you want to be shown a message when the URL you are visiting
-                has a page note or has been mentioned in a note? Below, you can
-                configure conditions in which the dialog will be opened
-                automatically to let you know when you have been to this URL
-                before. This feature requires that background searches be
-                enabled.
+                has a <WikiLink target="Page Notes">Page Note</WikiLink> or has
+                been mentioned in a note? You can configure conditions in which
+                the dialog will be opened automatically to let you know when you
+                have been to this URL before. This feature requires that
+                background searches be enabled.
                 <Chip size="small" label="Requires extra permissions" />
               </Typography>
               <Typography paragraph={true}>
@@ -993,15 +993,15 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                       Never open the dialog automatically
                     </MenuItem>
                     <MenuItem value="direct-message">
-                      Open the dialog automatically when a page note was found
-                      for the current URL, and a web-message was set.
+                      Open the dialog automatically when a Page Note was found
+                      for the current URL, and a `web-message` was set.
                     </MenuItem>
                     <MenuItem value="direct">
-                      Open the dialog automatically when a page note was found
+                      Open the dialog automatically when a Page Note was found
                       for the current URL.
                     </MenuItem>
                     <MenuItem value="mention">
-                      Open the dialog automatically when either a page note was
+                      Open the dialog automatically when either a Page Note was
                       found for the current URL or the current URL was mentioned
                       in a note.
                     </MenuItem>
@@ -1025,14 +1025,15 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   label={
                     <>
                       <b>
-                        Suggest a template when a dedicated page for the current
-                        URL is found?
+                        Suggest a template when a{" "}
+                        <WikiLink target="Page Notes">Page Note</WikiLink>
+                        for the current URL is found?
                       </b>{" "}
                       When the URL of the page you are visiting has been found
-                      to match the <code>url</code> field in the frontmatter of
-                      an existing note in your vault, suggest a template for
-                      updating the existing note? This feature requires that you
-                      have enabled search features.
+                      to have a{" "}
+                      <WikiLink target="Page Notes">Page Note</WikiLink>,
+                      suggest a template for updating the existing note? This
+                      feature requires that you have enabled search features.
                     </>
                   }
                 />
