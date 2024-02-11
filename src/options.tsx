@@ -3,7 +3,11 @@ import ReactDOM from "react-dom";
 
 import compareVersions from "compare-versions";
 import { detect } from "detect-browser";
-import Joyride from "react-joyride";
+import Joyride, {
+  CallBackProps as JoyrideCallbackProps,
+  STATUS as JOYRIDE_STATUS,
+  Status as JoyrideStatusType,
+} from "react-joyride";
 
 import ThemeProvider from "@mui/system/ThemeProvider";
 import Button from "@mui/material/Button";
@@ -40,6 +44,7 @@ import ExportSettings from "@mui/icons-material/FileDownload";
 import BugReport from "@mui/icons-material/BugReport";
 
 import {
+  CurrentMaxOnboardingVersion,
   DefaultContentTemplate,
   DefaultHeaders,
   DefaultMethod,
@@ -120,7 +125,7 @@ export const OnboardingSteps: OnboardingStep[] = [
     target: "#protip-section",
     content: (
       <Typography paragraph={true}>
-        If you're curious about otherideas around how Obsidian Web can be used
+        If you're curious about other ideas around how Obsidian Web can be used
         to improve your workflow, you might want to check out the wiki and
         discussions linked at the bottom of the page.
       </Typography>
@@ -222,8 +227,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const [errorLog, setErrorLog] = useState<LogEntry[]>([]);
   const [showBugReportModal, setShowBugReportModal] = useState<boolean>(false);
-  const [showOnboardingFromVersion, setShowOnboardingFromVersion] =
-    useState<string>("");
+  const [onboardedToVersion, setOnboardedToVersion] = useState<string>("");
   const [filteredOnboardingSteps, setFilteredOnboardingSteps] = useState<
     OnboardingStep[]
   >([]);
@@ -335,9 +339,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             template: searchMatchDirectTemplate,
           },
         },
-        showOnboardingFromVersion: showOnboardingFromVersion,
+        onboardedToVersion: onboardedToVersion,
       };
-      console.log("Saving settings", syncSettings);
       await chrome.storage.sync.set(syncSettings);
       showSaveNotice();
     }
@@ -353,7 +356,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     searchMatchMentionTemplate,
     hoverEnabled,
     searchMatchAutoOpen,
-    showOnboardingFromVersion,
+    onboardedToVersion,
   ]);
 
   useEffect(() => {
@@ -379,7 +382,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       );
       setSearchMatchMentionTemplate(syncSettings.searchMatch.mentions.template);
       setHoverEnabled(syncSettings.searchMatch.hoverEnabled);
-      setShowOnboardingFromVersion(syncSettings.showOnboardingFromVersion);
+      setOnboardedToVersion(syncSettings.onboardedToVersion);
       setLoaded(true);
 
       // If we do not have access to all origins, we do not have sufficient
@@ -457,19 +460,29 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   }, [searchBackgroundEnabled]);
 
   useEffect(() => {
-    if (showOnboardingFromVersion) {
+    if (loaded && !onboardedToVersion) {
       setFilteredOnboardingSteps(
         OnboardingSteps.filter(
           (step) =>
             compareVersions(
               step.onboardingVersion,
-              showOnboardingFromVersion
+              onboardedToVersion || "0.0"
             ) >= 0
         )
       );
-      setShowOnboardingFromVersion("");
     }
-  }, [showOnboardingFromVersion]);
+  }, [loaded, onboardedToVersion]);
+
+  const onOnboardingAdvance = (props: JoyrideCallbackProps) => {
+    const completedStatuses: JoyrideStatusType[] = [
+      JOYRIDE_STATUS.FINISHED,
+      JOYRIDE_STATUS.SKIPPED,
+    ];
+
+    if (completedStatuses.indexOf(props.status) !== -1) {
+      setOnboardedToVersion(CurrentMaxOnboardingVersion);
+    }
+  };
 
   const openEditingModal = async (
     idx: number | null,
@@ -803,6 +816,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           showSkipButton={true}
           run={true}
           scrollToFirstStep={true}
+          callback={onOnboardingAdvance}
         />
       )}
       <Paper className="options-container">

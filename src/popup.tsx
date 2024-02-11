@@ -48,7 +48,10 @@ import {
 } from "./utils";
 import { getUrlMentions, obsidianRequest } from "./utils/requests";
 import RequestParameters from "./components/RequestParameters";
-import { TurndownConfiguration } from "./constants";
+import {
+  CurrentMaxOnboardingVersion,
+  TurndownConfiguration,
+} from "./constants";
 import MentionNotice from "./components/MentionNotice";
 import { Chip, NativeSelect, Paper } from "@mui/material";
 import MouseOverChip from "./components/MouseOverChip";
@@ -164,8 +167,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const [popupFormDisplayed, setPopupFormDisplayed] =
       useState<boolean>(false);
 
-    const [showOnboardingFromVersion, setShowOnboardingFromVersion] =
-      useState<string>("");
+    const [onboardedToVersion, setOnboardedToVersion] = useState<string>("");
 
     const [displayState, setDisplayState] = useState<
       "welcome" | "form" | "error" | "loading" | "alert" | "permission"
@@ -384,7 +386,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
         } else {
           setHoverEnabled(false);
         }
-        setShowOnboardingFromVersion(syncSettings.showOnboardingFromVersion);
+        setOnboardedToVersion(syncSettings.onboardedToVersion);
       }
       handle();
     }, []);
@@ -605,8 +607,12 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                     evt.stopPropagation();
                   }}
                 >
-                  {showOnboardingFromVersion &&
-                    compareVersions(showOnboardingFromVersion, "0.0") > 0 && (
+                  {onboardedToVersion &&
+                    compareVersions(onboardedToVersion, "0.0") > 0 &&
+                    compareVersions(
+                      onboardedToVersion,
+                      CurrentMaxOnboardingVersion
+                    ) < 0 && (
                       <MaterialAlert severity="success">
                         <p className="popup-text">
                           New features were added as part of the latest version

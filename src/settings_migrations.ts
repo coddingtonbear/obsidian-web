@@ -74,15 +74,12 @@ export async function migrateSyncSettings(
     // were erroneously setting the sync version to 2.0 in options.tsx;
     // so we need to just bump the version number up.
     settings.version = "2.0";
-    if (!settings.showOnboardingFromVersion) {
-      settings.showOnboardingFromVersion = "0.2";
-    }
     await sync.clear();
     await sync.set(settings);
   }
   if (settings.version == "2.0") {
-    if (!settings.showOnboardingFromVersion) {
-      settings.showOnboardingFromVersion = "2.0";
+    if (!settings.onboardedToVersion) {
+      settings.onboardedToVersion = "2.0";
     }
     settings.searchMatch.autoOpen = "never";
     settings.version = "2.1";

@@ -9,6 +9,8 @@ import {
 
 export const MinVersion = "1.3.1";
 
+export const CurrentMaxOnboardingVersion = "3.2";
+
 export const DefaultContentTemplate =
   '---\npage-title: {{json page.title}}\nurl: {{page.url}}\nweb-message:\nweb-badge-color: ""\nweb-badge-message:\ndate: "{{date}}"\n---\n{{#if page.selectedText}}\n\n{{quote page.selectedText}}\n{{/if}}';
 export const DefaultUrlTemplate = "/vault/{{filename page.title}}.md";
@@ -101,7 +103,7 @@ export const DefaultSyncSettings: ExtensionSyncSettings = {
       template: DefaultSearchMatchTemplate,
     },
   },
-  showOnboardingFromVersion: "0.0",
+  onboardedToVersion: "",
 };
 
 export const KnownSyncSettingKeys = [
@@ -112,7 +114,7 @@ export const KnownSyncSettingKeys = [
   "searchBackgroundEnabled",
   "searchMatchMentionTemplate",
   "searchMatchDirectTemplate",
-  "showOnboardingFromVersion",
+  "onboardedToVersion",
 ];
 
 export const TurndownConfiguration: TurndownService.Options = {

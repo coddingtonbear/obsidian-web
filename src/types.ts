@@ -77,7 +77,7 @@ export interface ExtensionSyncSettings {
       template: OutputPreset;
     };
   };
-  showOnboardingFromVersion: string;
+  onboardedToVersion: string;
 }
 
 export interface AlertStatus {
