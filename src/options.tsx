@@ -93,7 +93,6 @@ export interface Props {
 export const OnboardingSteps: OnboardingStep[] = [
   {
     disableBeacon: true,
-    onboardingVersion: "0.0",
     target: "#api-key-settings-panel",
     content: (
       <>
@@ -108,7 +107,6 @@ export const OnboardingSteps: OnboardingStep[] = [
   },
   {
     disableBeacon: true,
-    onboardingVersion: "0.0",
     target: "#templates-section",
     content: (
       <Typography paragraph={true}>
@@ -121,7 +119,6 @@ export const OnboardingSteps: OnboardingStep[] = [
   },
   {
     disableBeacon: true,
-    onboardingVersion: "0.0",
     target: "#protip-section",
     content: (
       <Typography paragraph={true}>
@@ -134,6 +131,7 @@ export const OnboardingSteps: OnboardingStep[] = [
   {
     disableBeacon: true,
     onboardingVersion: "3.2",
+    skipDuringInitialOnboarding: true,
     target: "#automatically-display-matches-section",
     content: (
       <Typography paragraph={true}>
@@ -146,6 +144,7 @@ export const OnboardingSteps: OnboardingStep[] = [
   {
     disableBeacon: true,
     onboardingVersion: "3.2",
+    skipDuringInitialOnboarding: true,
     target: "#hover-messages-toggle",
     content: (
       <Typography paragraph={true}>
@@ -462,13 +461,19 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   useEffect(() => {
     if (loaded) {
       setFilteredOnboardingSteps(
-        OnboardingSteps.filter(
-          (step) =>
+        OnboardingSteps.filter((step) => {
+          const meetsMinimumVersionRequirement =
+            !onboardedToVersion ||
             compareVersions(
-              step.onboardingVersion,
-              onboardedToVersion || "0.0"
-            ) > 0
-        )
+              step.onboardingVersion ?? "0.0",
+              onboardedToVersion
+            ) > 0;
+          const shouldBeSkipped =
+            (step.skipDuringInitialOnboarding ?? false) &&
+            onboardedToVersion === "";
+
+          return meetsMinimumVersionRequirement && !shouldBeSkipped;
+        })
       );
     }
   }, [loaded, onboardedToVersion]);

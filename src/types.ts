@@ -234,5 +234,6 @@ export interface PreviewContext {
 }
 
 export interface OnboardingStep extends JoyrideStep {
-  onboardingVersion: string;
+  onboardingVersion?: string;
+  skipDuringInitialOnboarding?: boolean;
 }
