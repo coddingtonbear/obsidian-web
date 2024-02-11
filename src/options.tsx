@@ -257,7 +257,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       let usedInsecureMode = false;
 
       if (apiKey === "") {
-        setApiKeyError(undefined);
+        setApiKeyError(
+          "A valid API key from Obsidian Local REST API is required."
+        );
       } else {
         let result: Response;
         try {
@@ -942,7 +944,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                       )}
                     </>
                   )}
-                  {apiKeyError && (
+                  {loaded && apiKeyError && (
                     <Error
                       color="error"
                       fontSize="large"
@@ -959,12 +961,12 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   )}
                 </div>
               </div>
-              {apiKeyError && (
+              {loaded && apiKeyError && (
                 <div className="option-value">
                   <MaterialAlert severity="error">{apiKeyError}</MaterialAlert>
                 </div>
               )}
-              {!hasHostPermission && (
+              {loaded && !hasHostPermission && (
                 <div className="option-value">
                   <MaterialAlert severity="error">
                     This browser extension does not have permission for the host{" "}
@@ -977,22 +979,24 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   </MaterialAlert>
                 </div>
               )}
-              {pluginVersion && compareVersions(pluginVersion, minVersion) < 0 && (
-                <>
-                  <div className="option-value">
-                    <MaterialAlert severity="warning">
-                      <strong>
-                        Your install of Obsidian Local REST API is out-of-date
-                        and missing some important capabilities.
-                      </strong>{" "}
-                      Some features may not work correctly as a result. Please
-                      go to the "Community Plugins" section of your settings in
-                      Obsidian to update the "Obsidian Local REST API" plugin to
-                      the latest version.
-                    </MaterialAlert>
-                  </div>
-                </>
-              )}
+              {loaded &&
+                pluginVersion &&
+                compareVersions(pluginVersion, minVersion) < 0 && (
+                  <>
+                    <div className="option-value">
+                      <MaterialAlert severity="warning">
+                        <strong>
+                          Your install of Obsidian Local REST API is out-of-date
+                          and missing some important capabilities.
+                        </strong>{" "}
+                        Some features may not work correctly as a result. Please
+                        go to the "Community Plugins" section of your settings
+                        in Obsidian to update the "Obsidian Local REST API"
+                        plugin to the latest version.
+                      </MaterialAlert>
+                    </div>
+                  </>
+                )}
             </div>
           </div>
           <div className="option">
