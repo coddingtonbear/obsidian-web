@@ -971,16 +971,46 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 }
               />
             </FormGroup>
-            <div className="option">
-              <h2>Page Notes</h2>
+            <Paper className="paper-option-panel">
+              <h3>Automatically Display Matches</h3>
               <Typography paragraph={true}>
-                If you have a note having a frontmatter field or property named{" "}
-                <code>url</code> that matches the URL of the page you are
-                currently visiting, we consider that note to be dedicated to
-                that URL. If we find such a note, we can show you a message when
-                such a note was found and can even suggest using a particular
-                template for updating that note.
+                Do you want to be shown a message when the URL you are visiting
+                has a page note or has been mentioned in a note? Below, you can
+                configure conditions in which the dialog will be opened
+                automatically to let you know when you have been to this URL
+                before. This feature requires that background searches be
+                enabled.
+                <Chip size="small" label="Requires extra permissions" />
               </Typography>
+              <Typography paragraph={true}>
+                <FormControl fullWidth={true}>
+                  <Select
+                    onChange={(evt) => onChangeAutoOpen(evt.target.value)}
+                    value={searchMatchAutoOpen}
+                    disabled={!searchBackgroundEnabled}
+                  >
+                    <MenuItem value="never">
+                      Never open the dialog automatically
+                    </MenuItem>
+                    <MenuItem value="direct-message">
+                      Open the dialog automatically when a page note was found
+                      for the current URL, and a web-message was set.
+                    </MenuItem>
+                    <MenuItem value="direct">
+                      Open the dialog automatically when a page note was found
+                      for the current URL.
+                    </MenuItem>
+                    <MenuItem value="mention">
+                      Open the dialog automatically when either a page note was
+                      found for the current URL or the current URL was mentioned
+                      in a note.
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Typography>
+            </Paper>
+            <Paper className="paper-option-panel">
+              <h3>Template Suggestions</h3>
               <FormGroup>
                 <FormControlLabel
                   control={
@@ -1022,14 +1052,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   Configure Template to use for Page Notes
                 </Button>
               </FormGroup>
-            </div>
-            <div className="option">
-              <h2>Mentioned URL Detection</h2>
-              <Typography paragraph={true}>
-                If the URL you are currently visiting has been mentioned on one
-                of your notes, we can help you become aware of that and can even
-                suggest using a particular template to modify that note.
-              </Typography>
               <FormGroup>
                 <FormControlLabel
                   control={
@@ -1070,45 +1092,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   Configure Template to use for Mentions
                 </Button>
               </FormGroup>
-            </div>
-            <div className="option">
-              <h2>Automatically Display Matches</h2>
-              <Typography paragraph={true}>
-                Do you want to be reminded when the URL you are visiting has a
-                note or has been mentioned in one of them? You can below
-                configure conditions in which the dialog will be opened
-                automatically to let you know when you have been to this URL
-                before. This feature requires that background searches be
-                enabled.
-                <Chip size="small" label="Requires extra permissions" />
-              </Typography>
-              <Typography paragraph={true}>
-                <FormControl fullWidth={true}>
-                  <Select
-                    onChange={(evt) => onChangeAutoOpen(evt.target.value)}
-                    value={searchMatchAutoOpen}
-                    disabled={!searchBackgroundEnabled}
-                  >
-                    <MenuItem value="never">
-                      Never open the dialog automatically
-                    </MenuItem>
-                    <MenuItem value="direct-message">
-                      Open the dialog automatically when a page note was found
-                      for the current URL, and a web-message was set.
-                    </MenuItem>
-                    <MenuItem value="direct">
-                      Open the dialog automatically when a page note was found
-                      for the current URL.
-                    </MenuItem>
-                    <MenuItem value="mention">
-                      Open the dialog automatically when either a page note was
-                      found for the current URL or the current URL was mentioned
-                      in a note.
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Typography>
-            </div>
+            </Paper>
           </div>
           <div className="option">
             <h2>Templates</h2>
