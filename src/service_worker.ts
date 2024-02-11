@@ -76,30 +76,13 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       url
     );
 
-    if (mentions.direct.length > 0) {
-      chrome.action.setBadgeBackgroundColor({
-        color: "#A68B36",
-        tabId,
-      });
+    if (mentions.count > 0) {
       chrome.action.setBadgeText({
-        text: `${mentions.direct.length}`,
+        text: `${mentions.count}`,
         tabId,
       });
       chrome.action.setTitle({
-        title: `${mentions.direct.length} mentions`,
-        tabId,
-      });
-    } else if (mentions.mentions.length > 0) {
-      chrome.action.setBadgeBackgroundColor({
-        color: "#3D7D98",
-        tabId,
-      });
-      chrome.action.setBadgeText({
-        text: `${mentions.mentions.length}`,
-        tabId,
-      });
-      chrome.action.setTitle({
-        title: `${mentions.mentions.length} mentions`,
+        title: `${mentions.count} mentions`,
         tabId,
       });
     } else {
@@ -109,6 +92,18 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       });
       chrome.action.setTitle({
         title: "",
+        tabId,
+      });
+    }
+
+    if (mentions.direct.length > 0) {
+      chrome.action.setBadgeBackgroundColor({
+        color: "#A68B36",
+        tabId,
+      });
+    } else if (mentions.mentions.length > 0) {
+      chrome.action.setBadgeBackgroundColor({
+        color: "#3D7D98",
         tabId,
       });
     }

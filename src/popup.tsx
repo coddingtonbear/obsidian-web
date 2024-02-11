@@ -580,8 +580,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
         {mouseOverTarget &&
           mousePosition &&
           mouseOverMentions &&
-          (mouseOverMentions.direct.length > 0 ||
-            mouseOverMentions.mentions.length > 0) && (
+          mouseOverMentions.count > 0 && (
             <MouseOverChip
               mousePosition={mousePosition}
               mentions={mouseOverMentions}

@@ -72,9 +72,13 @@ export async function getUrlMentions(
     return pageMetadata;
   }
 
+  const mentions = await handleMentions();
+  const direct = await handleDirect();
+
   return {
-    mentions: await handleMentions(),
-    direct: await handleDirect(),
+    mentions,
+    direct,
+    count: direct.length + (mentions.length - direct.length),
   };
 }
 export async function getPageMetadata(

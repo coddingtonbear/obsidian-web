@@ -32,9 +32,7 @@ const MouseOverChip: React.FunctionComponent<Props> = ({
   };
 
   const getMouseOverMentionCount = (): number => {
-    return (mentions?.direct.length ?? 0) > 0
-      ? mentions?.direct.length
-      : mentions?.mentions.length;
+    return mentions.count;
   };
 
   const getMouseOverMessage = (): string | undefined => {

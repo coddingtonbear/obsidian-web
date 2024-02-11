@@ -137,6 +137,7 @@ export interface SearchJsonResponseItemWithMetadata
 export interface UrlMentionContainer {
   mentions: SearchJsonResponseItem[];
   direct: SearchJsonResponseItemWithMetadata[];
+  count: number;
 }
 
 export interface StatusResponse {
