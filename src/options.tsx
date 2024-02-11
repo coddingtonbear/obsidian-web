@@ -350,7 +350,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   // Inter-feature dependencies
   useEffect(() => {
-    if (!searchEnabled) {
+    if (!searchEnabled && loaded) {
       onToggleBackgroundSearch(false);
       onChangeHoverEnabled(false);
       setSearchMatchDirectEnabled(false);
@@ -359,7 +359,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   }, [searchEnabled]);
 
   useEffect(() => {
-    if (!searchBackgroundEnabled) {
+    if (!searchBackgroundEnabled && loaded) {
       onChangeAutoOpen("never");
     }
   }, [searchBackgroundEnabled]);
