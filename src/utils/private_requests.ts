@@ -5,6 +5,7 @@ import {
   SearchJsonResponseItemWithMetadata,
   UrlMentionContainer,
 } from "../types";
+import { countMentions } from ".";
 
 export async function _getUrlMentions(
   hostname: string,
@@ -63,7 +64,7 @@ export async function _getUrlMentions(
   return {
     mentions,
     direct,
-    count: direct.length + (mentions.length - direct.length),
+    count: countMentions(mentions, direct),
   };
 }
 export async function _obsidianSearchRequest(

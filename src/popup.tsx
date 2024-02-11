@@ -240,7 +240,8 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     useEffect(() => {
       async function handler() {
         if (mouseOverTarget) {
-          setMouseOverMentions(await getUrlMentions(mouseOverTarget.href));
+          const mentions = await getUrlMentions(mouseOverTarget.href);
+          setMouseOverMentions(mentions);
         }
       }
 

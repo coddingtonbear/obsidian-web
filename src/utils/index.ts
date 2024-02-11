@@ -17,6 +17,8 @@ import {
   ObsidianResponseError,
   BackgroundErrorLog,
   LogEntry,
+  SearchJsonResponseItem,
+  SearchJsonResponseItemWithMetadata,
 } from "../types";
 import {
   DefaultSyncSettings,
@@ -220,4 +222,21 @@ export function compileTemplateCallback(
   }
 
   delete HandlebarsCallbacks[eventData.request.id];
+}
+
+export function countMentions(
+  mentions: SearchJsonResponseItem[],
+  direct: SearchJsonResponseItemWithMetadata[]
+): number {
+  const matchedFiles = [];
+
+  for (const list of [mentions, direct]) {
+    for (const mention of list) {
+      if (matchedFiles.indexOf(mention.filename) === -1) {
+        matchedFiles.push(mention.filename);
+      }
+    }
+  }
+
+  return matchedFiles.length;
 }

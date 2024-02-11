@@ -1,4 +1,4 @@
-import { sendBackgroundRequest } from ".";
+import { countMentions, sendBackgroundRequest } from ".";
 
 import {
   FileMetadataObject,
@@ -78,7 +78,7 @@ export async function getUrlMentions(
   return {
     mentions,
     direct,
-    count: direct.length + (mentions.length - direct.length),
+    count: countMentions(mentions, direct),
   };
 }
 export async function getPageMetadata(
