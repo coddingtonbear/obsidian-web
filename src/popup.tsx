@@ -590,6 +590,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const onFinished = () => {
       setPopupFormDisplayed(false);
       setPopupDisplayed(false);
+      setStatus(undefined);
     };
 
     return (
