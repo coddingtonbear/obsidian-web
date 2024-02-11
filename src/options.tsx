@@ -617,7 +617,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       if (searchMatchAutoOpen === "never") {
         chrome.permissions.remove(
           {
-            permissions: ["scripting"],
             origins: [`http://*/*`, "https://*/*"],
           },
           () => {
@@ -630,7 +629,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     } else {
       chrome.permissions.request(
         {
-          permissions: ["scripting"],
           origins: [`http://*/*`, `https://*/*`],
         },
         (granted) => {
@@ -648,7 +646,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         if (!hoverEnabled) {
           chrome.permissions.remove(
             {
-              permissions: ["scripting"],
               origins: [`http://*/*`, "https://*/*"],
             },
             () => {
@@ -662,7 +659,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       default:
         chrome.permissions.request(
           {
-            permissions: ["scripting"],
             origins: [`http://*/*`, `https://*/*`],
           },
           (granted) => {
