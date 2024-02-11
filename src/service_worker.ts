@@ -122,7 +122,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       injectScript(tabId, () => window.ObsidianWeb.showPopUpMessage());
     } else if (
       syncSettings.searchMatch.autoOpen === "mention" &&
-      mentions.mentions.length > 0
+      mentions.count > 0 // Any direct or mention is sufficient
     ) {
       injectScript(tabId, () => window.ObsidianWeb.showPopUpMessage());
     } else if (syncSettings.searchMatch.hoverEnabled) {
