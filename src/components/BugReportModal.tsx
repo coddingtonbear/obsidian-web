@@ -79,11 +79,11 @@ const BugReportModal: React.FC<Props> = ({
             }
             label={
               <>
-                <b>Include log entries from the previous fifteen minutes?</b>
-                &nbsp;This information is needed when troubleshooting problems
-                that are occurring in background scripts. If you select this
-                option, the exported file may reveal private information like
-                what websites you have recently visited in any tab.
+                <b>Include log entries from the previous fifteen minutes?</b>{" "}
+                This information is needed when troubleshooting problems that
+                are occurring in background scripts. If you select this option,
+                the exported file may reveal private information like what
+                websites you have recently visited in any tab.
               </>
             }
           />
@@ -100,14 +100,14 @@ const BugReportModal: React.FC<Props> = ({
             }
             label={
               <>
-                <b>Include a snapshot of your plugin configuration?</b>
-                &nbsp;This information is needed when troubleshooting
-                configuration or template-related problems. If you select this
-                option, the exported file may reveal detailed information about
-                the template presets you have created, the address of the host
-                you have configured this extension to communicate with, the
-                permissions you've granted to the plugin, and the options you
-                have enabled within the plugin.
+                <b>Include a snapshot of your plugin configuration?</b> This
+                information is needed when troubleshooting configuration or
+                template-related problems. If you select this option, the
+                exported file may reveal detailed information about the template
+                presets you have created, the address of the host you have
+                configured this extension to communicate with, the permissions
+                you've granted to the plugin, and the options you have enabled
+                within the plugin.
               </>
             }
           />
