@@ -403,7 +403,16 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       }
     }, [host]);
 
-    async function getPreviewContext(): Promise<Record<string, any>> {
+    const [previewContext, setPreviewContext] =
+      React.useState<Record<string, any>>();
+
+    useEffect(() => {
+      if (popupFormDisplayed) {
+        updatePreviewContext();
+      }
+    }, [popupFormDisplayed]);
+
+    async function updatePreviewContext(): Promise<void> {
       let selectedText: string;
       try {
         const selectionReadability = htmlToReadabilityData(
@@ -446,7 +455,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           readabilityDataToMarkdown(pageReadability);
       } catch (e) {}
 
-      return previewContext;
+      setPreviewContext(previewContext);
     }
 
     useEffect(() => {
@@ -794,7 +803,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                                 url={formUrl}
                                 sandbox={sandbox}
                                 headers={formHeaders}
-                                getPreviewContext={getPreviewContext}
+                                previewContext={previewContext ?? {}}
                                 content={formContent}
                                 onChangeMethod={setFormMethod}
                                 onChangeUrl={setFormUrl}

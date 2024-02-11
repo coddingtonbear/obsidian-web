@@ -123,9 +123,7 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
           allowUrlConfiguration={isAdhocSelectedTemplate}
           method={method}
           sandbox={sandbox}
-          getPreviewContext={() =>
-            new Promise((resolve, reject) => resolve(DefaultPreviewContext))
-          }
+          previewContext={DefaultPreviewContext}
           url={urlTemplate}
           headers={headers}
           content={contentTemplate}

@@ -15,7 +15,7 @@ interface Props {
   method: UrlOutputPreset["method"];
   showCrystalizeOption?: boolean;
   sandbox: HTMLIFrameElement;
-  getPreviewContext: () => Promise<Record<string, any>>;
+  previewContext: Record<string, any>;
   allowUrlConfiguration?: boolean;
   url: string;
   headers: Record<string, string>;
@@ -34,7 +34,7 @@ interface Props {
 const RequestParameters: React.FC<Props> = ({
   method,
   sandbox,
-  getPreviewContext,
+  previewContext,
   showCrystalizeOption = false,
   allowUrlConfiguration = true,
   url,
@@ -73,35 +73,31 @@ const RequestParameters: React.FC<Props> = ({
     setCompiledContentMatches(content === compiledContent);
   }, [content, compiledContent]);
 
-  React.useEffect(() => {
-    async function handle() {
-      try {
-        const renderedContent = await compileTemplate(
-          sandbox,
-          content,
-          await getPreviewContext()
-        );
-        setCompiledContent(renderedContent);
-        setCompiledContentError(undefined);
-        if (onChangeRenderedContent) {
-          onChangeRenderedContent(renderedContent);
-        }
-      } catch (e) {
-        setCompiledContentError(e as string);
+  const generateCompiledContent = async () => {
+    try {
+      const renderedContent = await compileTemplate(
+        sandbox,
+        content,
+        previewContext
+      );
+      setCompiledContent(renderedContent);
+      setCompiledContentError(undefined);
+      if (onChangeRenderedContent) {
+        onChangeRenderedContent(renderedContent);
       }
+    } catch (e) {
+      setCompiledContentError(e as string);
     }
+  };
 
-    handle();
-  }, [content]);
+  React.useEffect(() => {
+    generateCompiledContent();
+  }, [content, previewContext]);
 
   React.useEffect(() => {
     async function handle() {
       try {
-        const renderedUrl = await compileTemplate(
-          sandbox,
-          url,
-          await getPreviewContext()
-        );
+        const renderedUrl = await compileTemplate(sandbox, url, previewContext);
 
         setCompiledUrl(renderedUrl);
         setCompiledUrlError(undefined);
