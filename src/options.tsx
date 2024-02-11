@@ -347,6 +347,22 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     });
   }, []);
 
+  // Inter-feature dependencies
+  useEffect(() => {
+    if (!searchEnabled) {
+      onToggleBackgroundSearch(false);
+      onChangeHoverEnabled(false);
+      setSearchMatchDirectEnabled(false);
+      setSearchMatchMentionEnabled(false);
+    }
+  }, [searchEnabled]);
+
+  useEffect(() => {
+    if (!searchBackgroundEnabled) {
+      onChangeAutoOpen("never");
+    }
+  }, [searchBackgroundEnabled]);
+
   const openEditingModal = async (
     idx: number | null,
     template?: number | undefined
@@ -453,27 +469,23 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         {
           permissions: ["tabs"],
         },
-        (removed) => {
-          if (removed) {
-            setSearchBackgroundEnabled(targetStateEnabled);
-          }
+        () => {
+          setSearchBackgroundEnabled(targetStateEnabled);
         }
       );
     }
   };
 
-  const onChangeHoverEnabled = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    if (!evt.target.checked) {
+  const onChangeHoverEnabled = (checked: boolean) => {
+    if (!checked) {
       if (searchMatchAutoOpen === "never") {
         chrome.permissions.remove(
           {
             permissions: ["scripting"],
             origins: [`http://*/*`, "https://*/*"],
           },
-          (removed) => {
-            if (removed) {
-              setHoverEnabled(false);
-            }
+          () => {
+            setHoverEnabled(false);
           }
         );
       } else {
@@ -494,8 +506,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     }
   };
 
-  const onChangeAutoOpen = (evt: SelectChangeEvent<AutoOpenOption>) => {
-    switch (evt.target.value) {
+  const onChangeAutoOpen = (value: string) => {
+    switch (value) {
       case "never":
         if (!hoverEnabled) {
           chrome.permissions.remove(
@@ -503,10 +515,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
               permissions: ["scripting"],
               origins: [`http://*/*`, "https://*/*"],
             },
-            (removed) => {
-              if (removed) {
-                setSearchMatchAutoOpen("never");
-              }
+            () => {
+              setSearchMatchAutoOpen("never");
             }
           );
         } else {
@@ -521,7 +531,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           },
           (granted) => {
             if (granted) {
-              setSearchMatchAutoOpen(evt.target.value as AutoOpenOption);
+              setSearchMatchAutoOpen(value as AutoOpenOption);
             }
           }
         );
@@ -890,10 +900,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 control={
                   <Switch
                     onChange={(evt) => {
-                      // If background search is enabled; disable it first.
-                      if (searchBackgroundEnabled) {
-                        onToggleBackgroundSearch(false);
-                      }
                       setSearchEnabled(evt.target.checked);
                     }}
                     checked={searchEnabled}
@@ -909,6 +915,31 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     are currently visiting, and pages on which you've mentioned
                     the URL you are visiting will be shown to you in the dialog
                     when you activate the extension.
+                  </>
+                }
+              />
+            </FormGroup>
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    onChange={(evt) => onChangeHoverEnabled(evt.target.checked)}
+                    disabled={!searchEnabled}
+                    checked={hoverEnabled}
+                  />
+                }
+                label={
+                  <>
+                    <b>
+                      Search for previous notes about linked pages when you
+                      hover over links?
+                    </b>{" "}
+                    If you turn this feature on, a tooltip will be displayed
+                    when hovering over links targeting pages you have created
+                    notes for or have mentioned in a note. The displayed message
+                    can be customized using <code>web-message</code> and other
+                    frontmatter fields.
+                    <Chip size="small" label="Requires extra permissions" />
                   </>
                 }
               />
@@ -935,31 +966,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     the URL you are visiting will be searched for as you browse
                     the internet. If a match is found, a badge will be shown on
                     the extension icon.
-                    <Chip size="small" label="Requires extra permissions" />
-                  </>
-                }
-              />
-            </FormGroup>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch
-                    onChange={onChangeHoverEnabled}
-                    disabled={!searchEnabled}
-                    checked={hoverEnabled}
-                  />
-                }
-                label={
-                  <>
-                    <b>
-                      Search for previous notes about linked pages when you
-                      hover over links?
-                    </b>{" "}
-                    If you turn this feature on, a tooltip will be displayed
-                    when hovering over links targeting pages you have created
-                    notes for or have mentioned in a note. The displayed message
-                    can be customized using <code>web-message</code> and other
-                    frontmatter fields.
                     <Chip size="small" label="Requires extra permissions" />
                   </>
                 }
@@ -1079,7 +1085,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
               <Typography paragraph={true}>
                 <FormControl fullWidth={true}>
                   <Select
-                    onChange={onChangeAutoOpen}
+                    onChange={(evt) => onChangeAutoOpen(evt.target.value)}
                     value={searchMatchAutoOpen}
                     disabled={!searchBackgroundEnabled}
                   >
