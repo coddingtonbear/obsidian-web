@@ -259,7 +259,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           document.removeEventListener("keydown", handleEscapeKey);
         }
       };
-    }, []);
+    }, [hoverEnabled]);
 
     const onSandboxMessage = (message: MessageEvent<any>) => {
       if (
