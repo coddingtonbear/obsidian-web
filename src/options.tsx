@@ -909,9 +909,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                       Search for previous notes about this page when you
                       activate the extension?
                     </b>{" "}
-                    If you turn this feature on,{" "}
-                    <WikiLink target="Page Notes">Page Notes</WikiLink> for URL
-                    you are currently visiting, and pages on which you've
+                    If enabled,{" "}
+                    <WikiLink target="Page Notes">Page Notes</WikiLink> for the
+                    URL you are currently visiting, and pages on which you've
                     mentioned the URL you are visiting will be shown to you in
                     the dialog when you activate the extension.
                   </>
@@ -934,10 +934,11 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                       hover over links?{" "}
                       <WikiLink target="Hover Messages">(docs)</WikiLink>
                     </b>{" "}
-                    If you turn this feature on, a tooltip will be displayed
-                    when hovering over links targeting pages you have created
-                    notes for or have mentioned in a note. The displayed message
-                    can be customized using <code>web-message</code> and other
+                    If enabled, a tooltip will be displayed when hovering over
+                    links targeting pages you have created{" "}
+                    <WikiLink target="Page Notes">Page Notes</WikiLink> for or
+                    have mentioned in a note. The displayed message can be
+                    customized using <code>web-message</code> and other
                     frontmatter fields.
                     <Chip size="small" label="Requires extra permissions" />
                   </>
@@ -964,12 +965,12 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                         (docs)
                       </WikiLink>
                     </b>{" "}
-                    If you turn this feature on,{" "}
+                    If enabled,{" "}
                     <WikiLink target="Page Notes">Page Notes</WikiLink> for the
                     URL you are currently visiting, and pages on which you've
                     mentioned the URL you are visiting will be searched for as
-                    you browse the internet. If a match is found, a badge will
-                    be shown on the extension icon.
+                    you browse. If a matching note is found, a badge will be
+                    shown on the extension icon.
                     <Chip size="small" label="Requires extra permissions" />
                   </>
                 }
