@@ -63,7 +63,11 @@ const MouseOverChip: React.FunctionComponent<Props> = ({
       className="hover-popup"
       label={
         <>
-          {getMouseOverBadgeMessage() && <b>{getMouseOverBadgeMessage()}</b>}
+          {getMouseOverBadgeMessage() && (
+            <>
+              <b>{getMouseOverBadgeMessage()}</b>{" "}
+            </>
+          )}
           {getMouseOverMessage()}{" "}
           <i>
             ({getMouseOverMentionCount()} mention
