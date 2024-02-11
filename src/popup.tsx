@@ -244,8 +244,13 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
     useEffect(() => {
       async function handler() {
-        if (mouseOverTarget) {
-          const mentions = await getUrlMentions(mouseOverTarget.href);
+        if (
+          mouseOverTarget &&
+          mouseOverTarget.href &&
+          window.location.href !== mouseOverTarget.href
+        ) {
+          const url = new URL(mouseOverTarget.href, window.location.href).href;
+          const mentions = await getUrlMentions(url);
           setMouseOverMentions(mentions);
         }
       }
