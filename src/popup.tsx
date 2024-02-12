@@ -100,17 +100,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     },
   };
 
-  function preventBrowserFromStealingKeypress(event: KeyboardEvent) {
-    if (event.code !== "Escape") {
-      event.stopPropagation();
-    }
-  }
-  document.addEventListener(
-    "keydown",
-    preventBrowserFromStealingKeypress,
-    true
-  );
-
   interface Props {
     sandbox: HTMLIFrameElement;
   }
@@ -406,10 +395,34 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const [previewContext, setPreviewContext] =
       React.useState<Record<string, any>>();
 
+    function preventBrowserFromStealingKeypress(event: KeyboardEvent) {
+      if (event.code !== "Escape") {
+        event.stopPropagation();
+      }
+    }
+
     useEffect(() => {
       if (popupFormDisplayed) {
         updatePreviewContext();
+        document.addEventListener(
+          "keydown",
+          preventBrowserFromStealingKeypress,
+          true
+        );
+      } else {
+        document.removeEventListener(
+          "keydown",
+          preventBrowserFromStealingKeypress,
+          true
+        );
       }
+      return () => {
+        document.removeEventListener(
+          "keydown",
+          preventBrowserFromStealingKeypress,
+          true
+        );
+      };
     }, [popupFormDisplayed]);
 
     async function updatePreviewContext(): Promise<void> {
