@@ -1,10 +1,17 @@
 import { AlertProps } from "@mui/material/Alert";
 import { Step as JoyrideStep } from "react-joyride";
 
+export interface OutputPresetFieldDefinition {
+  name: string;
+  type: "text" | "date" | "time" | "datetime" | "checkbox";
+  placeholderValue: string;
+}
+
 export interface OutputPreset {
   contentTemplate: string;
   headers: Record<string, string>;
   method: "post" | "put" | "patch";
+  fields?: OutputPresetFieldDefinition[];
 }
 
 export interface UrlOutputPreset extends OutputPreset {

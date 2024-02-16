@@ -4,16 +4,32 @@ import RequestParameters from "./RequestParameters";
 import Modal from "@mui/material/Modal";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
-import { ConfiguredTemplate } from "../types";
+import CreateIcon from "@mui/icons-material/AddCircle";
+import { ConfiguredTemplate, OutputPresetFieldDefinition } from "../types";
 import { DefaultPreviewContext } from "../constants";
-import { Alert } from "@mui/material";
+import {
+  Alert,
+  Checkbox,
+  FormControlLabel,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import WikiLink from "./WikiLink";
+import { DatePicker, DateTimePicker, TimePicker } from "@mui/x-date-pickers";
 
 export interface Props {
   open: boolean;
   sandbox: HTMLIFrameElement;
   isAdhocSelectedTemplate?: boolean;
+  fields?: OutputPresetFieldDefinition[];
   name?: string;
   method?: ConfiguredTemplate["method"];
   urlTemplate?: string;
@@ -27,6 +43,7 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
   open,
   sandbox,
   isAdhocSelectedTemplate = true,
+  fields,
   name: originalName,
   method: originalMethod = "post",
   urlTemplate: originalUrlTemplate,
@@ -47,6 +64,9 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
   );
   const [method, setMethod] =
     React.useState<ConfiguredTemplate["method"]>(originalMethod);
+  const [formFields, setFormFields] = React.useState<
+    OutputPresetFieldDefinition[]
+  >(fields ?? []);
 
   const [saveError, setSaveError] = React.useState<boolean>(false);
 
@@ -119,6 +139,170 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
             </>
           )}
         </Alert>
+        <div>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Field Name</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Placeholder Value</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {formFields.map((formField, idx) => (
+                  <TableRow key={formField.name + idx}>
+                    <TableCell>
+                      OK
+                      <TextField
+                        label="Field Name"
+                        onChange={(evt) => {
+                          setFormFields((fields) => {
+                            const newFields = [...fields];
+                            newFields[idx].name = evt.target.value;
+                            return newFields;
+                          });
+                        }}
+                        value={formField.name}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        onChange={(evt) => {
+                          setFormFields((fields) => {
+                            const newFields = [...fields];
+                            newFields[idx].type = evt.target
+                              .value as OutputPresetFieldDefinition["type"];
+                            return newFields;
+                          });
+                        }}
+                        value={formField.type}
+                      >
+                        <MenuItem value="text">Text</MenuItem>
+                        <MenuItem value="text">Checkbox</MenuItem>
+                        <MenuItem value="text">Date</MenuItem>
+                        <MenuItem value="text">Time</MenuItem>
+                        <MenuItem value="text">Date and Time</MenuItem>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      {formField.type === "text" && (
+                        <TextField
+                          label="Placeholder"
+                          value={formField.placeholderValue}
+                          onChange={(evt) => {
+                            setFormFields((fields) => {
+                              const newFields = [...fields];
+                              newFields[idx] = {
+                                ...fields[idx],
+                                placeholderValue: evt.target.value,
+                              };
+                              return newFields;
+                            });
+                          }}
+                        />
+                      )}
+                      {formField.type === "checkbox" && (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              value={formField.placeholderValue === "true"}
+                              onChange={(evt) => {
+                                setFormFields((fields) => {
+                                  const newFields = [...fields];
+                                  newFields[idx] = {
+                                    ...fields[idx],
+                                    placeholderValue: evt.target.checked
+                                      ? "true"
+                                      : "false",
+                                  };
+                                  return newFields;
+                                });
+                              }}
+                            />
+                          }
+                          label="Label"
+                        />
+                      )}
+                      {formField.type === "date" && (
+                        <DatePicker
+                          label="Placeholder"
+                          value={formField.placeholderValue}
+                          onChange={(value) => {
+                            setFormFields((fields) => {
+                              const newFields = [...fields];
+                              newFields[idx] = {
+                                ...fields[idx],
+                                placeholderValue: value ?? "",
+                              };
+                              return newFields;
+                            });
+                          }}
+                        />
+                      )}
+                      {formField.type === "time" && (
+                        <TimePicker
+                          label="Placeholder"
+                          value={formField.placeholderValue}
+                          onChange={(value) => {
+                            setFormFields((fields) => {
+                              const newFields = [...fields];
+                              newFields[idx] = {
+                                ...fields[idx],
+                                placeholderValue: value ?? "",
+                              };
+                              return newFields;
+                            });
+                          }}
+                        />
+                      )}
+                      {formField.type === "datetime" && (
+                        <DateTimePicker
+                          label="Placeholder"
+                          value={formField.placeholderValue}
+                          onChange={(value) => {
+                            setFormFields((fields) => {
+                              const newFields = [...fields];
+                              newFields[idx] = {
+                                ...fields[idx],
+                                placeholderValue: value ?? "",
+                              };
+                              return newFields;
+                            });
+                          }}
+                        />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow key="new">
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell></TableCell>
+                  <TableCell align="right">
+                    <IconButton
+                      onClick={() => {
+                        setFormFields((value) => {
+                          return [
+                            ...value,
+                            {
+                              name: `New Field ${value.length + 1}`,
+                              type: "text",
+                              placeholderValue: "",
+                            },
+                          ];
+                        });
+                      }}
+                    >
+                      <CreateIcon titleAccess="Create new template" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
         <RequestParameters
           allowUrlConfiguration={isAdhocSelectedTemplate}
           method={method}
