@@ -4,6 +4,7 @@ import {
   ExtensionLocalSettings,
   ExtensionSyncSettings,
   OutputPreset,
+  OutputPresetFieldDefinition,
   PreviewContext,
 } from "./types";
 
@@ -126,3 +127,20 @@ export const TurndownConfiguration: TurndownService.Options = {
 };
 
 export const MaximumErrorLogLength = 250;
+
+export const DefaultOutputPresetFieldDefinitionOptions: Record<
+  OutputPresetFieldDefinition["type"],
+  Record<string, any>
+> = {
+  text: {},
+  checkbox: {},
+  date: {
+    format: "yyyy-LL-dd",
+  },
+  datetime: {
+    format: "yyyy-LL-dd'T'HH:mm",
+  },
+  time: {
+    format: "HH:mm",
+  },
+};

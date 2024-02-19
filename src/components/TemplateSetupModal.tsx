@@ -150,6 +150,7 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
                 <TableHead>
                   <TableRow>
                     <TableCell>Field Name</TableCell>
+                    <TableCell>Template Variable</TableCell>
                     <TableCell>Type</TableCell>
                     <TableCell>Default Value</TableCell>
                     <TableCell align="right">Actions</TableCell>
@@ -159,6 +160,12 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
                   {formFields.map((formField, idx) => (
                     <TableRow key={formField.name + idx}>
                       <TableCell>{formField.name}</TableCell>
+                      <TableCell>
+                        <code>
+                          {"{{"}form.{formField.name}
+                          {"}}"}
+                        </code>
+                      </TableCell>
                       <TableCell>{formField.type}</TableCell>
                       <TableCell>{formField.defaultValue}</TableCell>
                       <TableCell>

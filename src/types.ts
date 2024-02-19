@@ -5,6 +5,7 @@ export interface OutputPresetFieldDefinition {
   name: string;
   type: "text" | "date" | "time" | "datetime" | "checkbox";
   defaultValue: string;
+  options: Record<string, any>;
 }
 
 export interface OutputPreset {
