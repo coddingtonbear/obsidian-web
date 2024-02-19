@@ -46,6 +46,7 @@
     "@types/chrome": "0.0.158",
     "@types/clone-deep": "^4.0.4",
     "@types/jest": "^27.0.2",
+    "@types/luxon": "^3.4.2",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/turndown": "^5.0.1",

@@ -129,9 +129,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       injectScript(tabId, () => {});
     }
 
-    console.log("Processing pageview");
     for (const mention of mentions.direct) {
-      console.log("Looking at direct mentions");
       if (typeof mention.meta.frontmatter["web-badge-color"] === "string") {
         chrome.action.setBadgeBackgroundColor({
           color: mention.meta.frontmatter["web-badge-color"],

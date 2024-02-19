@@ -4,7 +4,7 @@ import { Step as JoyrideStep } from "react-joyride";
 export interface OutputPresetFieldDefinition {
   name: string;
   type: "text" | "date" | "time" | "datetime" | "checkbox";
-  placeholderValue: string;
+  defaultValue: string;
 }
 
 export interface OutputPreset {

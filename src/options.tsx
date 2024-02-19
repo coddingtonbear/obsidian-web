@@ -42,6 +42,8 @@ import RestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import ImportSettings from "@mui/icons-material/FileUpload";
 import ExportSettings from "@mui/icons-material/FileDownload";
 import BugReport from "@mui/icons-material/BugReport";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
 import {
   CurrentMaxOnboardingVersion,
@@ -530,11 +532,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       const preset = presets[idx];
 
       const underEdit: ConfiguredTemplate = {
+        ...preset,
         name: fromTemplate ? `Copy of ${preset.name}` : preset.name,
-        urlTemplate: preset.urlTemplate,
-        contentTemplate: preset.contentTemplate,
-        headers: preset.headers,
-        method: preset.method,
       };
       showPresetEditor(underEdit, true, (preset: ConfiguredTemplate) => {
         const newPresets = presets.slice();
@@ -819,625 +818,633 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   };
 
   return (
-    <ThemeProvider theme={PurpleTheme}>
-      {filteredOnboardingSteps.length > 0 && (
-        <Joyride
-          steps={filteredOnboardingSteps}
-          continuous={true}
-          showProgress={true}
-          showSkipButton={true}
-          scrollToFirstStep={true}
-          callback={onOnboardingAdvance}
-        />
-      )}
-      <Paper className="options-container">
-        <div className="options-header">
-          <div className="left">
-            <img src="./icon48.png" />
-          </div>
-          <h1>Obsidian Web Settings</h1>
-          <div className="right">
-            <div>
-              <IconButton
-                title="Import Settings as JSON"
-                aria-label="import settings as JSON"
-                onClick={onImportSettings}
-              >
-                <ImportSettings fontSize="small" />
-              </IconButton>
-              <IconButton
-                title="Export Settings as JSON"
-                aria-label="export settings as JSON"
-                onClick={onExportSettings}
-              >
-                <ExportSettings fontSize="small" />
-              </IconButton>
-              <IconButton
-                id="bug-report-button"
-                title="Are you having trouble? Report a bug."
-                aria-label="report a bug"
-                color="error"
-                onClick={() => setShowBugReportModal(true)}
-              >
-                <BugReport fontSize="small" />
-              </IconButton>
-            </div>
-          </div>
-        </div>
-        {browser && browser.name !== "chrome" && (
-          <UnsupportedEnvironmentWarning />
+    <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <ThemeProvider theme={PurpleTheme}>
+        {filteredOnboardingSteps.length > 0 && (
+          <Joyride
+            steps={filteredOnboardingSteps}
+            continuous={true}
+            showProgress={true}
+            showSkipButton={true}
+            scrollToFirstStep={true}
+            callback={onOnboardingAdvance}
+          />
         )}
-        <div className="option-panel">
-          <div id="api-key-settings-panel">
-            <Typography paragraph={true}>
-              Obsidian Web integrates with Obsidian via the interface provided
-              by the{" "}
-              <a
-                href="https://github.com/coddingtonbear/obsidian-local-rest-api"
-                target="_blank"
-              >
-                Local REST API
-              </a>{" "}
-              plugin. Before beginning to use this, you will want to install and
-              enable that plugin from within Obsidian.
-            </Typography>
-            <div className="option">
-              <div className="option-value host">
-                <TextField
-                  label="Hostname"
-                  className="auth-field"
-                  onBlur={() => {
-                    setHost(tempHost);
-                    checkHasHostPermission(tempHost).then((result) => {
-                      setHasHostPermission(result);
-                      if (!result) {
-                        setRequestingHostPermissionFor(tempHost);
-                      }
-                    });
-                  }}
-                  onChange={(event) => setTempHost(event.target.value)}
-                  value={tempHost}
-                  helperText="Hostname on which Obsidian is running (usually 127.0.0.1)."
-                />
-                <div className="validation-icon">
-                  {!hasHostPermission && (
-                    <Error
-                      className="action-icon"
-                      color="error"
-                      fontSize="large"
-                      titleAccess="Missing permissions.  Click to grant."
-                      onClick={() => setRequestingHostPermissionFor(host)}
-                    />
-                  )}
-                </div>
+        <Paper className="options-container">
+          <div className="options-header">
+            <div className="left">
+              <img src="./icon48.png" />
+            </div>
+            <h1>Obsidian Web Settings</h1>
+            <div className="right">
+              <div>
+                <IconButton
+                  title="Import Settings as JSON"
+                  aria-label="import settings as JSON"
+                  onClick={onImportSettings}
+                >
+                  <ImportSettings fontSize="small" />
+                </IconButton>
+                <IconButton
+                  title="Export Settings as JSON"
+                  aria-label="export settings as JSON"
+                  onClick={onExportSettings}
+                >
+                  <ExportSettings fontSize="small" />
+                </IconButton>
+                <IconButton
+                  id="bug-report-button"
+                  title="Are you having trouble? Report a bug."
+                  aria-label="report a bug"
+                  color="error"
+                  onClick={() => setShowBugReportModal(true)}
+                >
+                  <BugReport fontSize="small" />
+                </IconButton>
               </div>
             </div>
-            <div className="option">
-              <div className="option-value api-key">
-                <TextField
-                  label="API Key"
-                  className="auth-field"
-                  value={apiKey}
-                  helperText="You can find your API key in the 'Local REST API' section of your settings in Obsidian."
-                  onChange={(event) => setApiKey(event.target.value)}
-                />
-                <div className="validation-icon">
-                  {apiKeyOk && (
-                    <>
-                      {insecureMode && (
-                        <InsecureConnection
-                          color="warning"
-                          fontSize="large"
-                          titleAccess="Connected insecurely to the API via HTTP."
-                        />
-                      )}
-                      {!insecureMode && (
-                        <SecureConnection
-                          color="success"
-                          fontSize="large"
-                          titleAccess="Connected securely to the API via HTTPS."
-                        />
-                      )}
-                    </>
-                  )}
-                  {loaded && apiKeyError && (
-                    <Error
-                      color="error"
-                      fontSize="large"
-                      className="action-icon"
-                      onClick={() => {
-                        const tempApiKey = apiKey;
-                        setApiKey("");
-                        setTimeout(() => {
-                          setApiKey(tempApiKey);
-                        }, 1);
-                      }}
-                      titleAccess="Could not connect to the API. Click to retry."
-                    />
-                  )}
-                </div>
-              </div>
-              {loaded && apiKeyError && (
-                <div className="option-value">
-                  <MaterialAlert severity="error">{apiKeyError}</MaterialAlert>
-                </div>
-              )}
-              {loaded && !hasHostPermission && (
-                <div className="option-value">
-                  <MaterialAlert severity="error">
-                    This browser extension does not have permission for the host{" "}
-                    <code>{tempHost}</code>.
-                    <Button
-                      onClick={() => setRequestingHostPermissionFor(host)}
-                    >
-                      Grant Permissions
-                    </Button>
-                  </MaterialAlert>
-                </div>
-              )}
-              {loaded &&
-                pluginVersion &&
-                compareVersions(pluginVersion, minVersion) < 0 && (
-                  <>
-                    <div className="option-value">
-                      <MaterialAlert severity="warning">
-                        <strong>
-                          Your install of Obsidian Local REST API is out-of-date
-                          and missing some important capabilities.
-                        </strong>{" "}
-                        Some features may not work correctly as a result. Please
-                        go to the "Community Plugins" section of your settings
-                        in Obsidian to update the "Obsidian Local REST API"
-                        plugin to the latest version.
-                      </MaterialAlert>
-                    </div>
-                  </>
-                )}
-            </div>
           </div>
-          <div className="option">
-            <h2>Keyboard Shortcut</h2>
-            {keyboardShortcut ? (
+          {browser && browser.name !== "chrome" && (
+            <UnsupportedEnvironmentWarning />
+          )}
+          <div className="option-panel">
+            <div id="api-key-settings-panel">
               <Typography paragraph={true}>
-                You can launch Obsidian Web by pressing{" "}
-                <code>{keyboardShortcut}</code>. If you would like to select a
-                different shortcut, you can do so via{" "}
+                Obsidian Web integrates with Obsidian via the interface provided
+                by the{" "}
                 <a
-                  href="#"
-                  onClick={(event) => {
-                    chrome.tabs.create({
-                      url: "chrome://extensions/shortcuts",
-                    });
-                    event.preventDefault();
-                  }}
+                  href="https://github.com/coddingtonbear/obsidian-local-rest-api"
+                  target="_blank"
                 >
-                  Chrome's shortcut settings
-                </a>
-                .
+                  Local REST API
+                </a>{" "}
+                plugin. Before beginning to use this, you will want to install
+                and enable that plugin from within Obsidian.
               </Typography>
-            ) : (
-              <Typography paragraph={true}>
-                No keyboard shortcut is currently configured. If you would like
-                to select a shortcut, you can do so via{" "}
-                <a
-                  href="#"
-                  onClick={(event) => {
-                    chrome.tabs.create({
-                      url: "chrome://extensions/shortcuts",
-                    });
-                    event.preventDefault();
-                  }}
-                >
-                  Chrome's shortcut settings
-                </a>
-                .
-              </Typography>
-            )}
-          </div>
-          <div className="option">
-            <h2>Note Recall</h2>
-            <Typography paragraph={true}>
-              Have you been to this page before? Maybe you already have notes
-              about it. Enabling this feature will let this extension search
-              your notes for references to the URL you are visiting.
-            </Typography>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch
-                    onChange={(evt) => {
-                      setSearchEnabled(evt.target.checked);
+              <div className="option">
+                <div className="option-value host">
+                  <TextField
+                    label="Hostname"
+                    className="auth-field"
+                    onBlur={() => {
+                      setHost(tempHost);
+                      checkHasHostPermission(tempHost).then((result) => {
+                        setHasHostPermission(result);
+                        if (!result) {
+                          setRequestingHostPermissionFor(tempHost);
+                        }
+                      });
                     }}
-                    checked={searchEnabled}
+                    onChange={(event) => setTempHost(event.target.value)}
+                    value={tempHost}
+                    helperText="Hostname on which Obsidian is running (usually 127.0.0.1)."
                   />
-                }
-                label={
-                  <>
-                    <b>
-                      Search for previous notes about this page when you
-                      activate the extension?
-                    </b>{" "}
-                    If enabled,{" "}
-                    <WikiLink target="Page Notes">Page Notes</WikiLink> for the
-                    URL you are currently visiting, and pages on which you've
-                    mentioned the URL you are visiting will be shown to you in
-                    the dialog when you activate the extension.
-                  </>
-                }
-              />
-            </FormGroup>
-            <FormGroup>
-              <FormControlLabel
-                id="hover-messages-toggle"
-                control={
-                  <Switch
-                    onChange={(evt) => onChangeHoverEnabled(evt.target.checked)}
-                    disabled={!searchEnabled}
-                    checked={hoverEnabled}
+                  <div className="validation-icon">
+                    {!hasHostPermission && (
+                      <Error
+                        className="action-icon"
+                        color="error"
+                        fontSize="large"
+                        titleAccess="Missing permissions.  Click to grant."
+                        onClick={() => setRequestingHostPermissionFor(host)}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="option">
+                <div className="option-value api-key">
+                  <TextField
+                    label="API Key"
+                    className="auth-field"
+                    value={apiKey}
+                    helperText="You can find your API key in the 'Local REST API' section of your settings in Obsidian."
+                    onChange={(event) => setApiKey(event.target.value)}
                   />
-                }
-                label={
-                  <>
-                    <b>
-                      Search for previous notes about linked pages when you
-                      hover over links?{" "}
-                      <WikiLink target="Hover Messages">(docs)</WikiLink>
-                    </b>{" "}
-                    If enabled, a tooltip will be displayed when hovering over
-                    links targeting pages you have created{" "}
-                    <WikiLink target="Page Notes">Page Notes</WikiLink> for or
-                    have mentioned in a note. The displayed message can be
-                    customized using <code>web-message</code> and other
-                    frontmatter fields.
-                    <Chip size="small" label="Requires extra permissions" />
-                  </>
-                }
-              />
-            </FormGroup>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch
-                    onChange={(evt) =>
-                      onToggleBackgroundSearch(evt.target.checked)
-                    }
-                    disabled={!searchEnabled}
-                    checked={searchBackgroundEnabled}
-                  />
-                }
-                label={
-                  <>
-                    <b>
-                      Search for previous notes about this page in the
-                      background?{" "}
-                      <WikiLink target="Extension Badge Messages">
-                        (docs)
-                      </WikiLink>
-                    </b>{" "}
-                    If enabled,{" "}
-                    <WikiLink target="Page Notes">Page Notes</WikiLink> for the
-                    URL you are currently visiting, and pages on which you've
-                    mentioned the URL you are visiting will be searched for as
-                    you browse. If a matching note is found, a badge will be
-                    shown on the extension icon.
-                    <Chip size="small" label="Requires extra permissions" />
-                  </>
-                }
-              />
-            </FormGroup>
-            <Paper
-              className="paper-option-panel"
-              id="automatically-display-matches-section"
-            >
-              <h3>
-                Automatically Display Matches{" "}
-                <WikiLink target="Automatic Match Display">(docs)</WikiLink>
-              </h3>
-              <Typography paragraph={true}>
-                Do you want to be shown a message when the URL you are visiting
-                has a <WikiLink target="Page Notes">Page Note</WikiLink> or has
-                been mentioned in a note? You can configure conditions in which
-                the dialog will be opened automatically to let you know when you
-                have been to this URL before. This feature requires that
-                background searches be enabled.
-                <Chip size="small" label="Requires extra permissions" />
-              </Typography>
-              <Typography paragraph={true}>
-                <FormControl fullWidth={true}>
-                  <Select
-                    onChange={(evt) => onChangeAutoOpen(evt.target.value)}
-                    value={searchMatchAutoOpen}
-                    disabled={!searchBackgroundEnabled}
-                    label=""
+                  <div className="validation-icon">
+                    {apiKeyOk && (
+                      <>
+                        {insecureMode && (
+                          <InsecureConnection
+                            color="warning"
+                            fontSize="large"
+                            titleAccess="Connected insecurely to the API via HTTP."
+                          />
+                        )}
+                        {!insecureMode && (
+                          <SecureConnection
+                            color="success"
+                            fontSize="large"
+                            titleAccess="Connected securely to the API via HTTPS."
+                          />
+                        )}
+                      </>
+                    )}
+                    {loaded && apiKeyError && (
+                      <Error
+                        color="error"
+                        fontSize="large"
+                        className="action-icon"
+                        onClick={() => {
+                          const tempApiKey = apiKey;
+                          setApiKey("");
+                          setTimeout(() => {
+                            setApiKey(tempApiKey);
+                          }, 1);
+                        }}
+                        titleAccess="Could not connect to the API. Click to retry."
+                      />
+                    )}
+                  </div>
+                </div>
+                {loaded && apiKeyError && (
+                  <div className="option-value">
+                    <MaterialAlert severity="error">
+                      {apiKeyError}
+                    </MaterialAlert>
+                  </div>
+                )}
+                {loaded && !hasHostPermission && (
+                  <div className="option-value">
+                    <MaterialAlert severity="error">
+                      This browser extension does not have permission for the
+                      host <code>{tempHost}</code>.
+                      <Button
+                        onClick={() => setRequestingHostPermissionFor(host)}
+                      >
+                        Grant Permissions
+                      </Button>
+                    </MaterialAlert>
+                  </div>
+                )}
+                {loaded &&
+                  pluginVersion &&
+                  compareVersions(pluginVersion, minVersion) < 0 && (
+                    <>
+                      <div className="option-value">
+                        <MaterialAlert severity="warning">
+                          <strong>
+                            Your install of Obsidian Local REST API is
+                            out-of-date and missing some important capabilities.
+                          </strong>{" "}
+                          Some features may not work correctly as a result.
+                          Please go to the "Community Plugins" section of your
+                          settings in Obsidian to update the "Obsidian Local
+                          REST API" plugin to the latest version.
+                        </MaterialAlert>
+                      </div>
+                    </>
+                  )}
+              </div>
+            </div>
+            <div className="option">
+              <h2>Keyboard Shortcut</h2>
+              {keyboardShortcut ? (
+                <Typography paragraph={true}>
+                  You can launch Obsidian Web by pressing{" "}
+                  <code>{keyboardShortcut}</code>. If you would like to select a
+                  different shortcut, you can do so via{" "}
+                  <a
+                    href="#"
+                    onClick={(event) => {
+                      chrome.tabs.create({
+                        url: "chrome://extensions/shortcuts",
+                      });
+                      event.preventDefault();
+                    }}
                   >
-                    <MenuItem value="never">
-                      Never open the dialog automatically
-                    </MenuItem>
-                    <MenuItem value="direct-message">
-                      Open the dialog automatically when a Page Note was found
-                      for the current URL, and a `web-message` was set.
-                    </MenuItem>
-                    <MenuItem value="direct">
-                      Open the dialog automatically when a Page Note was found
-                      for the current URL.
-                    </MenuItem>
-                    <MenuItem value="mention">
-                      Open the dialog automatically when either a Page Note was
-                      found for the current URL or the current URL was mentioned
-                      in a note.
-                    </MenuItem>
-                  </Select>
-                </FormControl>
+                    Chrome's shortcut settings
+                  </a>
+                  .
+                </Typography>
+              ) : (
+                <Typography paragraph={true}>
+                  No keyboard shortcut is currently configured. If you would
+                  like to select a shortcut, you can do so via{" "}
+                  <a
+                    href="#"
+                    onClick={(event) => {
+                      chrome.tabs.create({
+                        url: "chrome://extensions/shortcuts",
+                      });
+                      event.preventDefault();
+                    }}
+                  >
+                    Chrome's shortcut settings
+                  </a>
+                  .
+                </Typography>
+              )}
+            </div>
+            <div className="option">
+              <h2>Note Recall</h2>
+              <Typography paragraph={true}>
+                Have you been to this page before? Maybe you already have notes
+                about it. Enabling this feature will let this extension search
+                your notes for references to the URL you are visiting.
               </Typography>
-            </Paper>
-            <Paper className="paper-option-panel">
-              <h3>Template Suggestions</h3>
               <FormGroup>
                 <FormControlLabel
                   control={
                     <Switch
-                      onChange={(evt) =>
-                        setSearchMatchDirectEnabled(evt.target.checked)
-                      }
-                      disabled={!searchEnabled}
-                      checked={searchMatchDirectEnabled}
+                      onChange={(evt) => {
+                        setSearchEnabled(evt.target.checked);
+                      }}
+                      checked={searchEnabled}
                     />
                   }
                   label={
                     <>
                       <b>
-                        Suggest a template when a{" "}
-                        <WikiLink target="Page Notes">Page Note</WikiLink> for
-                        the current URL is found?
+                        Search for previous notes about this page when you
+                        activate the extension?
                       </b>{" "}
-                      When the URL of the page you are visiting has been found
-                      to have a{" "}
-                      <WikiLink target="Page Notes">Page Note</WikiLink>,
-                      suggest a template for updating the existing note? This
-                      feature requires that you have enabled search features.
+                      If enabled,{" "}
+                      <WikiLink target="Page Notes">Page Notes</WikiLink> for
+                      the URL you are currently visiting, and pages on which
+                      you've mentioned the URL you are visiting will be shown to
+                      you in the dialog when you activate the extension.
                     </>
                   }
                 />
-                <Button
-                  disabled={!searchMatchDirectEnabled}
-                  onClick={() => {
-                    showPresetEditor(
-                      searchMatchDirectTemplate,
-                      false,
-                      (preset: ConfiguredTemplate) => {
-                        setSearchMatchDirectTemplate(preset);
+              </FormGroup>
+              <FormGroup>
+                <FormControlLabel
+                  id="hover-messages-toggle"
+                  control={
+                    <Switch
+                      onChange={(evt) =>
+                        onChangeHoverEnabled(evt.target.checked)
                       }
-                    );
-                  }}
-                  variant="outlined"
-                >
-                  Configure Template to use for Page Notes
-                </Button>
+                      disabled={!searchEnabled}
+                      checked={hoverEnabled}
+                    />
+                  }
+                  label={
+                    <>
+                      <b>
+                        Search for previous notes about linked pages when you
+                        hover over links?{" "}
+                        <WikiLink target="Hover Messages">(docs)</WikiLink>
+                      </b>{" "}
+                      If enabled, a tooltip will be displayed when hovering over
+                      links targeting pages you have created{" "}
+                      <WikiLink target="Page Notes">Page Notes</WikiLink> for or
+                      have mentioned in a note. The displayed message can be
+                      customized using <code>web-message</code> and other
+                      frontmatter fields.
+                      <Chip size="small" label="Requires extra permissions" />
+                    </>
+                  }
+                />
               </FormGroup>
               <FormGroup>
                 <FormControlLabel
                   control={
                     <Switch
                       onChange={(evt) =>
-                        setSearchMatchMentionEnabled(evt.target.checked)
+                        onToggleBackgroundSearch(evt.target.checked)
                       }
                       disabled={!searchEnabled}
-                      checked={searchMatchMentionEnabled}
+                      checked={searchBackgroundEnabled}
                     />
                   }
                   label={
                     <>
                       <b>
-                        Suggest a template when a note mentioning this URL is
-                        found?
+                        Search for previous notes about this page in the
+                        background?{" "}
+                        <WikiLink target="Extension Badge Messages">
+                          (docs)
+                        </WikiLink>
                       </b>{" "}
-                      When the URL of the page you are visiting has been found
-                      in the content of a note in your vault, suggest a template
-                      for updating the existing note? This feature requires that
-                      you enable search features.
+                      If enabled,{" "}
+                      <WikiLink target="Page Notes">Page Notes</WikiLink> for
+                      the URL you are currently visiting, and pages on which
+                      you've mentioned the URL you are visiting will be searched
+                      for as you browse. If a matching note is found, a badge
+                      will be shown on the extension icon.
+                      <Chip size="small" label="Requires extra permissions" />
                     </>
                   }
                 />
-                <Button
-                  disabled={!searchMatchMentionEnabled}
-                  onClick={() => {
-                    showPresetEditor(
-                      searchMatchMentionTemplate,
-                      false,
-                      (preset: ConfiguredTemplate) => {
-                        setSearchMatchMentionTemplate(preset);
-                      }
-                    );
-                  }}
-                  variant="outlined"
-                >
-                  Configure Template to use for Mentions
-                </Button>
               </FormGroup>
-            </Paper>
-          </div>
-          <div className="option" id="templates-section">
-            <h2>
-              Templates{" "}
-              <WikiLink target="Understanding Templates">(docs)</WikiLink>
-            </h2>
-            <Typography paragraph={true}>
-              You can configure multiple templates for use when inserting
-              content into Obsidian. Each template describes how to convert
-              information about the current tab into content for insertion into
-              your notes.
-            </Typography>
-            <div className="option-value">
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell></TableCell>
-                      <TableCell>Name</TableCell>
-                      <TableCell align="right">Options</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {presets.map((preset, idx) => (
-                      <TableRow key={preset.name + idx}>
-                        <TableCell>
-                          {idx === 0 && (
-                            <Star fontSize="small" titleAccess="Default" />
-                          )}
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {preset.name}
-                        </TableCell>
+              <Paper
+                className="paper-option-panel"
+                id="automatically-display-matches-section"
+              >
+                <h3>
+                  Automatically Display Matches{" "}
+                  <WikiLink target="Automatic Match Display">(docs)</WikiLink>
+                </h3>
+                <Typography paragraph={true}>
+                  Do you want to be shown a message when the URL you are
+                  visiting has a{" "}
+                  <WikiLink target="Page Notes">Page Note</WikiLink> or has been
+                  mentioned in a note? You can configure conditions in which the
+                  dialog will be opened automatically to let you know when you
+                  have been to this URL before. This feature requires that
+                  background searches be enabled.
+                  <Chip size="small" label="Requires extra permissions" />
+                </Typography>
+                <Typography paragraph={true}>
+                  <FormControl fullWidth={true}>
+                    <Select
+                      onChange={(evt) => onChangeAutoOpen(evt.target.value)}
+                      value={searchMatchAutoOpen}
+                      disabled={!searchBackgroundEnabled}
+                      label=""
+                    >
+                      <MenuItem value="never">
+                        Never open the dialog automatically
+                      </MenuItem>
+                      <MenuItem value="direct-message">
+                        Open the dialog automatically when a Page Note was found
+                        for the current URL, and a `web-message` was set.
+                      </MenuItem>
+                      <MenuItem value="direct">
+                        Open the dialog automatically when a Page Note was found
+                        for the current URL.
+                      </MenuItem>
+                      <MenuItem value="mention">
+                        Open the dialog automatically when either a Page Note
+                        was found for the current URL or the current URL was
+                        mentioned in a note.
+                      </MenuItem>
+                    </Select>
+                  </FormControl>
+                </Typography>
+              </Paper>
+              <Paper className="paper-option-panel">
+                <h3>Template Suggestions</h3>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(evt) =>
+                          setSearchMatchDirectEnabled(evt.target.checked)
+                        }
+                        disabled={!searchEnabled}
+                        checked={searchMatchDirectEnabled}
+                      />
+                    }
+                    label={
+                      <>
+                        <b>
+                          Suggest a template when a{" "}
+                          <WikiLink target="Page Notes">Page Note</WikiLink> for
+                          the current URL is found?
+                        </b>{" "}
+                        When the URL of the page you are visiting has been found
+                        to have a{" "}
+                        <WikiLink target="Page Notes">Page Note</WikiLink>,
+                        suggest a template for updating the existing note? This
+                        feature requires that you have enabled search features.
+                      </>
+                    }
+                  />
+                  <Button
+                    disabled={!searchMatchDirectEnabled}
+                    onClick={() => {
+                      showPresetEditor(
+                        searchMatchDirectTemplate,
+                        false,
+                        (preset: ConfiguredTemplate) => {
+                          setSearchMatchDirectTemplate(preset);
+                        }
+                      );
+                    }}
+                    variant="outlined"
+                  >
+                    Configure Template to use for Page Notes
+                  </Button>
+                </FormGroup>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(evt) =>
+                          setSearchMatchMentionEnabled(evt.target.checked)
+                        }
+                        disabled={!searchEnabled}
+                        checked={searchMatchMentionEnabled}
+                      />
+                    }
+                    label={
+                      <>
+                        <b>
+                          Suggest a template when a note mentioning this URL is
+                          found?
+                        </b>{" "}
+                        When the URL of the page you are visiting has been found
+                        in the content of a note in your vault, suggest a
+                        template for updating the existing note? This feature
+                        requires that you enable search features.
+                      </>
+                    }
+                  />
+                  <Button
+                    disabled={!searchMatchMentionEnabled}
+                    onClick={() => {
+                      showPresetEditor(
+                        searchMatchMentionTemplate,
+                        false,
+                        (preset: ConfiguredTemplate) => {
+                          setSearchMatchMentionTemplate(preset);
+                        }
+                      );
+                    }}
+                    variant="outlined"
+                  >
+                    Configure Template to use for Mentions
+                  </Button>
+                </FormGroup>
+              </Paper>
+            </div>
+            <div className="option" id="templates-section">
+              <h2>
+                Templates{" "}
+                <WikiLink target="Understanding Templates">(docs)</WikiLink>
+              </h2>
+              <Typography paragraph={true}>
+                You can configure multiple templates for use when inserting
+                content into Obsidian. Each template describes how to convert
+                information about the current tab into content for insertion
+                into your notes.
+              </Typography>
+              <div className="option-value">
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell></TableCell>
+                        <TableCell>Name</TableCell>
+                        <TableCell align="right">Options</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {presets.map((preset, idx) => (
+                        <TableRow key={preset.name + idx}>
+                          <TableCell>
+                            {idx === 0 && (
+                              <Star fontSize="small" titleAccess="Default" />
+                            )}
+                          </TableCell>
+                          <TableCell component="th" scope="row">
+                            {preset.name}
+                          </TableCell>
+                          <TableCell align="right">
+                            {idx !== 0 && (
+                              <IconButton
+                                title="Make Default"
+                                aria-label="make default"
+                                onClick={() => {
+                                  setAsDefault(idx);
+                                }}
+                              >
+                                <Promote />
+                              </IconButton>
+                            )}
+                            <IconButton
+                              title="Edit"
+                              aria-label="edit"
+                              onClick={() => {
+                                openEditingModal(idx);
+                              }}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton
+                              title="Duplicate"
+                              aria-label="duplicate"
+                              onClick={() => {
+                                openEditingModal(null, idx);
+                              }}
+                            >
+                              <Copy />
+                            </IconButton>
+                            {presets.length > 1 && (
+                              <IconButton
+                                title="Delete"
+                                aria-label="delete"
+                                onClick={() => {
+                                  deletePreset(idx);
+                                }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow key="new">
+                        <TableCell></TableCell>
+                        <TableCell component="th" scope="row"></TableCell>
                         <TableCell align="right">
-                          {idx !== 0 && (
-                            <IconButton
-                              title="Make Default"
-                              aria-label="make default"
-                              onClick={() => {
-                                setAsDefault(idx);
-                              }}
-                            >
-                              <Promote />
-                            </IconButton>
-                          )}
-                          <IconButton
-                            title="Edit"
-                            aria-label="edit"
-                            onClick={() => {
-                              openEditingModal(idx);
-                            }}
-                          >
-                            <EditIcon />
+                          <IconButton onClick={() => restoreDefaultTemplates()}>
+                            <RestoreIcon titleAccess="Restore default templates" />
                           </IconButton>
-                          <IconButton
-                            title="Duplicate"
-                            aria-label="duplicate"
-                            onClick={() => {
-                              openEditingModal(null, idx);
-                            }}
-                          >
-                            <Copy />
+                          <IconButton onClick={() => openEditingModal(null)}>
+                            <CreateIcon titleAccess="Create new template" />
                           </IconButton>
-                          {presets.length > 1 && (
-                            <IconButton
-                              title="Delete"
-                              aria-label="delete"
-                              onClick={() => {
-                                deletePreset(idx);
-                              }}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          )}
                         </TableCell>
                       </TableRow>
-                    ))}
-                    <TableRow key="new">
-                      <TableCell></TableCell>
-                      <TableCell component="th" scope="row"></TableCell>
-                      <TableCell align="right">
-                        <IconButton onClick={() => restoreDefaultTemplates()}>
-                          <RestoreIcon titleAccess="Restore default templates" />
-                        </IconButton>
-                        <IconButton onClick={() => openEditingModal(null)}>
-                          <CreateIcon titleAccess="Create new template" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </div>
             </div>
-          </div>
-          <Paper className="protip" id="protip-section">
-            <Typography paragraph={true}>
-              <strong>Protip:</strong> Looking for ideas about how you can use
-              this plugin to improve your workflow; have a look at the{" "}
-              <a
-                href="https://github.com/coddingtonbear/obsidian-web/wiki"
-                target="_blank"
-              >
-                Wiki
-              </a>{" "}
-              and{" "}
-              <a
-                href="https://github.com/coddingtonbear/obsidian-web/discussions"
-                target="_blank"
-              >
-                Discussions
-              </a>{" "}
-              for tips.
-            </Typography>
-          </Paper>
-          <Snackbar
-            open={Boolean(status)}
-            autoHideDuration={5000}
-            onClose={() => setStatus(undefined)}
-          >
-            <div>{status && <Alert value={status} />}</div>
-          </Snackbar>
-        </div>
-      </Paper>
-      <BugReportModal
-        open={showBugReportModal}
-        onClose={() => setShowBugReportModal(false)}
-        onExportBugReportData={onExportBugReportData}
-      />
-      <Modal
-        open={requestingHostPermissionFor !== undefined}
-        onClose={() => {
-          setRequestingHostPermissionFor(undefined);
-        }}
-      >
-        <Paper elevation={3} className="permission-modal">
-          <div className="modal-content">
-            <Typography paragraph={true}>
-              Obsidian Web needs your permission before it can interact with
-              Obsidian's API on '{requestingHostPermissionFor}'.
-            </Typography>
-          </div>
-          <div className="submit">
-            <Button
-              variant="outlined"
-              onClick={() => setRequestingHostPermissionFor(undefined)}
+            <Paper className="protip" id="protip-section">
+              <Typography paragraph={true}>
+                <strong>Protip:</strong> Looking for ideas about how you can use
+                this plugin to improve your workflow; have a look at the{" "}
+                <a
+                  href="https://github.com/coddingtonbear/obsidian-web/wiki"
+                  target="_blank"
+                >
+                  Wiki
+                </a>{" "}
+                and{" "}
+                <a
+                  href="https://github.com/coddingtonbear/obsidian-web/discussions"
+                  target="_blank"
+                >
+                  Discussions
+                </a>{" "}
+                for tips.
+              </Typography>
+            </Paper>
+            <Snackbar
+              open={Boolean(status)}
+              autoHideDuration={5000}
+              onClose={() => setStatus(undefined)}
             >
-              Cancel
-            </Button>
-            {requestingHostPermissionFor && (
-              <Button
-                variant="contained"
-                onClick={() => {
-                  requestHostPermission(requestingHostPermissionFor).then(
-                    (result) => {
-                      setHasHostPermission(result);
-                      if (result) {
-                        setRequestingHostPermissionFor(undefined);
-                      }
-                    }
-                  );
-                }}
-              >
-                Grant Permissions
-              </Button>
-            )}
+              <div>{status && <Alert value={status} />}</div>
+            </Snackbar>
           </div>
         </Paper>
-      </Modal>
-      {sandbox && presetUnderEdit && (
-        <TemplateSetupModal
-          open={presetEditorShown}
-          sandbox={sandbox}
-          isAdhocSelectedTemplate={presetEditorIncludesName}
-          name={presetUnderEdit.name}
-          method={presetUnderEdit.method}
-          urlTemplate={presetUnderEdit.urlTemplate}
-          headers={presetUnderEdit.headers}
-          contentTemplate={presetUnderEdit?.contentTemplate}
-          onSave={presetEditorSave}
-          onClose={hidePresetEditor}
+        <BugReportModal
+          open={showBugReportModal}
+          onClose={() => setShowBugReportModal(false)}
+          onExportBugReportData={onExportBugReportData}
         />
-      )}
-    </ThemeProvider>
+        <Modal
+          open={requestingHostPermissionFor !== undefined}
+          onClose={() => {
+            setRequestingHostPermissionFor(undefined);
+          }}
+        >
+          <Paper elevation={3} className="permission-modal">
+            <div className="modal-content">
+              <Typography paragraph={true}>
+                Obsidian Web needs your permission before it can interact with
+                Obsidian's API on '{requestingHostPermissionFor}'.
+              </Typography>
+            </div>
+            <div className="submit">
+              <Button
+                variant="outlined"
+                onClick={() => setRequestingHostPermissionFor(undefined)}
+              >
+                Cancel
+              </Button>
+              {requestingHostPermissionFor && (
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    requestHostPermission(requestingHostPermissionFor).then(
+                      (result) => {
+                        setHasHostPermission(result);
+                        if (result) {
+                          setRequestingHostPermissionFor(undefined);
+                        }
+                      }
+                    );
+                  }}
+                >
+                  Grant Permissions
+                </Button>
+              )}
+            </div>
+          </Paper>
+        </Modal>
+        {sandbox && presetUnderEdit && (
+          <TemplateSetupModal
+            open={presetEditorShown}
+            sandbox={sandbox}
+            isAdhocSelectedTemplate={presetEditorIncludesName}
+            name={presetUnderEdit.name}
+            method={presetUnderEdit.method}
+            urlTemplate={presetUnderEdit.urlTemplate}
+            headers={presetUnderEdit.headers}
+            contentTemplate={presetUnderEdit?.contentTemplate}
+            onSave={presetEditorSave}
+            onClose={hidePresetEditor}
+            fields={presetUnderEdit.fields}
+          />
+        )}
+      </ThemeProvider>
+    </LocalizationProvider>
   );
 };
 
