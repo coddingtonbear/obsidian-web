@@ -8,10 +8,15 @@ import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import CreateIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
+import Tab from "@mui/material/Tab";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
 import { ConfiguredTemplate, OutputPresetFieldDefinition } from "../types";
 import { DefaultPreviewContext } from "../constants";
 import {
   Alert,
+  Box,
   Stack,
   Table,
   TableBody,
@@ -73,6 +78,10 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
     number | null
   >(null);
 
+  const [currentTab, setCurrentTab] = React.useState<
+    "overview" | "fields" | "request"
+  >("overview");
+
   const [saveError, setSaveError] = React.useState<boolean>(false);
 
   const onAttemptSave = () => {
@@ -101,118 +110,173 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
                 onChange={(event) => setName(event.target.value)}
               />
             )}
-            <Alert severity="info">
-              <>
-                {isAdhocSelectedTemplate ? (
-                  <>
-                    You can use{" "}
-                    <a href="https://handlebarsjs.com/guide/" target="_blank">
-                      Handlebars
-                    </a>{" "}
-                    templating in your API URL and Content fields below.
-                  </>
-                ) : (
-                  <>
-                    You can use{" "}
-                    <a href="https://handlebarsjs.com/guide/" target="_blank">
-                      Handlebars
-                    </a>{" "}
-                    templating in your Content field below.
-                  </>
-                )}{" "}
-                See{" "}
-                <WikiLink target="Understanding Templates">
-                  Obsidian Web's template documentation
-                </WikiLink>{" "}
-                to get an understanding of how to write your template and what
-                context variables and helpers are available.
-              </>
-              {isAdhocSelectedTemplate && (
-                <>
-                  <br />
-                  <br />
-                  If you're not sure about what to enter for API URL below, see{" "}
-                  <a
-                    href="https://coddingtonbear.github.io/obsidian-local-rest-api/"
-                    target="_blank"
-                  >
-                    Obsidian Local REST API's live documentation
-                  </a>{" "}
-                  for insight into what URLs are provided for selecting the
-                  document you would like to modify.
-                </>
-              )}
-            </Alert>
-            <Typography variant="h1">Form Fields</Typography>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Field Name</TableCell>
-                    <TableCell>Template Variable</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Default Value</TableCell>
-                    <TableCell align="right">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {formFields.map((formField, idx) => (
-                    <TableRow key={formField.name + idx}>
-                      <TableCell>{formField.name}</TableCell>
-                      <TableCell>
-                        <code>
-                          {"{{"}form.{formField.name}
-                          {"}}"}
-                        </code>
-                      </TableCell>
-                      <TableCell>{formField.type}</TableCell>
-                      <TableCell>{formField.defaultValue}</TableCell>
-                      <TableCell>
-                        <IconButton
-                          onClick={() => {
-                            setShowEditingFormFieldModal(true);
-                            setEditingFormFieldIdx(idx);
-                          }}
+            <TabContext value={currentTab}>
+              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                <TabList
+                  onChange={(evt, newValue) => setCurrentTab(newValue)}
+                  aria-label="template configuration form sections"
+                >
+                  <Tab label="Overview" value="overview" />
+                  <Tab label="Form Fields" value="form" />
+                  <Tab label="Request Parameters" value="request" />
+                </TabList>
+              </Box>
+              <TabPanel value="overview">
+                <Typography paragraph={true}>
+                  Templates are responsible for transforming information from
+                  and about the page you're currently visiting into content that
+                  you would like added to your notes.
+                </Typography>
+                <Typography paragraph={true}>
+                  When you send content to Obsidian, we will gather{" "}
+                  <WikiLink target="Understanding Templates">
+                    a variety of information about the page you are visiting
+                  </WikiLink>{" "}
+                  combined with the (optional) form data you provide, and then
+                  will generate content according to your specifications to add
+                  new content to your notes.
+                </Typography>
+              </TabPanel>
+              <TabPanel value="form">
+                <Stack direction="column" spacing={2}>
+                  <Alert severity="info">
+                    <Typography paragraph={true}>
+                      Do you have questions you would like to prompt yourself to
+                      answer when you use a particular template? You can use
+                      Form Fields to design a form that will be displayed when a
+                      particular template has been selected.
+                    </Typography>
+                    <Typography paragraph={true}>
+                      The form field values you enter will become available in
+                      your template as variables (see the "Template Variable"
+                      column) so that you use that data in the content sent to
+                      Obsidian.
+                    </Typography>
+                  </Alert>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Field Name</TableCell>
+                          <TableCell>Template Variable</TableCell>
+                          <TableCell>Type</TableCell>
+                          <TableCell>Default Value</TableCell>
+                          <TableCell align="right">Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {formFields.map((formField, idx) => (
+                          <TableRow key={formField.name + idx}>
+                            <TableCell>{formField.name}</TableCell>
+                            <TableCell>
+                              <code>
+                                {"{{"}form.{formField.name}
+                                {"}}"}
+                              </code>
+                            </TableCell>
+                            <TableCell>{formField.type}</TableCell>
+                            <TableCell>{formField.defaultValue}</TableCell>
+                            <TableCell>
+                              <IconButton
+                                onClick={() => {
+                                  setShowEditingFormFieldModal(true);
+                                  setEditingFormFieldIdx(idx);
+                                }}
+                              >
+                                <EditIcon titleAccess="Edit field definition" />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow key="new">
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
+                          <TableCell align="right">
+                            <IconButton
+                              onClick={() => {
+                                setShowEditingFormFieldModal(true);
+                                setEditingFormFieldIdx(null);
+                              }}
+                            >
+                              <CreateIcon titleAccess="Create new template" />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Stack>
+              </TabPanel>
+              <TabPanel value="request">
+                <Stack direction="column" spacing={2}>
+                  <Alert severity="info">
+                    <>
+                      {isAdhocSelectedTemplate ? (
+                        <>
+                          You can use{" "}
+                          <a
+                            href="https://handlebarsjs.com/guide/"
+                            target="_blank"
+                          >
+                            Handlebars
+                          </a>{" "}
+                          templating in your API URL and Content fields below.
+                        </>
+                      ) : (
+                        <>
+                          You can use{" "}
+                          <a
+                            href="https://handlebarsjs.com/guide/"
+                            target="_blank"
+                          >
+                            Handlebars
+                          </a>{" "}
+                          templating in your Content field below.
+                        </>
+                      )}{" "}
+                      See{" "}
+                      <WikiLink target="Understanding Templates">
+                        Obsidian Web's template documentation
+                      </WikiLink>{" "}
+                      to get an understanding of how to write your template and
+                      what context variables and helpers are available.
+                    </>
+                    {isAdhocSelectedTemplate && (
+                      <>
+                        <br />
+                        <br />
+                        If you're not sure about what to enter for API URL
+                        below, see{" "}
+                        <a
+                          href="https://coddingtonbear.github.io/obsidian-local-rest-api/"
+                          target="_blank"
                         >
-                          <EditIcon titleAccess="Edit field definition" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  <TableRow key="new">
-                    <TableCell></TableCell>
-                    <TableCell></TableCell>
-                    <TableCell></TableCell>
-                    <TableCell></TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        onClick={() => {
-                          setShowEditingFormFieldModal(true);
-                          setEditingFormFieldIdx(null);
-                        }}
-                      >
-                        <CreateIcon titleAccess="Create new template" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Typography variant="h1">Request Parameters</Typography>
-            <RequestParameters
-              allowUrlConfiguration={isAdhocSelectedTemplate}
-              method={method}
-              sandbox={sandbox}
-              previewContext={DefaultPreviewContext}
-              url={urlTemplate}
-              headers={headers}
-              content={contentTemplate}
-              onChangeMethod={setMethod}
-              onChangeUrl={setUrlTemplate}
-              onChangeHeaders={setHeaders}
-              onChangeContent={setContentTemplate}
-              onChangeIsValid={(valid) => setSaveError(!valid)}
-            />
+                          Obsidian Local REST API's live documentation
+                        </a>{" "}
+                        for insight into what URLs are provided for selecting
+                        the document you would like to modify.
+                      </>
+                    )}
+                  </Alert>
+                  <RequestParameters
+                    allowUrlConfiguration={isAdhocSelectedTemplate}
+                    method={method}
+                    sandbox={sandbox}
+                    previewContext={DefaultPreviewContext}
+                    url={urlTemplate}
+                    headers={headers}
+                    content={contentTemplate}
+                    onChangeMethod={setMethod}
+                    onChangeUrl={setUrlTemplate}
+                    onChangeHeaders={setHeaders}
+                    onChangeContent={setContentTemplate}
+                    onChangeIsValid={(valid) => setSaveError(!valid)}
+                  />
+                </Stack>
+              </TabPanel>
+            </TabContext>
 
             <Stack direction="row" className="submit" justifyContent="flex-end">
               <Button variant="outlined" onClick={onClose}>

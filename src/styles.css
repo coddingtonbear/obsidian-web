@@ -241,6 +241,11 @@ div.protip p {
   flex-grow: 1
 }
 
+.MuiTabPanel-root {
+  padding: 0px
+}
+
+
 p.request-params-no-url-notice {
   flex-grow: 1;
   margin: auto 10px;

@@ -1,3 +1,4 @@
+import type {} from "@mui/lab/themeAugmentation";
 import { ThemeOptions, createTheme } from "@mui/material/styles";
 
 const DefaultThemeOptions: ThemeOptions = {
@@ -20,6 +21,15 @@ const DefaultThemeOptions: ThemeOptions = {
       main: "#2a2a2a",
       dark: "#525252",
       contrastText: "#ffffff",
+    },
+  },
+  components: {
+    MuiTabPanel: {
+      styleOverrides: {
+        root: {
+          padding: "0px",
+        },
+      },
     },
   },
 };
