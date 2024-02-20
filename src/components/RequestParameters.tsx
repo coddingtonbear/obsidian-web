@@ -119,68 +119,61 @@ const RequestParameters: React.FC<Props> = ({
   }, [compiledUrlError, compiledContentError]);
 
   return (
-    <>
-      <div className="option">
-        <div className="option-value">
-          <NativeSelect
-            value={method}
-            className="method-select"
-            onChange={(event) =>
-              onChangeMethod(event.target.value as UrlOutputPreset["method"])
-            }
-          >
-            <option value="post">POST</option>
-            <option value="put">PUT</option>
-            <option value="patch">PATCH</option>
-          </NativeSelect>
-          {allowUrlConfiguration && (
-            <TextField
-              label="API URL"
-              fullWidth={true}
-              value={url}
-              onChange={(event) => onChangeUrl(event.target.value)}
-            />
-          )}
-          {!allowUrlConfiguration && (
-            <Typography
-              paragraph={true}
-              className="request-params-no-url-notice"
-            >
-              URL will be set to address file in which match was found.
-            </Typography>
-          )}
-        </div>
-        {allowUrlConfiguration && !debouncedCompiledUrlMatches && (
-          <Stack direction="row" className="preview-content url">
-            {showCrystalizeOption && (
-              <div>
-                <IconButton
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    onChangeUrl(compiledUrl);
-                  }}
-                  title="Pre-render template (optional)"
-                >
-                  <Prerender />
-                </IconButton>
-              </div>
-            )}
-            <TextField
-              label="API URL (Rendered)"
-              fullWidth={true}
-              value={compiledUrl}
-              disabled={true}
-              title={
-                "This is the URL that will be used when interacting with the API." +
-                (showCrystalizeOption
-                  ? "If you would like to modify this URL before the request, use the 'Pre-render' button."
-                  : "")
-              }
-            />
-          </Stack>
+    <Stack direction="column" spacing={1}>
+      <Stack direction="row">
+        <NativeSelect
+          value={method}
+          className="method-select"
+          onChange={(event) =>
+            onChangeMethod(event.target.value as UrlOutputPreset["method"])
+          }
+        >
+          <option value="post">POST</option>
+          <option value="put">PUT</option>
+          <option value="patch">PATCH</option>
+        </NativeSelect>
+        {allowUrlConfiguration && (
+          <TextField
+            label="API URL"
+            fullWidth={true}
+            value={url}
+            onChange={(event) => onChangeUrl(event.target.value)}
+          />
         )}
-      </div>
+      </Stack>
+      {!allowUrlConfiguration && (
+        <Typography paragraph={true} className="request-params-no-url-notice">
+          URL will be set to address file in which match was found.
+        </Typography>
+      )}
+      {allowUrlConfiguration && !debouncedCompiledUrlMatches && (
+        <Stack direction="row" className="preview-content url">
+          {showCrystalizeOption && (
+            <IconButton
+              color="primary"
+              size="small"
+              onClick={() => {
+                onChangeUrl(compiledUrl);
+              }}
+              title="Pre-render template (optional)"
+            >
+              <Prerender />
+            </IconButton>
+          )}
+          <TextField
+            label="API URL (Rendered)"
+            fullWidth={true}
+            value={compiledUrl}
+            disabled={true}
+            title={
+              "This is the URL that will be used when interacting with the API." +
+              (showCrystalizeOption
+                ? "If you would like to modify this URL before the request, use the 'Pre-render' button."
+                : "")
+            }
+          />
+        </Stack>
+      )}
       {compiledUrlError && (
         <Alert
           value={{
@@ -190,57 +183,48 @@ const RequestParameters: React.FC<Props> = ({
           }}
         />
       )}
-      <div className="option">
-        <div className="option-value">
-          <HeaderControl headers={headers} onChange={onChangeHeaders} />
-        </div>
-      </div>
-      <div className="option">
-        <div className="option-value">
+      <HeaderControl headers={headers} onChange={onChangeHeaders} />
+      <TextField
+        className="template-content"
+        label="Content (Template)"
+        fullWidth={true}
+        multiline={true}
+        value={content}
+        onChange={(event) => onChangeContent(event.target.value)}
+        title={
+          "This template will be used for generating the content to send to Obsidian.  You can see the actual data that will be sent by looking below at 'Content (Rendered)'."
+        }
+      />
+      {!debouncedCompiledContentMatches && (
+        <Stack direction="row" className="preview-content">
+          {showCrystalizeOption && (
+            <IconButton
+              color="primary"
+              size="small"
+              onClick={() => {
+                onChangeContent(compiledContent);
+              }}
+              title="Pre-render template (optional)"
+            >
+              <Prerender />
+            </IconButton>
+          )}
           <TextField
-            className="template-content"
-            label="Content (Template)"
+            label="Content (Rendered)"
             fullWidth={true}
+            value={compiledContent}
+            disabled={true}
             multiline={true}
-            value={content}
-            onChange={(event) => onChangeContent(event.target.value)}
             title={
-              "This template will be used for generating the content to send to Obsidian.  You can see the actual data that will be sent by looking below at 'Content (Rendered)'."
+              "This is the content that will be sent to Obsidian when interacting with the API. " +
+              (showCrystalizeOption
+                ? "If you would like to modify this content before the request, use the 'Pre-render' button."
+                : "")
             }
           />
-        </div>
-        {!debouncedCompiledContentMatches && (
-          <Stack direction="row" className="preview-content">
-            {showCrystalizeOption && (
-              <div>
-                <IconButton
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    onChangeContent(compiledContent);
-                  }}
-                  title="Pre-render template (optional)"
-                >
-                  <Prerender />
-                </IconButton>
-              </div>
-            )}
-            <TextField
-              label="Content (Rendered)"
-              fullWidth={true}
-              value={compiledContent}
-              disabled={true}
-              multiline={true}
-              title={
-                "This is the content that will be sent to Obsidian when interacting with the API. " +
-                (showCrystalizeOption
-                  ? "If you would like to modify this content before the request, use the 'Pre-render' button."
-                  : "")
-              }
-            />
-          </Stack>
-        )}
-      </div>
+        </Stack>
+      )}
+
       {compiledContentError && (
         <Alert
           value={{
@@ -250,7 +234,7 @@ const RequestParameters: React.FC<Props> = ({
           }}
         />
       )}
-    </>
+    </Stack>
   );
 };
 

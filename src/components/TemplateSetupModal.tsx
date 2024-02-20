@@ -12,12 +12,14 @@ import { ConfiguredTemplate, OutputPresetFieldDefinition } from "../types";
 import { DefaultPreviewContext } from "../constants";
 import {
   Alert,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
 import WikiLink from "./WikiLink";
 import FormFieldModal from "./FormFieldModal";
@@ -90,61 +92,58 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
     <Modal open={open} onClose={onClose}>
       <>
         <Paper elevation={3} className="modal">
-          {isAdhocSelectedTemplate && (
-            <div className="option">
-              <div className="option-value">
-                <TextField
-                  label="Template Name"
-                  fullWidth={true}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-              </div>
-            </div>
-          )}
-          <Alert severity="info">
-            <>
-              {isAdhocSelectedTemplate ? (
-                <>
-                  You can use{" "}
-                  <a href="https://handlebarsjs.com/guide/" target="_blank">
-                    Handlebars
-                  </a>{" "}
-                  templating in your API URL and Content fields below.
-                </>
-              ) : (
-                <>
-                  You can use{" "}
-                  <a href="https://handlebarsjs.com/guide/" target="_blank">
-                    Handlebars
-                  </a>{" "}
-                  templating in your Content field below.
-                </>
-              )}{" "}
-              See{" "}
-              <WikiLink target="Understanding Templates">
-                Obsidian Web's template documentation
-              </WikiLink>{" "}
-              to get an understanding of how to write your template and what
-              context variables and helpers are available.
-            </>
+          <Stack direction="column" spacing={2}>
             {isAdhocSelectedTemplate && (
-              <>
-                <br />
-                <br />
-                If you're not sure about what to enter for API URL below, see{" "}
-                <a
-                  href="https://coddingtonbear.github.io/obsidian-local-rest-api/"
-                  target="_blank"
-                >
-                  Obsidian Local REST API's live documentation
-                </a>{" "}
-                for insight into what URLs are provided for selecting the
-                document you would like to modify.
-              </>
+              <TextField
+                label="Template Name"
+                fullWidth={true}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
             )}
-          </Alert>
-          <div>
+            <Alert severity="info">
+              <>
+                {isAdhocSelectedTemplate ? (
+                  <>
+                    You can use{" "}
+                    <a href="https://handlebarsjs.com/guide/" target="_blank">
+                      Handlebars
+                    </a>{" "}
+                    templating in your API URL and Content fields below.
+                  </>
+                ) : (
+                  <>
+                    You can use{" "}
+                    <a href="https://handlebarsjs.com/guide/" target="_blank">
+                      Handlebars
+                    </a>{" "}
+                    templating in your Content field below.
+                  </>
+                )}{" "}
+                See{" "}
+                <WikiLink target="Understanding Templates">
+                  Obsidian Web's template documentation
+                </WikiLink>{" "}
+                to get an understanding of how to write your template and what
+                context variables and helpers are available.
+              </>
+              {isAdhocSelectedTemplate && (
+                <>
+                  <br />
+                  <br />
+                  If you're not sure about what to enter for API URL below, see{" "}
+                  <a
+                    href="https://coddingtonbear.github.io/obsidian-local-rest-api/"
+                    target="_blank"
+                  >
+                    Obsidian Local REST API's live documentation
+                  </a>{" "}
+                  for insight into what URLs are provided for selecting the
+                  document you would like to modify.
+                </>
+              )}
+            </Alert>
+            <Typography variant="h1">Form Fields</Typography>
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
@@ -184,6 +183,7 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
                     <TableCell></TableCell>
                     <TableCell></TableCell>
                     <TableCell></TableCell>
+                    <TableCell></TableCell>
                     <TableCell align="right">
                       <IconButton
                         onClick={() => {
@@ -198,33 +198,35 @@ const TemplateSetupModal: React.FunctionComponent<Props> = ({
                 </TableBody>
               </Table>
             </TableContainer>
-          </div>
-          <RequestParameters
-            allowUrlConfiguration={isAdhocSelectedTemplate}
-            method={method}
-            sandbox={sandbox}
-            previewContext={DefaultPreviewContext}
-            url={urlTemplate}
-            headers={headers}
-            content={contentTemplate}
-            onChangeMethod={setMethod}
-            onChangeUrl={setUrlTemplate}
-            onChangeHeaders={setHeaders}
-            onChangeContent={setContentTemplate}
-            onChangeIsValid={(valid) => setSaveError(!valid)}
-          />
-          <div className="submit">
-            <Button variant="outlined" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              onClick={onAttemptSave}
-              disabled={saveError}
-            >
-              Save Changes
-            </Button>
-          </div>
+            <Typography variant="h1">Request Parameters</Typography>
+            <RequestParameters
+              allowUrlConfiguration={isAdhocSelectedTemplate}
+              method={method}
+              sandbox={sandbox}
+              previewContext={DefaultPreviewContext}
+              url={urlTemplate}
+              headers={headers}
+              content={contentTemplate}
+              onChangeMethod={setMethod}
+              onChangeUrl={setUrlTemplate}
+              onChangeHeaders={setHeaders}
+              onChangeContent={setContentTemplate}
+              onChangeIsValid={(valid) => setSaveError(!valid)}
+            />
+
+            <Stack direction="row" className="submit" justifyContent="flex-end">
+              <Button variant="outlined" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                onClick={onAttemptSave}
+                disabled={saveError}
+              >
+                Save Changes
+              </Button>
+            </Stack>
+          </Stack>
         </Paper>
         <FormFieldModal
           open={showEditingFormFieldModal}
