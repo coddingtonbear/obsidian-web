@@ -1,4 +1,8 @@
-import { getLocalSettings, getSyncSettings } from "./utils";
+import {
+  getLocalSettings,
+  getObsidianWebFrontmatterSettings,
+  getSyncSettings,
+} from "./utils";
 import { _obsidianRequest, _getUrlMentions } from "./utils/private_requests";
 import {
   BackgroundRequest,
@@ -112,18 +116,37 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     if (
       syncSettings.searchMatch.autoOpen === "direct-message" &&
       mentions.direct.length > 0 &&
-      mentions.direct.filter((match) => match.meta.frontmatter["web-message"])
-        .length > 0
+      mentions.direct.filter((match) => {
+        const frontmatterSettings = getObsidianWebFrontmatterSettings(
+          match.meta.frontmatter
+        );
+        return (
+          frontmatterSettings.message &&
+          frontmatterSettings.autoOpenSuppress !== "direct-message"
+        );
+      }).length > 0
     ) {
       injectScript(tabId, () => window.ObsidianWeb.showPopUpMessage());
     } else if (
       syncSettings.searchMatch.autoOpen === "direct" &&
-      mentions.direct.length > 0
+      mentions.direct.length > 0 &&
+      mentions.direct.filter((match) => {
+        const frontmatterSettings = getObsidianWebFrontmatterSettings(
+          match.meta.frontmatter
+        );
+        return (
+          frontmatterSettings.message &&
+          frontmatterSettings.autoOpenSuppress !== "direct-message" &&
+          frontmatterSettings.autoOpenSuppress !== "direct"
+        );
+      }).length > 0
     ) {
       injectScript(tabId, () => window.ObsidianWeb.showPopUpMessage());
     } else if (
       syncSettings.searchMatch.autoOpen === "mention" &&
       mentions.count > 0 // Any direct or mention is sufficient
+      // @TODO@ - Add support for suppressing indirect mentions,
+      // too
     ) {
       injectScript(tabId, () => window.ObsidianWeb.showPopUpMessage());
     } else if (syncSettings.searchMatch.hoverEnabled) {

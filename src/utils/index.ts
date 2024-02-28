@@ -19,6 +19,7 @@ import {
   LogEntry,
   SearchJsonResponseItem,
   SearchJsonResponseItemWithMetadata,
+  FrontmatterSettings,
 } from "../types";
 import {
   DefaultSyncSettings,
@@ -239,4 +240,54 @@ export function countMentions(
   }
 
   return matchedFiles.length;
+}
+
+export function getFrontmatterBooleanValue(value: string): boolean | null {
+  if (value.toLowerCase() === "yes" || value.toLowerCase() === "true") {
+    return true;
+  } else if (value.toUpperCase() === "no" || value.toLowerCase() === "false") {
+    return false;
+  }
+  return null;
+}
+
+export function getObsidianWebFrontmatterSettings(
+  frontmatter: Record<string, any>
+): FrontmatterSettings {
+  const settings: FrontmatterSettings = {};
+
+  const message = frontmatter["web-message"];
+  const autoOpenSuppress = frontmatter["web-suppress-auto-open"];
+  const badgeMessage = frontmatter["web-badge-message"];
+  const badgeColor = frontmatter["web-badge-color"];
+
+  if (message) {
+    settings.message = String(message);
+  }
+  if (autoOpenSuppress) {
+    const autoOpenBool = getFrontmatterBooleanValue(String(autoOpenSuppress));
+    if (autoOpenBool) {
+      // This is the most restrictive auto-open setting
+      settings.autoOpenSuppress = "direct-message";
+    } else if (
+      autoOpenSuppress === "mention" ||
+      autoOpenSuppress === "direct" ||
+      autoOpenSuppress === "direct-message"
+    ) {
+      settings.autoOpenSuppress =
+        autoOpenSuppress as FrontmatterSettings["autoOpenSuppress"];
+    }
+  }
+  if (badgeMessage) {
+    settings.badgeMessage = String(badgeMessage);
+  }
+  if (badgeColor) {
+    if (/[0-9a-f]{6}/.test(String(badgeColor).trim().toLowerCase())) {
+      settings.badgeColor = `#${badgeColor}`;
+    } else {
+      settings.badgeColor = badgeColor;
+    }
+  }
+
+  return settings;
 }

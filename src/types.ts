@@ -237,3 +237,10 @@ export interface OnboardingStep extends JoyrideStep {
   onboardingVersion?: string;
   skipDuringInitialOnboarding?: boolean;
 }
+
+export interface FrontmatterSettings {
+  message?: string;
+  autoOpenSuppress?: "mention" | "direct" | "direct-message";
+  badgeMessage?: string;
+  badgeColor?: string;
+}
