@@ -62,6 +62,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     !settings ||
     !settings.host ||
     !settings.apiKey ||
+    !syncSettings.searchMatch.backgroundEnabled ||
     !url ||
     changeInfo.status !== "loading"
   ) {
