@@ -30,6 +30,7 @@ import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 
 import SecureConnection from "@mui/icons-material/GppGood";
+import InsecureLocalConnection from "@mui/icons-material/Cable";
 import InsecureConnection from "@mui/icons-material/GppMaybe";
 import Error from "@mui/icons-material/Error";
 import Copy from "@mui/icons-material/ContentCopy";
@@ -948,17 +949,27 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                   {apiKeyOk && (
                     <>
                       {insecureMode && (
-                        <InsecureConnection
-                          color="warning"
-                          fontSize="large"
-                          titleAccess="Connected insecurely to the API via HTTP."
-                        />
+                        <>
+                          {host === "127.0.0.1" || host === "localhost" ? (
+                            <InsecureLocalConnection
+                              color="info"
+                              fontSize="large"
+                              titleAccess="Connected to a local Obsidian instance via HTTP."
+                            />
+                          ) : (
+                            <InsecureConnection
+                              color="warning"
+                              fontSize="large"
+                              titleAccess="Connected to a remote Obsidian instance via HTTP. This is unsafe and it is strongly recommended that you attempt to configure HTTPS!"
+                            />
+                          )}
+                        </>
                       )}
                       {!insecureMode && (
                         <SecureConnection
                           color="success"
                           fontSize="large"
-                          titleAccess="Connected securely to the API via HTTPS."
+                          titleAccess="Connected to Obsidian via HTTPS."
                         />
                       )}
                     </>
