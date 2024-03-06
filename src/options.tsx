@@ -52,7 +52,6 @@ import {
   DefaultSyncSettings,
   DefaultUrlTemplate,
   LocalSettingsVersion,
-  MinVersion,
   SyncSettingsVersion,
 } from "./constants";
 import {
@@ -66,6 +65,7 @@ import {
   LogEntry,
   AutoOpenOption,
   OnboardingStep,
+  GithubRelease,
 } from "./types";
 import {
   getLocalSettings,
@@ -184,11 +184,10 @@ export const OnboardingSteps: OnboardingStep[] = [
 ];
 
 const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
-  const minVersion = MinVersion;
-
   const [loaded, setLoaded] = useState<boolean>(false);
   const [status, setStatus] = useState<AlertStatus>();
   const [pluginVersion, setPluginVersion] = useState<string>();
+  const [latestPluginVersion, setLatestPluginVersion] = useState<string>();
 
   const [presetEditorShown, setPresetEditorShown] = useState<boolean>(false);
   const [presetEditorIncludesName, setPresetEditorIncludesName] =
@@ -450,6 +449,25 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     getBackgroundErrorLog().then((result) => {
       setErrorLog(result);
     });
+  }, []);
+
+  useEffect(() => {
+    async function handle() {
+      const result = await fetch(
+        "https://api.github.com/repos/coddingtonbear/obsidian-local-rest-api/releases/latest",
+        {
+          method: "GET",
+          mode: "no-cors",
+        }
+      );
+      if (result.status === 200) {
+        const resultJson: GithubRelease = await result.json();
+        setLatestPluginVersion(resultJson.tag_name);
+      } else {
+        setLatestPluginVersion(undefined);
+      }
+    }
+    handle();
   }, []);
 
   // Inter-feature dependencies
@@ -977,18 +995,21 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
               )}
               {loaded &&
                 pluginVersion &&
-                compareVersions(pluginVersion, minVersion) < 0 && (
+                latestPluginVersion &&
+                compareVersions(pluginVersion, latestPluginVersion) < 0 && (
                   <>
                     <div className="option-value">
                       <MaterialAlert severity="warning">
                         <strong>
                           Your install of Obsidian Local REST API is out-of-date
-                          and missing some important capabilities.
+                          and missing the latest capabilities.
                         </strong>{" "}
-                        Some features may not work correctly as a result. Please
-                        go to the "Community Plugins" section of your settings
-                        in Obsidian to update the "Obsidian Local REST API"
-                        plugin to the latest version.
+                        In Obsidian you have version {pluginVersion} installed,
+                        but version {latestPluginVersion} is available. Some
+                        features may not work correctly as a result. Please go
+                        to the "Community Plugins" section of your settings in
+                        Obsidian to update the "Obsidian Local REST API" plugin
+                        to the latest version.
                       </MaterialAlert>
                     </div>
                   </>

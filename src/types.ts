@@ -237,3 +237,9 @@ export interface OnboardingStep extends JoyrideStep {
   onboardingVersion?: string;
   skipDuringInitialOnboarding?: boolean;
 }
+
+export interface GithubRelease {
+  name: string;
+  tag_name: string;
+  html_url: string;
+}

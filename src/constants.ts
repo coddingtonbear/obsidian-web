@@ -7,8 +7,6 @@ import {
   PreviewContext,
 } from "./types";
 
-export const MinVersion = "1.3.1";
-
 export const CurrentMaxOnboardingVersion = "3.2";
 
 export const DefaultContentTemplate =
