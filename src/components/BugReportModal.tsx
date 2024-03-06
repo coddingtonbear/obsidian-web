@@ -14,7 +14,11 @@ import UnsupportedEnvironmentWarning from "./UnsupportedEnvironmentWarning";
 interface Props {
   open: boolean;
   onClose: () => void;
-  onExportBugReportData: (logs: boolean, configuration: boolean) => void;
+  onExportBugReportData: (
+    logs: boolean,
+    configuration: boolean,
+    pluginInfo: boolean
+  ) => void;
 }
 
 const BugReportModal: React.FC<Props> = ({
@@ -24,6 +28,8 @@ const BugReportModal: React.FC<Props> = ({
 }) => {
   const [bugReportExportLogs, setBugReportExportLogs] = useState<boolean>(true);
   const [bugReportExportConfig, setBugReportExportConfig] =
+    useState<boolean>(true);
+  const [bugReportExportPluginInfo, setBugReportExportPluginInfo] =
     useState<boolean>(true);
 
   const browser = useMemo(detect, []);
@@ -112,6 +118,29 @@ const BugReportModal: React.FC<Props> = ({
             }
           />
         </FormGroup>
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Switch
+                onChange={(evt) => {
+                  setBugReportExportPluginInfo(evt.target.checked);
+                }}
+                checked={bugReportExportPluginInfo}
+              />
+            }
+            label={
+              <>
+                <b>Include version information from Obsidian Local REST API?</b>{" "}
+                This information is useful when troubleshooting bugs that might
+                be rooted in Obsidian Local REST API (the Obsidian plugin
+                Obsidian Web uses for interacting with your notes). If you
+                select this option the exported file may reveal information
+                about the version of Obsidian you have installed and the version
+                of Obsidian Local REST API you have installed within it.
+              </>
+            }
+          />
+        </FormGroup>
         <div className="submit">
           <Button variant="outlined" onClick={onClose}>
             Cancel
@@ -119,7 +148,11 @@ const BugReportModal: React.FC<Props> = ({
           <Button
             variant="contained"
             onClick={() =>
-              onExportBugReportData(bugReportExportLogs, bugReportExportConfig)
+              onExportBugReportData(
+                bugReportExportLogs,
+                bugReportExportConfig,
+                bugReportExportPluginInfo
+              )
             }
           >
             Export

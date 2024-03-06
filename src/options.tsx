@@ -186,6 +186,7 @@ export const OnboardingSteps: OnboardingStep[] = [
 const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [status, setStatus] = useState<AlertStatus>();
+  const [obsidianVersion, setObsidianVersion] = useState<string>();
   const [pluginVersion, setPluginVersion] = useState<string>();
   const [latestPluginVersion, setLatestPluginVersion] = useState<string>();
 
@@ -231,7 +232,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const [presets, setPresets] = useState<UrlOutputPreset[]>([]);
 
-  const [errorLog, setErrorLog] = useState<LogEntry[]>([]);
   const [showBugReportModal, setShowBugReportModal] = useState<boolean>(false);
   const [onboardedToVersion, setOnboardedToVersion] = useState<string>("");
   const [filteredOnboardingSteps, setFilteredOnboardingSteps] = useState<
@@ -299,6 +299,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           return;
         }
 
+        setObsidianVersion(body.versions.obsidian);
         setPluginVersion(body.versions.self);
 
         if (!body.authenticated) {
@@ -444,12 +445,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       setHasHostPermission(result);
     });
   }, [host]);
-
-  useEffect(() => {
-    getBackgroundErrorLog().then((result) => {
-      setErrorLog(result);
-    });
-  }, []);
 
   useEffect(() => {
     async function handle() {
@@ -691,10 +686,14 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const onExportBugReportData = async (
     logs: boolean,
-    configuration: boolean
+    configuration: boolean,
+    pluginInfo: boolean
   ) => {
     const now = new Date();
     const minDate = new Date(now.getTime() - 1000 * 60 * 15);
+
+    const errorLog = await getBackgroundErrorLog();
+
     const blob = new Blob(
       [
         JSON.stringify(
@@ -742,6 +741,12 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     },
                   },
                   presets: presets,
+                }
+              : undefined,
+            versionInfo: pluginInfo
+              ? {
+                  plugin: pluginVersion,
+                  obsidian: obsidianVersion,
                 }
               : undefined,
           },
