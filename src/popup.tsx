@@ -53,7 +53,7 @@ import {
   TurndownConfiguration,
 } from "./constants";
 import MentionNotice from "./components/MentionNotice";
-import { NativeSelect, Paper } from "@mui/material";
+import { LinearProgress, NativeSelect, Paper } from "@mui/material";
 import MouseOverChip from "./components/MouseOverChip";
 
 declare const BUILD_ID: string;
@@ -773,6 +773,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                       )}
                       {popupFormDisplayed && (
                         <>
+                          {!previewContext && <LinearProgress />}
                           <div className="option">
                             <div className="option-value">
                               <NativeSelect
