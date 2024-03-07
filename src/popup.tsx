@@ -12,7 +12,6 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import CircularProgress from "@mui/material/CircularProgress";
 import MaterialAlert from "@mui/material/Alert";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
@@ -730,7 +729,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                   {displayState === "loading" && (
                     <div className="loading">
                       {" "}
-                      <CircularProgress />
+                      <LinearProgress />
                     </div>
                   )}
                   {displayState === "form" && (
