@@ -498,7 +498,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     }
 
     useEffect(() => {
-      if (!searchEnabled) {
+      if (!searchEnabled || !popupDisplayed) {
         return;
       }
 
@@ -518,7 +518,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       }
 
       handle();
-    }, [pageUrl, searchEnabled]);
+    }, [pageUrl, searchEnabled, popupDisplayed]);
 
     useEffect(() => {
       if (!sandboxReady || presets === undefined) {
