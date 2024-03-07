@@ -156,6 +156,12 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
     const [onboardedToVersion, setOnboardedToVersion] = useState<string>("");
 
+    const [previewContextProcessing, setPreviewContextProcessing] =
+      useState<boolean>(false);
+    const [accordionIsExpanded, setAccordionIsExpanded] =
+      useState<boolean>(false);
+    const [pageUrl, setPageUrl] = useState<string>(window.location.href);
+
     const [displayState, setDisplayState] = useState<
       "welcome" | "form" | "error" | "loading" | "alert" | "permission"
     >("loading");
@@ -288,9 +294,28 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       }
     };
 
+    const handleUrlChange = (): void => {
+      if (pageUrl !== window.location.href) {
+        setPageUrl(window.location.href);
+      }
+    };
+
     useEffect(() => {
       window.addEventListener("message", onSandboxMessage);
       window.addEventListener("obsidian-web", onObsidianWebMessage);
+      window.addEventListener("popstate", handleUrlChange);
+      window.addEventListener("hashchange", handleUrlChange);
+
+      const timer = window.setInterval(handleUrlChange, 1000);
+
+      return () => {
+        window.removeEventListener("message", onSandboxMessage);
+        window.removeEventListener("obsidian-web", onObsidianWebMessage);
+        window.removeEventListener("popstate", handleUrlChange);
+        window.removeEventListener("hashchange", handleUrlChange);
+
+        window.clearInterval(timer);
+      };
     }, []);
 
     useEffect(() => {
@@ -401,7 +426,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     }
 
     useEffect(() => {
-      if (popupFormDisplayed) {
+      if (popupFormDisplayed && !accordionIsExpanded) {
         updatePreviewContext();
         document.addEventListener(
           "keydown",
@@ -422,9 +447,10 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           true
         );
       };
-    }, [popupFormDisplayed]);
+    }, [popupFormDisplayed, accordionIsExpanded, pageUrl]);
 
     async function updatePreviewContext(): Promise<void> {
+      setPreviewContextProcessing(true);
       let selectedText: string;
       try {
         const selectionReadability = htmlToReadabilityData(
@@ -468,6 +494,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       } catch (e) {}
 
       setPreviewContext(newPreviewContext);
+      setPreviewContextProcessing(false);
     }
 
     useEffect(() => {
@@ -491,7 +518,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       }
 
       handle();
-    }, [window.location.href, searchEnabled]);
+    }, [pageUrl, searchEnabled]);
 
     useEffect(() => {
       if (!sandboxReady || presets === undefined) {
@@ -772,7 +799,9 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                       )}
                       {popupFormDisplayed && (
                         <>
-                          {!previewContext && <LinearProgress />}
+                          {(previewContextProcessing || !previewContext) && (
+                            <LinearProgress />
+                          )}
                           <div className="option">
                             <div className="option-value">
                               <NativeSelect
@@ -812,7 +841,11 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                               </IconButton>
                             </div>
                           </div>
-                          <Accordion>
+                          <Accordion
+                            onChange={(evt, expanded) => {
+                              setAccordionIsExpanded(expanded);
+                            }}
+                          >
                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                               <p>View Request Details</p>
                             </AccordionSummary>
