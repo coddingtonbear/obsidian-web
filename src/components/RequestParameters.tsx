@@ -110,7 +110,7 @@ const RequestParameters: React.FC<Props> = ({
     }
 
     handle();
-  }, [url]);
+  }, [url, previewContext]);
 
   React.useEffect(() => {
     onChangeIsValid(
