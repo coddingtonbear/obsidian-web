@@ -437,7 +437,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
         selectedText = "";
       }
 
-      const previewContext: PreviewContext = {
+      const newPreviewContext: PreviewContext = {
         page: {
           url: window.document.location.href ?? "",
           title: window.document.title ?? "",
@@ -453,7 +453,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           window.document.location.href
         );
         if (pageReadability) {
-          previewContext.article = {
+          newPreviewContext.article = {
             title: pageReadability.title,
             length: pageReadability.length,
             excerpt: pageReadability.excerpt,
@@ -462,13 +462,13 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
             siteName: pageReadability.siteName,
           };
         } else {
-          previewContext.article = {};
+          newPreviewContext.article = {};
         }
-        previewContext.page.content =
+        newPreviewContext.page.content =
           readabilityDataToMarkdown(pageReadability);
       } catch (e) {}
 
-      setPreviewContext(previewContext);
+      setPreviewContext(newPreviewContext);
     }
 
     useEffect(() => {
