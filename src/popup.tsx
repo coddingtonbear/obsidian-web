@@ -804,7 +804,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                                 className="send-to-obsidian"
                                 color="primary"
                                 size="large"
-                                disabled={!contentIsValid}
+                                disabled={!contentIsValid || !previewContext}
                                 onClick={sendToObsidian}
                                 title="Send to Obsidian"
                               >
