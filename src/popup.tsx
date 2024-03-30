@@ -15,7 +15,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MaterialAlert from "@mui/material/Alert";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
-import Draggable from "react-draggable";
+import { default as DraggableRaw, DraggableProps } from "react-draggable";
 
 import SendIcon from "@mui/icons-material/SaveAlt";
 
@@ -54,6 +54,8 @@ import {
 import MentionNotice from "./components/MentionNotice";
 import { LinearProgress, NativeSelect, Paper } from "@mui/material";
 import MouseOverChip from "./components/MouseOverChip";
+
+const Draggable: any = DraggableRaw;
 
 declare const BUILD_ID: string;
 declare global {
