@@ -732,7 +732,18 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                     </MaterialAlert>
                   )}
                   {displayState === "alert" && status && (
-                    <Alert value={status} />
+                    <Alert value={status}>
+                      {status.severity !== "success" && (
+                        <div className="submit">
+                          <Button
+                            variant="contained"
+                            onClick={() => setStatus(undefined)}
+                          >
+                            Back
+                          </Button>
+                        </div>
+                      )}
+                    </Alert>
                   )}
                   {displayState === "error" && (
                     <MaterialAlert severity="error">

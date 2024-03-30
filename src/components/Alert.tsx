@@ -7,14 +7,14 @@ import { AlertStatus } from "../types";
 
 interface Props {
   value: AlertStatus;
-  onClick?: () => {};
 }
 
-const Alert: React.FC<Props> = ({ value, onClick }) => {
+const Alert: React.FC<Props> = ({ value, children }) => {
   return (
     <MaterialAlert severity={value.severity} className="options-alert">
       <AlertTitle>{value.title}</AlertTitle>
-      {value.message}
+      <p className="popup-text">{value.message}</p>
+      {children}
     </MaterialAlert>
   );
 };
