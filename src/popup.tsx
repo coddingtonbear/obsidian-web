@@ -581,6 +581,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           severity: "error",
           title: "Error",
           message: `Could not send content to Obsidian: ${e}`,
+          recoverable: true,
         });
         return;
       }
@@ -599,12 +600,14 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
             severity: "error",
             title: "Error",
             message: `Could not send content to Obsidian: (Error Code ${body.errorCode}) ${body.message}`,
+            recoverable: true,
           });
         } catch (e) {
           setStatus({
             severity: "error",
             title: "Error",
             message: `Could not send content to Obsidian!: (Status Code ${result.status}) ${result.data}`,
+            recoverable: true,
           });
         }
       }
@@ -735,7 +738,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                   )}
                   {displayState === "alert" && status && (
                     <Alert value={status}>
-                      {status.severity !== "success" && (
+                      {status.recoverable && (
                         <div className="submit">
                           <Button
                             variant="contained"

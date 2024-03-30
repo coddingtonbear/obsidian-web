@@ -84,6 +84,7 @@ export interface AlertStatus {
   severity: AlertProps["severity"];
   title: string;
   message: string;
+  recoverable?: boolean;
 }
 
 export interface SandboxRenderRequest {
