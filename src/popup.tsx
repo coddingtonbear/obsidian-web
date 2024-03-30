@@ -354,61 +354,60 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       }
     }, [apiKey, popupDisplayed]);
 
-    useEffect(() => {
-      async function handle() {
-        let syncSettings: ExtensionSyncSettings;
-        let localSettings: ExtensionLocalSettings;
+    const fetchAndLoadSettings = async (): Promise<void> => {
+      let syncSettings: ExtensionSyncSettings;
+      let localSettings: ExtensionLocalSettings;
 
-        try {
-          localSettings = await getLocalSettings(chrome.storage.local);
-        } catch (e) {
-          setStatus({
-            severity: "error",
-            title: "Error",
-            message: "Could not get local settings!",
-          });
-          return;
-        }
-
-        try {
-          syncSettings = await getSyncSettings(chrome.storage.sync);
-          setPresets(syncSettings.presets);
-        } catch (e) {
-          setStatus({
-            severity: "error",
-            title: "Error",
-            message: "Could not get sync settings!",
-          });
-          return;
-        }
-
-        setHost(localSettings.host);
-        setInsecureMode(localSettings.insecureMode ?? false);
-        setApiKey(localSettings.apiKey);
-        setSearchEnabled(syncSettings.searchMatch.enabled);
-        if (syncSettings.searchMatch.mentions.suggestionEnabled) {
-          setSearchMatchMentionTemplate(
-            syncSettings.searchMatch.mentions.template
-          );
-        } else {
-          setSearchMatchMentionTemplate(undefined);
-        }
-        if (syncSettings.searchMatch.direct.suggestionEnabled) {
-          setSearchMatchDirectTemplate(
-            syncSettings.searchMatch.direct.template
-          );
-        } else {
-          setSearchMatchDirectTemplate(undefined);
-        }
-        if (syncSettings.searchMatch.enabled) {
-          setHoverEnabled(syncSettings.searchMatch.hoverEnabled);
-        } else {
-          setHoverEnabled(false);
-        }
-        setOnboardedToVersion(syncSettings.onboardedToVersion);
+      try {
+        localSettings = await getLocalSettings(chrome.storage.local);
+      } catch (e) {
+        setStatus({
+          severity: "error",
+          title: "Error",
+          message: "Could not get local settings!",
+        });
+        return;
       }
-      handle();
-    }, []);
+
+      try {
+        syncSettings = await getSyncSettings(chrome.storage.sync);
+        setPresets(syncSettings.presets);
+      } catch (e) {
+        setStatus({
+          severity: "error",
+          title: "Error",
+          message: "Could not get sync settings!",
+        });
+        return;
+      }
+
+      setHost(localSettings.host);
+      setInsecureMode(localSettings.insecureMode ?? false);
+      setApiKey(localSettings.apiKey);
+      setSearchEnabled(syncSettings.searchMatch.enabled);
+      if (syncSettings.searchMatch.mentions.suggestionEnabled) {
+        setSearchMatchMentionTemplate(
+          syncSettings.searchMatch.mentions.template
+        );
+      } else {
+        setSearchMatchMentionTemplate(undefined);
+      }
+      if (syncSettings.searchMatch.direct.suggestionEnabled) {
+        setSearchMatchDirectTemplate(syncSettings.searchMatch.direct.template);
+      } else {
+        setSearchMatchDirectTemplate(undefined);
+      }
+      if (syncSettings.searchMatch.enabled) {
+        setHoverEnabled(syncSettings.searchMatch.hoverEnabled);
+      } else {
+        setHoverEnabled(false);
+      }
+      setOnboardedToVersion(syncSettings.onboardedToVersion);
+    };
+
+    useEffect(() => {
+      fetchAndLoadSettings();
+    }, [popupDisplayed]);
 
     useEffect(() => {
       if (host) {
