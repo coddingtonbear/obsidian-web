@@ -336,6 +336,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
         const result = jsonData as StatusResponse;
         if (
           result.status === "OK" &&
+          result.authenticated &&
           result.service.includes("Obsidian Local REST API")
         ) {
           setObsidianUnavailable(false);
@@ -754,8 +755,9 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                     <MaterialAlert severity="error">
                       <p className="popup-text">
                         Could not connect to Obsidian! Make sure Obsidian is
-                        running and that the Obsidian Local REST API plugin is
-                        enabled.
+                        running, that the Obsidian Local REST API plugin is
+                        enabled, and that Obsidian Web is configured with the
+                        correct API Key.
                       </p>
                       <div className="submit">
                         <Button
