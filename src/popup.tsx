@@ -318,39 +318,38 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       };
     }, []);
 
-    useEffect(() => {
-      if (apiKey === undefined) {
-        return;
-      }
+    const checkIfObsidianIsAvailable = async (): Promise<void> => {
+      try {
+        if (!host) {
+          throw new Error("No hostname configured");
+        }
 
-      async function handle() {
-        try {
-          if (!host) {
-            throw new Error("No hostname configured");
-          }
+        const request = await obsidianRequest("/", { method: "get" });
+        const jsonData = request.data;
+        if (!jsonData) {
+          setObsidianUnavailable(true);
+          return;
+        }
 
-          const request = await obsidianRequest("/", { method: "get" });
-          const jsonData = request.data;
-          if (!jsonData) {
-            setObsidianUnavailable(true);
-            return;
-          }
-
-          const result = jsonData as StatusResponse;
-          if (
-            result.status === "OK" &&
-            result.service.includes("Obsidian Local REST API")
-          ) {
-            setObsidianUnavailable(false);
-          } else {
-            setObsidianUnavailable(true);
-          }
-        } catch (e) {
+        const result = jsonData as StatusResponse;
+        if (
+          result.status === "OK" &&
+          result.service.includes("Obsidian Local REST API")
+        ) {
+          setObsidianUnavailable(false);
+        } else {
           setObsidianUnavailable(true);
         }
+      } catch (e) {
+        setObsidianUnavailable(true);
       }
-      handle();
-    }, [apiKey]);
+    };
+
+    useEffect(() => {
+      if (popupDisplayed && apiKey) {
+        checkIfObsidianIsAvailable();
+      }
+    }, [apiKey, popupDisplayed]);
 
     useEffect(() => {
       async function handle() {
@@ -749,6 +748,12 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                           href={`chrome-extension://${chrome.runtime.id}/options.html`}
                         >
                           Go to settings
+                        </Button>
+                        <Button
+                          variant="contained"
+                          onClick={() => checkIfObsidianIsAvailable()}
+                        >
+                          Retry
                         </Button>
                       </div>
                     </MaterialAlert>
