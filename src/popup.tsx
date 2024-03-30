@@ -374,7 +374,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           setStatus({
             severity: "error",
             title: "Error",
-            message: "Could not get settings!",
+            message: "Could not get sync settings!",
           });
           return;
         }
