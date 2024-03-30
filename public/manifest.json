@@ -3,7 +3,7 @@
 
   "name": "Obsidian Web",
   "description": "Connect your browser with your notes in Obsidian. Obsidian Web is a customizable web clipper for Obsidian with advanced features.",
-  "version": "3.3.1",
+  "version": "3.3.2",
 
   "options_page": "options.html",
 
