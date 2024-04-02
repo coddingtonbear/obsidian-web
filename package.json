@@ -1,6 +1,6 @@
 {
   "name": "obsidian-web",
-  "version": "3.3.3",
+  "version": "3.3.4",
   "description": "Connect your browser with your notes in Obsidian",
   "main": "index.js",
   "scripts": {
