@@ -427,7 +427,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     }
 
     useEffect(() => {
-      if (popupFormDisplayed && !accordionIsExpanded) {
+      if (popupDisplayed && !accordionIsExpanded) {
         updatePreviewContext();
         document.addEventListener(
           "keydown",
@@ -448,7 +448,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           true
         );
       };
-    }, [popupFormDisplayed, accordionIsExpanded, pageUrl]);
+    }, [popupDisplayed, accordionIsExpanded, pageUrl]);
 
     async function updatePreviewContext(): Promise<void> {
       setPreviewContextProcessing(true);
