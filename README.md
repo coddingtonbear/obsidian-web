@@ -8,7 +8,6 @@ Do you find yourself on a webpage somewhere and want to add it to your notes so 
 ## Prerequisites
 
 * [Obsidian Local REST API](https://github.com/coddingtonbear/obsidian-local-rest-api)
-  * Note: Supports use only with the default port (27124).
 
 ## Quickstart
 
