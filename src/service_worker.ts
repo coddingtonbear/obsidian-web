@@ -60,7 +60,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
   if (
     !settings ||
-    !settings.host ||
+    !settings.url ||
     !settings.apiKey ||
     !syncSettings.searchMatch.backgroundEnabled ||
     !url ||
@@ -70,12 +70,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 
   try {
-    const mentions = await _getUrlMentions(
-      settings.host,
-      settings.apiKey,
-      Boolean(settings.insecureMode),
-      url
-    );
+    const mentions = await _getUrlMentions(settings.url, settings.apiKey, url);
 
     if (mentions.count > 0) {
       chrome.action.setBadgeText({
@@ -191,10 +186,7 @@ chrome.runtime.onMessage.addListener(
       case "check-has-host-permission":
         chrome.permissions.contains(
           {
-            origins: [
-              `http://${message.host}:27123/*`,
-              `https://${message.host}:27124/*`,
-            ],
+            origins: [message.url],
           },
           (result) => {
             log({ message: "check-has-host-permission result", data: result });
@@ -205,10 +197,7 @@ chrome.runtime.onMessage.addListener(
       case "request-host-permission":
         chrome.permissions.request(
           {
-            origins: [
-              `http://${message.host}:27123/*`,
-              `https://${message.host}:27124/*`,
-            ],
+            origins: [message.url],
           },
           (result) => {
             log({
@@ -235,11 +224,10 @@ chrome.runtime.onMessage.addListener(
       case "obsidian-request":
         getLocalSettings(chrome.storage.local).then((settings) => {
           _obsidianRequest(
-            settings.host,
+            settings.url,
             settings.apiKey,
             message.request.path,
-            message.request.options,
-            Boolean(settings.insecureMode)
+            message.request.options
           )
             .then((response) => {
               const result: Partial<ObsidianResponse> = {

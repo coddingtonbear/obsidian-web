@@ -115,6 +115,8 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const [sandboxReady, setSandboxReady] = useState<boolean>(false);
     const [obsidianUnavailable, setObsidianUnavailable] = useState<boolean>();
 
+    const [apiUrl, setApiUrl] = useState<string | null>(null);
+
     const [host, setHost] = useState<string | null>(null);
     const [hasHostPermission, setHasHostPermission] = useState<boolean | null>(
       null
@@ -210,8 +212,10 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     }, [selectedPreset]);
 
     const [mouseOverTarget, setMouseOverTarget] = useState<HTMLAnchorElement>();
-    const [mousePosition, setMousePosition] =
-      useState<{ x: number; y: number }>();
+    const [mousePosition, setMousePosition] = useState<{
+      x: number;
+      y: number;
+    }>();
     const [mouseOverMentions, setMouseOverMentions] =
       useState<UrlMentionContainer>();
 
@@ -322,8 +326,8 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
     const checkIfObsidianIsAvailable = async (): Promise<void> => {
       try {
-        if (!host) {
-          throw new Error("No hostname configured");
+        if (!apiUrl) {
+          throw new Error("No API URL configured");
         }
 
         const request = await obsidianRequest("/", { method: "get" });
@@ -381,8 +385,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
         return;
       }
 
-      setHost(localSettings.host);
-      setInsecureMode(localSettings.insecureMode ?? false);
+      setApiUrl(localSettings.url);
       setApiKey(localSettings.apiKey);
       setSearchEnabled(syncSettings.searchMatch.enabled);
       if (syncSettings.searchMatch.mentions.suggestionEnabled) {
@@ -410,12 +413,12 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     }, [popupDisplayed]);
 
     useEffect(() => {
-      if (host) {
-        checkHasHostPermission(host).then((hasPermission) => {
+      if (apiUrl) {
+        checkHasHostPermission(apiUrl).then((hasPermission) => {
           setHasHostPermission(hasPermission);
         });
       }
-    }, [host]);
+    }, [apiUrl]);
 
     const [previewContext, setPreviewContext] =
       React.useState<Record<string, any>>();
@@ -504,7 +507,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       }
 
       async function handle() {
-        if (!host) {
+        if (!apiUrl) {
           return;
         }
         const allMentions = await getUrlMentions(window.location.href);
@@ -569,7 +572,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       };
       let result: ObsidianResponse;
 
-      if (host === null) {
+      if (apiUrl === null) {
         console.error("Cannot send to Obsidian; no hostname set.");
         return;
       }
@@ -708,11 +711,11 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                       </MaterialAlert>
                     </>
                   )}
-                  {displayState === "permission" && host && (
+                  {displayState === "permission" && apiUrl && (
                     <MaterialAlert severity="warning" style={{ flexGrow: 1 }}>
                       <p className="popup-text">
-                        Obsidian Web needs permission to access Obsidian on '
-                        {host}
+                        Obsidian Web needs permission to access Obsidian at '
+                        {apiUrl}
                         '.
                       </p>
                       <div className="submit">
@@ -725,11 +728,11 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                         </Button>
                         <Button
                           variant="contained"
-                          onClick={() =>
-                            requestHostPermission(host).then((result) => {
+                          onClick={() => {
+                            requestHostPermission(apiUrl).then((result) => {
                               setHasHostPermission(result);
-                            })
-                          }
+                            });
+                          }}
                         >
                           Grant
                         </Button>
@@ -783,7 +786,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                   )}
                   {displayState === "form" && (
                     <>
-                      {host && (
+                      {apiUrl && (
                         <>
                           {(mentions.length > 0 ||
                             directReferences.length > 0) && (

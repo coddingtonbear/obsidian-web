@@ -51,8 +51,6 @@
   "permissions": ["storage", "activeTab", "scripting"],
   
   "optional_host_permissions": [
-    "https://*:27124/*",
-    "http://*:27123/*",
     "https://*/*",
     "http://*/*"
   ]

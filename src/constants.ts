@@ -19,8 +19,7 @@ export const LocalSettingsVersion = "2.0";
 
 export const DefaultLocalSettings: ExtensionLocalSettings = {
   version: LocalSettingsVersion,
-  host: "127.0.0.1",
-  insecureMode: false,
+  url: "https://127.0.0.1:27124/",
   apiKey: "",
 };
 

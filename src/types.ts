@@ -17,11 +17,17 @@ export interface ConfiguredTemplate extends OutputPreset {
   urlTemplate?: string;
 }
 
-export interface ExtensionLocalSettings {
+export interface ExtensionLocalSettings__2_0 {
   version: string;
   host: string;
   apiKey: string;
   insecureMode?: boolean;
+}
+
+export interface ExtensionLocalSettings {
+  version: string;
+  url: string;
+  apiKey: string;
 }
 
 export interface ContentCache {

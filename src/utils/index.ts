@@ -120,17 +120,17 @@ export async function sendBackgroundRequest(
   return await chrome.runtime.sendMessage(message);
 }
 
-export async function checkHasHostPermission(host: string): Promise<boolean> {
+export async function checkHasHostPermission(url: string): Promise<boolean> {
   return await sendBackgroundRequest({
     type: "check-has-host-permission",
-    host,
+    url,
   });
 }
 
-export async function requestHostPermission(host: string): Promise<boolean> {
+export async function requestHostPermission(url: string): Promise<boolean> {
   return await sendBackgroundRequest({
     type: "request-host-permission",
-    host,
+    url,
   });
 }
 

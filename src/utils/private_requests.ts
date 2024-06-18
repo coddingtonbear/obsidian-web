@@ -8,48 +8,32 @@ import {
 import { countMentions } from ".";
 
 export async function _getUrlMentions(
-  hostname: string,
+  apiUrl: string,
   apiKey: string,
-  insecureMode: boolean,
   url: string
 ): Promise<UrlMentionContainer> {
   async function handleMentions() {
-    const result = await _obsidianSearchRequest(
-      hostname,
-      apiKey,
-      insecureMode,
-      {
-        regexp: [`${escapeStringRegexp(url)}(?=\\s|\\)|$)`, { var: "content" }],
-      }
-    );
+    const result = await _obsidianSearchRequest(apiUrl, apiKey, {
+      regexp: [`${escapeStringRegexp(url)}(?=\\s|\\)|$)`, { var: "content" }],
+    });
     return result;
   }
 
   async function handleDirect(): Promise<SearchJsonResponseItemWithMetadata[]> {
-    const results = await _obsidianSearchRequest(
-      hostname,
-      apiKey,
-      insecureMode,
-      {
-        or: [
-          { glob: [{ var: "frontmatter.url" }, url] },
-          {
-            some: [
-              { var: "frontmatter.url-aliases" },
-              { glob: [{ var: "" }, url] },
-            ],
-          },
-        ],
-      }
-    );
+    const results = await _obsidianSearchRequest(apiUrl, apiKey, {
+      or: [
+        { glob: [{ var: "frontmatter.url" }, url] },
+        {
+          some: [
+            { var: "frontmatter.url-aliases" },
+            { glob: [{ var: "" }, url] },
+          ],
+        },
+      ],
+    });
     const pageMetadata: SearchJsonResponseItemWithMetadata[] = [];
     for (const result of results) {
-      const meta = await _getPageMetadata(
-        hostname,
-        apiKey,
-        insecureMode,
-        result.filename
-      );
+      const meta = await _getPageMetadata(apiUrl, apiKey, result.filename);
       pageMetadata.push({
         ...result,
         meta,
@@ -68,33 +52,25 @@ export async function _getUrlMentions(
   };
 }
 export async function _obsidianSearchRequest(
-  hostname: string,
+  apiUrl: string,
   apiKey: string,
-  insecureMode: boolean,
   query: Record<string, any>
 ): Promise<SearchJsonResponseItem[]> {
-  const result = await _obsidianRequest(
-    hostname,
-    apiKey,
-    "/search/",
-    {
-      method: "post",
-      body: JSON.stringify(query),
-      headers: {
-        "Content-type": "application/vnd.olrapi.jsonlogic+json",
-      },
+  const result = await _obsidianRequest(apiUrl, apiKey, "/search/", {
+    method: "post",
+    body: JSON.stringify(query),
+    headers: {
+      "Content-type": "application/vnd.olrapi.jsonlogic+json",
     },
-    insecureMode
-  );
+  });
 
   return (await result.json()) as SearchJsonResponseItem[];
 }
 export async function _obsidianRequest(
-  hostname: string,
+  apiUrl: string,
   apiKey: string,
   path: string,
-  options: RequestInit,
-  insecureMode: boolean
+  options: RequestInit
 ): ReturnType<typeof fetch> {
   const requestOptions: RequestInit = {
     ...options,
@@ -106,30 +82,25 @@ export async function _obsidianRequest(
     mode: "cors",
   };
 
-  return fetch(
-    `http${insecureMode ? "" : "s"}://${hostname}:${
-      insecureMode ? "27123" : "27124"
-    }${path}`,
-    requestOptions
-  );
+  const url = new URL(path, apiUrl);
+
+  return fetch(url.href, requestOptions);
 }
 export async function _getPageMetadata(
   hostname: string,
-  apiKey: string,
-  insecureMode: boolean,
+  apiUrl: string,
   filename: string
 ): Promise<FileMetadataObject> {
   const result = await _obsidianRequest(
     hostname,
-    apiKey,
+    apiUrl,
     `/vault/${filename}`,
     {
       method: "get",
       headers: {
         Accept: "application/vnd.olrapi.note+json",
       },
-    },
-    insecureMode
+    }
   );
 
   return (await result.json()) as FileMetadataObject;

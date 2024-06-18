@@ -1,6 +1,7 @@
 import { DefaultSearchMatchTemplate } from "./constants";
 import {
   ExtensionLocalSettings,
+  ExtensionLocalSettings__2_0,
   ExtensionSyncSettings,
   ExtensionSyncSettings__0_1,
   ExtensionSyncSettings__0_2,
@@ -12,7 +13,7 @@ export async function migrateLocalSettings(
   local: chrome.storage.LocalStorageArea,
   settings: Record<string, any>
 ): Promise<ExtensionLocalSettings> {
-  if (settings.version == "0.2") {
+  if (settings.version === "0.2") {
     // In ac0b804b634fded00363f38e996068dcd42ec68e and before, we
     // were erroneously setting the sync version to 2.0 in options.tsx;
     // and having two different version numbers for sync/local that
@@ -21,6 +22,19 @@ export async function migrateLocalSettings(
     settings.version = "2.0";
     await local.clear();
     await local.set(settings);
+  }
+  if (settings.version === "2.0") {
+    const oldSettings = settings as ExtensionLocalSettings__2_0;
+    const newSettings: ExtensionLocalSettings = {
+      version: "3.0",
+      url: `${oldSettings.insecureMode === true ? "http" : "https"}://${
+        oldSettings.host
+      }:${oldSettings.insecureMode === true ? "27123" : "27124"}/`,
+      apiKey: oldSettings.apiKey,
+    };
+    await local.clear();
+    await local.set(newSettings);
+    settings = newSettings;
   }
   return settings as ExtensionLocalSettings;
 }

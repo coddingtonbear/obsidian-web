@@ -67,6 +67,7 @@ import {
   AutoOpenOption,
   OnboardingStep,
   GithubRelease,
+  ObsidianResponse,
 } from "./types";
 import {
   getLocalSettings,
@@ -184,6 +185,8 @@ export const OnboardingSteps: OnboardingStep[] = [
   },
 ];
 
+const DEFAULT_API_URL = "https://127.0.0.1:27124/";
+
 const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [status, setStatus] = useState<AlertStatus>();
@@ -201,8 +204,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const [keyboardShortcut, setKeyboardShortcut] = useState<string>("");
 
-  const [host, setHost] = useState<string>("127.0.0.1");
-  const [tempHost, setTempHost] = useState<string>("127.0.0.1");
+  const [tempApiUrl, setTempApiUrl] = useState<string>(DEFAULT_API_URL);
+  const [apiUrl, setApiUrl] = useState<string>(DEFAULT_API_URL);
+  const [apiUrlObj, setApiUrlObj] = useState<URL>(new URL(DEFAULT_API_URL));
+
   const [hasHostPermission, setHasHostPermission] = useState<boolean | null>(
     null
   );
@@ -226,8 +231,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   const [searchMatchAutoOpen, setSearchMatchAutoOpen] =
     useState<AutoOpenOption>("never");
 
-  const [insecureMode, setInsecureMode] = useState<boolean>(false);
-
   const [requestingHostPermissionFor, setRequestingHostPermissionFor] =
     useState<string>();
 
@@ -247,14 +250,13 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       // of populating the form from stored settings.  If we are,
       // it means you've changed something.
       chrome.storage.local.set({
-        host,
+        url: apiUrl,
         apiKey,
       } as ExtensionLocalSettings);
       showSaveNotice();
     }
     async function handle() {
       setApiKeyOk(false);
-      let usedInsecureMode = false;
 
       if (apiKey === "") {
         setApiKeyError(
@@ -308,7 +310,6 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           return;
         }
 
-        setInsecureMode(usedInsecureMode);
         setApiKeyError(undefined);
         setApiKeyOk(true);
       }
@@ -317,15 +318,12 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
         // If we are *not* loaded, it means we're just in the process
         // of populating the form from stored settings.  If we are,
         // it means you've changed something.
-        await chrome.storage.local.set({
-          insecureMode: usedInsecureMode,
-        } as ExtensionLocalSettings);
         showSaveNotice();
       }
     }
 
     handle();
-  }, [apiKey, host, hasHostPermission]);
+  }, [apiKey, apiUrl, hasHostPermission]);
 
   useEffect(() => {
     if (!loaded) {
@@ -376,8 +374,8 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
       const syncSettings = await getSyncSettings(chrome.storage.sync);
       const localSettings = await getLocalSettings(chrome.storage.local);
 
-      setHost(localSettings.host);
-      setTempHost(localSettings.host);
+      setApiUrl(localSettings.url);
+      setTempApiUrl(localSettings.url);
       setApiKey(localSettings.apiKey);
       setPresets(syncSettings.presets);
       setSearchEnabled(syncSettings.searchMatch.enabled);
@@ -442,10 +440,11 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
   }, []);
 
   useEffect(() => {
-    checkHasHostPermission(host).then((result) => {
+    checkHasHostPermission(apiUrl).then((result) => {
       setHasHostPermission(result);
     });
-  }, [host]);
+    setApiUrlObj(new URL(apiUrl));
+  }, [apiUrl]);
 
   useEffect(() => {
     async function handle() {
@@ -724,8 +723,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                     apiKeyOk: apiKeyOk,
                     apiKeyError: apiKeyError,
                     hasHostPermission: hasHostPermission,
-                    host: host,
-                    insecureMode: insecureMode,
+                    apiUrl: apiUrl,
                   },
                   search: {
                     enabled: searchEnabled,
@@ -908,20 +906,20 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
             <div className="option">
               <div className="option-value host">
                 <TextField
-                  label="Hostname"
+                  label="API URL"
                   className="auth-field"
                   onBlur={() => {
-                    setHost(tempHost);
-                    checkHasHostPermission(tempHost).then((result) => {
+                    setApiUrl(tempApiUrl);
+                    checkHasHostPermission(tempApiUrl).then((result) => {
                       setHasHostPermission(result);
                       if (!result) {
-                        setRequestingHostPermissionFor(tempHost);
+                        setRequestingHostPermissionFor(tempApiUrl);
                       }
                     });
                   }}
-                  onChange={(event) => setTempHost(event.target.value)}
-                  value={tempHost}
-                  helperText="Hostname on which Obsidian is running (usually 127.0.0.1)."
+                  onChange={(event) => setTempApiUrl(event.target.value)}
+                  value={tempApiUrl}
+                  helperText="API URL on which Obsidian Local REST API is running (usually 'https://127.0.0.1:27124/')."
                 />
                 <div className="validation-icon">
                   {!hasHostPermission && (
@@ -930,7 +928,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                       color="error"
                       fontSize="large"
                       titleAccess="Missing permissions.  Click to grant."
-                      onClick={() => setRequestingHostPermissionFor(host)}
+                      onClick={() => setRequestingHostPermissionFor(apiUrl)}
                     />
                   )}
                 </div>
@@ -948,9 +946,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 <div className="validation-icon">
                   {apiKeyOk && (
                     <>
-                      {insecureMode && (
+                      {apiUrlObj.protocol === "http:" && (
                         <>
-                          {host === "127.0.0.1" || host === "localhost" ? (
+                          {apiUrlObj.hostname === "127.0.0.1" ||
+                          apiUrlObj.hostname === "localhost" ? (
                             <InsecureLocalConnection
                               color="info"
                               fontSize="large"
@@ -965,7 +964,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                           )}
                         </>
                       )}
-                      {!insecureMode && (
+                      {apiUrlObj.protocol === "https:" && (
                         <SecureConnection
                           color="success"
                           fontSize="large"
@@ -999,10 +998,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
               {loaded && !hasHostPermission && (
                 <div className="option-value">
                   <MaterialAlert severity="error">
-                    This browser extension does not have permission for the host{" "}
-                    <code>{tempHost}</code>.
+                    This browser extension does not have permission to access
+                    Obsidian Local REST API at <code>{tempApiUrl}</code>.
                     <Button
-                      onClick={() => setRequestingHostPermissionFor(host)}
+                      onClick={() => setRequestingHostPermissionFor(tempApiUrl)}
                     >
                       Grant Permissions
                     </Button>
