@@ -15,7 +15,7 @@ export const DefaultUrlTemplate = "/vault/{{filename page.title}}.md";
 export const DefaultHeaders = {};
 export const DefaultMethod = "put";
 
-export const LocalSettingsVersion = "2.0";
+export const LocalSettingsVersion = "3.0";
 
 export const DefaultLocalSettings: ExtensionLocalSettings = {
   version: LocalSettingsVersion,
@@ -45,6 +45,7 @@ export const DefaultPreviewContext: PreviewContext = {
 
 export const KnownLocalSettingKeys = [
   "version",
+  "url",
   "host",
   "insecureMode",
   "apiKey",
