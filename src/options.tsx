@@ -79,7 +79,6 @@ import {
   compileTemplateCallback,
   compileTemplateCallbackController,
 } from "./utils";
-import { _obsidianRequest } from "./utils/private_requests";
 import Alert from "./components/Alert";
 import { PurpleTheme } from "./theme";
 import TemplateSetupModal from "./components/TemplateSetupModal";
@@ -87,6 +86,7 @@ import BugReportModal from "./components/BugReportModal";
 import UnsupportedEnvironmentWarning from "./components/UnsupportedEnvironmentWarning";
 import { FormControl, MenuItem, Select } from "@mui/material";
 import WikiLink from "./components/WikiLink";
+import { obsidianRequestVerify } from "./utils/requests";
 
 export interface Props {
   sandbox: HTMLIFrameElement | null;
@@ -263,36 +263,21 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           "A valid API key from Obsidian Local REST API is required."
         );
       } else {
-        let result: Response;
+        let result: ObsidianResponse;
         try {
-          result = await _obsidianRequest(
-            host,
-            apiKey,
-            "/",
-            { method: "get" },
-            false
-          );
+          result = await obsidianRequestVerify(apiUrl, apiKey, {
+            method: "get",
+          });
         } catch (e) {
-          try {
-            result = await _obsidianRequest(
-              host,
-              apiKey,
-              "/",
-              { method: "get" },
-              true
-            );
-            usedInsecureMode = true;
-          } catch (e) {
-            setApiKeyError(
-              `Unable to connect to Obsidian: ${
-                (e as Error).message
-              }. This error occurs when Obsidian Web does not have permission to access this hostname, or when Obsidian Local REST API is running in secure-only mode and your browser does not trust its certificate.  Make sure you have granted permission for this host, and either enable insecure mode from Obsidian Local REST API's settings panel, or see the settings panel for instructions regarding where to acquire the certificate you need to configure your browser to trust.`
-            );
-            return;
-          }
+          setApiKeyError(
+            `Unable to connect to Obsidian: ${
+              (e as Error).message
+            }. This error occurs when Obsidian Web does not have permission to access this hostname, or when Obsidian Local REST API is running in secure-only mode and your browser does not trust its certificate.  Make sure you have granted permission for this host, and either enable insecure mode from Obsidian Local REST API's settings panel, or see the settings panel for instructions regarding where to acquire the certificate you need to configure your browser to trust.`
+          );
+          return;
         }
 
-        const body: StatusResponse = await result.json();
+        const body = result.data as StatusResponse;
         if (result.status !== 200) {
           setApiKeyError(
             `Unable to connect to Obsidian: (Status Code ${

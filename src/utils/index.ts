@@ -19,6 +19,7 @@ import {
   LogEntry,
   SearchJsonResponseItem,
   SearchJsonResponseItemWithMetadata,
+  ObsidianRequestVerify,
 } from "../types";
 import {
   DefaultSyncSettings,
@@ -110,6 +111,9 @@ export async function sendBackgroundRequest(
 ): Promise<string>;
 export async function sendBackgroundRequest(
   message: ObsidianRequest
+): Promise<ObsidianResponse | ObsidianResponseError>;
+export async function sendBackgroundRequest(
+  message: ObsidianRequestVerify
 ): Promise<ObsidianResponse | ObsidianResponseError>;
 export async function sendBackgroundRequest(
   message: BackgroundErrorLog

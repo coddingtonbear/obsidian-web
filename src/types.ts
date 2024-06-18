@@ -172,16 +172,25 @@ export interface BaseBackgroundRequest {
 
 export interface RequestHostPermissionRequest extends BaseBackgroundRequest {
   type: "request-host-permission";
-  host: string;
+  url: string;
 }
 
 export interface CheckHasHostPermissionRequest extends BaseBackgroundRequest {
   type: "check-has-host-permission";
-  host: string;
+  url: string;
 }
 
 export interface CheckKeyboardShortcutRequest extends BaseBackgroundRequest {
   type: "check-keyboard-shortcut";
+}
+
+export interface ObsidianRequestVerify extends BaseBackgroundRequest {
+  type: "obsidian-request-verify";
+  request: {
+    url: string;
+    apiKey: string;
+    options: RequestInit;
+  };
 }
 
 export interface ObsidianRequest extends BaseBackgroundRequest {
@@ -200,6 +209,7 @@ export type BackgroundRequest =
   | RequestHostPermissionRequest
   | CheckHasHostPermissionRequest
   | CheckKeyboardShortcutRequest
+  | ObsidianRequestVerify
   | ObsidianRequest
   | BackgroundErrorLog;
 

@@ -27,6 +27,28 @@ export async function obsidianRequest(
 
   return result;
 }
+
+export async function obsidianRequestVerify(
+  url: string,
+  apiKey: string,
+  options: RequestInit
+): Promise<ObsidianResponse> {
+  const result = await sendBackgroundRequest({
+    type: "obsidian-request-verify",
+    request: {
+      url: url,
+      apiKey: apiKey,
+      options: options,
+    },
+  });
+
+  if (!result.ok) {
+    throw new Error(result.error);
+  }
+
+  return result;
+}
+
 export async function obsidianSearchRequest(
   query: Record<string, any>
 ): Promise<SearchJsonResponseItem[]> {

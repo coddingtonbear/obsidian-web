@@ -221,6 +221,90 @@ chrome.runtime.onMessage.addListener(
           }
         });
         break;
+      case "obsidian-request-verify":
+        _obsidianRequest(
+          message.request.url,
+          message.request.apiKey,
+          "/",
+          message.request.options
+        )
+          .then((response) => {
+            const result: Partial<ObsidianResponse> = {
+              status: response.status,
+            };
+
+            result.headers = {};
+            for (const [name, value] of response.headers.entries()) {
+              result.headers[name] = value;
+            }
+
+            response
+              .text()
+              .then((text) => {
+                let jsonData;
+                result.ok = true;
+                try {
+                  jsonData = JSON.parse(text);
+                  result.data = jsonData;
+                } catch (e) {}
+                sendResponse(result as ObsidianResponse);
+
+                log({
+                  message: "obsidian-request-verify response parsed",
+                  data: {
+                    request: {
+                      url: message.request.url,
+                      apiKey: message.request.apiKey,
+                      options: message.request.options,
+                    },
+                    response: {
+                      status: response.status,
+                      json: jsonData,
+                      text,
+                    },
+                  },
+                });
+              })
+              .catch((error) => {
+                log({
+                  message: "obsidian-request-verify request failed to parse",
+                  data: {
+                    request: {
+                      url: message.request.url,
+                      apiKey: message.request.apiKey,
+                      options: message.request.options,
+                    },
+                    response: {
+                      status: response.status,
+                      text: response.text,
+                    },
+                    error,
+                  },
+                });
+                sendResponse({
+                  ok: false,
+                  error: error.toString(),
+                } as ObsidianResponseError);
+              });
+          })
+          .catch((e) => {
+            log({
+              message: "obsidian-request-verify request failed",
+              data: {
+                request: {
+                  url: message.request.url,
+                  apiKey: message.request.apiKey,
+                  options: message.request.options,
+                },
+                error: e,
+              },
+            });
+            sendResponse({
+              ok: false,
+              error: e.toString(),
+            } as ObsidianResponseError);
+          });
+        break;
       case "obsidian-request":
         getLocalSettings(chrome.storage.local).then((settings) => {
           _obsidianRequest(
