@@ -37,6 +37,7 @@
     "react-draggable": "^4.4.6",
     "react-joyride": "^2.7.2",
     "turndown": "^7.1.1",
+    "turndown-plugin-gfm": "^1.0.2",
     "usehooks-ts": "^2.9.1",
     "uuid": "^8.3.2"
   },

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import compareVersions from "compare-versions";
 import ReactDOM from "react-dom";
 import Turndown from "turndown";
+const turndownPluginGfm = require('turndown-plugin-gfm')
 import { Readability } from "@mozilla/readability";
 
 import Button from "@mui/material/Button";
@@ -171,6 +172,8 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     >("loading");
 
     const turndown = new Turndown(TurndownConfiguration);
+
+    turndown.use(turndownPluginGfm.gfm);
 
     useEffect(() => {
       if (
