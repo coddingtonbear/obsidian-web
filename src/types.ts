@@ -260,3 +260,10 @@ export interface GithubRelease {
   tag_name: string;
   html_url: string;
 }
+
+export interface FormState {
+  method: UrlOutputPreset["method"];
+  url: string;
+  headers: Record<string, any>;
+  content: string;
+}

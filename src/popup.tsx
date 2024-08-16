@@ -36,6 +36,7 @@ import {
   PreviewContext,
   SearchJsonResponseItemWithMetadata,
   UrlMentionContainer,
+  FormState,
 } from "./types";
 import {
   getLocalSettings,
@@ -151,6 +152,8 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     const [formHeaders, setFormHeaders] = useState<Record<string, any>>({});
     const [formContent, setFormContent] = useState<string>("");
 
+    const [originalFormState, setOriginalFormState] = useState<FormState>();
+
     const [compiledUrl, setCompiledUrl] = useState<string>("");
     const [compiledContent, setCompiledContent] = useState<string>("");
     const [contentIsValid, setContentIsValid] = useState<boolean>(false);
@@ -170,8 +173,20 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
     >("loading");
 
     const turndown = new Turndown(TurndownConfiguration);
-
     turndown.use(gfm);
+
+    const formStateMatches = React.useCallback(
+      (originalState: FormState, currentState: FormState) => {
+        return (
+          originalState.method === currentState.method &&
+          originalState.url === currentState.url &&
+          JSON.stringify(originalState.headers) ===
+            JSON.stringify(currentState.headers) &&
+          originalState.content === currentState.content
+        );
+      },
+      []
+    );
 
     useEffect(() => {
       if (
@@ -210,6 +225,13 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       setFormUrl(selectedPreset.urlTemplate);
       setFormHeaders(selectedPreset.headers);
       setFormContent(selectedPreset.contentTemplate);
+
+      setOriginalFormState({
+        method: selectedPreset.method,
+        url: selectedPreset.urlTemplate,
+        headers: selectedPreset.headers,
+        content: selectedPreset.contentTemplate,
+      });
     }, [selectedPreset]);
 
     const [mouseOverTarget, setMouseOverTarget] = useState<HTMLAnchorElement>();
@@ -596,7 +618,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
           title: "All done!",
           message: "Your content was sent to Obsidian successfully.",
         });
-        setTimeout(() => onFinished(), 1500);
+        setTimeout(() => onFinished(true), 1500);
       } else {
         try {
           const body = result.data ?? {};
@@ -639,10 +661,27 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
       setSuggestionAccepted(true);
     };
 
-    const onFinished = () => {
-      setPopupFormDisplayed(false);
-      setPopupDisplayed(false);
-      setStatus(undefined);
+    const hasNoUnsavedChangesOrConfirmed = (): boolean => {
+      return Boolean(
+        !originalFormState ||
+          formStateMatches(originalFormState, {
+            method: formMethod,
+            url: formUrl,
+            headers: formHeaders,
+            content: formContent,
+          }) ||
+          window.confirm(
+            "You have unsaved changes; if you continue, those changes will be lost!  Continue?"
+          )
+      );
+    };
+
+    const onFinished = (force?: boolean) => {
+      if (force || hasNoUnsavedChangesOrConfirmed()) {
+        setPopupFormDisplayed(false);
+        setPopupDisplayed(false);
+        setStatus(undefined);
+      }
     };
 
     return (
@@ -835,13 +874,18 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                                 className="preset-selector"
                                 value={selectedPresetIdx}
                                 fullWidth={true}
-                                onChange={(event) =>
-                                  setSelectedPresetIdx(
-                                    typeof event.target.value === "number"
-                                      ? event.target.value
-                                      : parseInt(event.target.value, 10)
-                                  )
-                                }
+                                onChange={(event) => {
+                                  console.log(
+                                    `Changing preset to ${event.target.value}`
+                                  );
+                                  if (hasNoUnsavedChangesOrConfirmed()) {
+                                    setSelectedPresetIdx(
+                                      typeof event.target.value === "number"
+                                        ? event.target.value
+                                        : parseInt(event.target.value, 10)
+                                    );
+                                  }
+                                }}
                               >
                                 {suggestionAccepted && searchMatchTemplate && (
                                   <option key={"___suggestion"} value={-2}>
