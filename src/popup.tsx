@@ -163,8 +163,6 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
 
     const [previewContextProcessing, setPreviewContextProcessing] =
       useState<boolean>(false);
-    const [accordionIsExpanded, setAccordionIsExpanded] =
-      useState<boolean>(false);
     const [pageUrl, setPageUrl] = useState<string>(window.location.href);
 
     const [displayState, setDisplayState] = useState<
@@ -869,11 +867,7 @@ if (!document.getElementById(ROOT_CONTAINER_ID)) {
                               </IconButton>
                             </div>
                           </div>
-                          <Accordion
-                            onChange={(evt, expanded) => {
-                              setAccordionIsExpanded(expanded);
-                            }}
-                          >
+                          <Accordion>
                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                               <p>View Request Details</p>
                             </AccordionSummary>
