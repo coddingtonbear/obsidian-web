@@ -863,9 +863,9 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 <ExportSettings fontSize="small" />
               </IconButton>
               <IconButton
-                title="Schedule a Discovery Call"
+                title="Schedule a one-on-one"
                 id="schedule-discovery-call"
-                aria-label="schedule a discovery call"
+                aria-label="schedule a one-on-one"
                 onClick={() => setShowDiscoveryModal(true)}
               >
                 <EventAvailable fontSize="small" />
