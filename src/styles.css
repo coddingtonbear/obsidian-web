@@ -111,11 +111,16 @@ div.submit {
 div.modal {
   display: flex;
   flex-direction: column;
-  margin: 50px 100px;
+  margin: 50px auto;
   padding: 25px;
   overflow-y: auto;
   overflow-x: hidden;
   max-height: calc(100vh - 200px);
+  max-width: min(950px, 100vw - 50px);
+}
+div.modal.small {
+  margin: 100px auto;
+  max-width: 400px;
 }
 
 svg.action-icon {

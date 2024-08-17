@@ -43,6 +43,7 @@ import RestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import ImportSettings from "@mui/icons-material/FileUpload";
 import ExportSettings from "@mui/icons-material/FileDownload";
 import BugReport from "@mui/icons-material/BugReport";
+import EventAvailable from "@mui/icons-material/EventAvailable";
 
 import {
   CurrentMaxOnboardingVersion,
@@ -87,6 +88,7 @@ import UnsupportedEnvironmentWarning from "./components/UnsupportedEnvironmentWa
 import { FormControl, MenuItem, Select } from "@mui/material";
 import WikiLink from "./components/WikiLink";
 import { obsidianRequestVerify } from "./utils/requests";
+import DiscoveryModal from "./components/DiscoveryModal";
 
 export interface Props {
   sandbox: HTMLIFrameElement | null;
@@ -236,6 +238,7 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
 
   const [presets, setPresets] = useState<UrlOutputPreset[]>([]);
 
+  const [showDiscoveryModal, setShowDiscoveryModal] = useState<boolean>(false);
   const [showBugReportModal, setShowBugReportModal] = useState<boolean>(false);
   const [onboardedToVersion, setOnboardedToVersion] = useState<string>("");
   const [filteredOnboardingSteps, setFilteredOnboardingSteps] = useState<
@@ -860,6 +863,14 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
                 <ExportSettings fontSize="small" />
               </IconButton>
               <IconButton
+                title="Schedule a Discovery Call"
+                id="schedule-discovery-call"
+                aria-label="schedule a discovery call"
+                onClick={() => setShowDiscoveryModal(true)}
+              >
+                <EventAvailable fontSize="small" />
+              </IconButton>
+              <IconButton
                 id="bug-report-button"
                 title="Are you having trouble? Report a bug."
                 aria-label="report a bug"
@@ -1444,6 +1455,10 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
           </div>
         </Paper>
       </Modal>
+      <DiscoveryModal
+        open={showDiscoveryModal}
+        onClose={() => setShowDiscoveryModal(false)}
+      />
       {sandbox && presetUnderEdit && (
         <TemplateSetupModal
           open={presetEditorShown}
