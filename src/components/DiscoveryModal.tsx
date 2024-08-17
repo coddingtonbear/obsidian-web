@@ -46,7 +46,7 @@ const DiscoveryModal: React.FunctionComponent<Props> = ({ open, onClose }) => {
               variant="contained"
               onClick={() => {
                 window.open(
-                  "https://calendar.app.google/pzQQQDCWKgxQ58QY9",
+                  "https://calendar.app.google/vh4ZJFkmWWzL1kbt9",
                   "_blank"
                 );
                 onClose();
