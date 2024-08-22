@@ -43,6 +43,10 @@ Handlebars.registerHelper("uuid", (): string => {
   return uuid();
 });
 
+Handlebars.registerHelper("removeBackticks", (content: string): string => {
+  return content.replace(/`/g, "");
+});
+
 const render = (request: SandboxRenderRequest): SandboxRenderResponse => {
   const compiled = Handlebars.compile(request.template, { noEscape: true });
 
