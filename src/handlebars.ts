@@ -26,8 +26,12 @@ Handlebars.registerHelper("date", (format: string | unknown): string => {
 });
 
 Handlebars.registerHelper("filename", (unsafe: string | undefined): string => {
+  // Remove any characters that are not allowed in filenames
+  // but keep ":" and replace it with "-"
   if (typeof unsafe === "string") {
-    return unsafe.replace(/[/\\?%*:|"<>#]/g, "");
+    var result = unsafe.replace(/[/\\?%*|"<>#]/g, "");
+    result = result.replace(/:/g, "-");
+    return result
   }
   return "";
 });
@@ -41,6 +45,22 @@ Handlebars.registerHelper("json", (unsafe: string | undefined): string => {
 
 Handlebars.registerHelper("uuid", (): string => {
   return uuid();
+});
+
+Handlebars.registerHelper("removeBackticks", (unsafe: string | undefined): string => {
+  // remove backticks from a string
+  if (typeof unsafe === "string") {
+    return unsafe.replace(/`/g, "");
+  }
+  return "";
+});
+
+Handlebars.registerHelper("replaceColons", (unsafe: string | undefined): string => {
+  // replace colons with dashes in a string
+  if (typeof unsafe === "string") {
+    return unsafe.replace(/:/g, "-");
+  }
+  return "";
 });
 
 const render = (request: SandboxRenderRequest): SandboxRenderResponse => {
