@@ -15,6 +15,12 @@ Handlebars.registerHelper("quote", (value: string): string => {
   return lines.join("\n");
 });
 
+Handlebars.registerHelper('contains', (needle: string, haystack: string, options: any): boolean => {
+   needle = Handlebars.escapeExpression(needle);
+   haystack = Handlebars.escapeExpression(haystack);
+   return (haystack.indexOf(needle) > -1) ? options.fn(this) : options.inverse(this);
+});
+
 Handlebars.registerHelper("date", (format: string | unknown): string => {
   const now = new Date();
   // Helpers are handed extra args by default -- we need to check
