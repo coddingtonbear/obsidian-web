@@ -431,7 +431,14 @@ const Options: React.FunctionComponent<Props> = ({ sandbox }) => {
     checkHasHostPermission(apiUrl).then((result) => {
       setHasHostPermission(result);
     });
-    setApiUrlObj(new URL(apiUrl));
+    let url;
+    try {
+      url = new URL(apiUrl);
+    } catch (e) {
+      // If we couldn't parse the URL, just revert to default
+      url = new URL(DEFAULT_API_URL);
+    }
+    setApiUrlObj(url);
   }, [apiUrl]);
 
   useEffect(() => {
